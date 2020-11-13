@@ -1,0 +1,19 @@
+package kr.happyjob.chainmaker.scm.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.happyjob.chainmaker.scm.model.WHInfoFormModel;
+
+public interface WHInfoFormDao {
+  
+  //전체 창고 정보
+  public List<WHInfoFormModel> whInfoFormList (Map<String, Object> paramMap);
+  
+  //조회 목록 수 
+  public int totalCnt (Map<String, Object> paramMap);
+  
+  //검색 창고 정보
+  public List<WHInfoFormModel> whList (Map<String, Object> paramMap);
+  
+}

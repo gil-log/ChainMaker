@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.WHInfoDao">
+
+   <!-- 창고 수 구하기 -->
+  <select id="totalCnt" resultType="int">
+  SELECT count(*) as totalcnt 
+    FROM tb_warehouse as wh
+    <where>
+      <if test="(searchKey != null) and (!searchKey.equals(''))">
+        <choose>
+          <when test="(searchKey != null) and (searchKey eq 'ware_name'.toString())">
+          wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
+          </when>
+          <when test="(searchKey != null) and (searchKey eq 'ware_address'.toString() || searchKey eq 'ware_dt_address'.toString())">
+          wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%')
+          </when>
+        </choose>
+      </if>
+    </where>
+  </select> 
+
+  <!-- 창고별 조회 -->
+  <select id="whInfoList" resultType="kr.happyjob.chainmaker.scm.model.WHInfoVO">
+    SELECT   wh.ware_no,
+             wh.ware_name, 
+             wh.ware_address, 
+             wh.ware_dt_address, 
+             wh.ware_zipcode, 
+             ui.name,
+             ui.user_tel1,
+             ui.user_tel2,
+             ui.user_tel3,
+             ui.user_email
+    FROM     tb_warehouse as wh
+    JOIN     tb_userinfo  as ui
+    ON       wh.loginID = ui.loginID
+    <where>
+      <if test="(searchKey != null) and (!searchKey.equals(''))">
+        <choose>
+          <when test="(searchKey != null) and (searchKey eq 'ware_name'.toString())">
+          wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
+          </when>
+          <when test="(searchKey != null) and (searchKey eq 'ware_address'.toString() || searchKey eq 'ware_dt_address'.toString())">
+          wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%')
+          </when>
+          <when test="(searchKey != null) and (searchKey eq 'all'.toString())">
+          ui.name LIKE CONCAT('%', #{searchWord}, '%')
+          OR wh.ware_no LIKE CONCAT('%', #{searchWord}, '%')
+          OR wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
+          OR (wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') 
+          OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%'))
+          </when>
+        </choose>
+      </if>
+    </where>
+    ORDER BY wh.ware_no
+    LIMIT  #{pageIndex}, #{pageSize}
+  </select>
+  
+  
+  
+</mapper>

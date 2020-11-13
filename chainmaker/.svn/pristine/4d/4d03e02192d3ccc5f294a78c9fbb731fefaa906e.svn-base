@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.ProductListDAO">
+
+
+	<select id="listProductList" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">
+		SELECT	@rownum:=@rownum+1 as pro_num	
+			,	pro_cd as pro_cod
+			,	pro_model_no as pro_cod_num
+			,	pro_model_name as pro_cod_nam
+			,	pro_manu_name as pro_manu_nm
+			,	pro_price as pro_prc
+		FROM	tb_product
+		WHERE (@rownum:=0)=0
+	</select>
+	
+	
+	<!-- 그룹코드 목록 총 갯수 조회 -->
+	<select id="countListProductList" resultType="int">
+		/*kr.kosmo.jobkorea.epc.dao.ProductListDAO.countListProductList*/
+		SELECT COUNT(1) AS tot_cnt FROM tb_product
+	</select>
+	
+	
+</mapper>
+
+

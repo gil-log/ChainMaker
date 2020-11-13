@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.system.dao.UsrMgrDao">
+	
+
+	  
+
+	<select id="countListUsr" resultType="int">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.countListUsr */
+		 SELECT COUNT(*) as tot_cnt FROM ADMININFO adi, tm_usr_mst tum WHERE adi.ADMID = tum.LGN_ID and ADMSTATUS = '00';
+	</select>
+	
+	
+	<!-- 관리자 단건 조회 -->
+	 <select id="selectUsr" resultType="kr.happyjob.chainmaker.system.model.UsrMgrModel">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.selectUsr */
+		 SELECT adi.ADMIDX
+	      ,adi.ADMID
+	      ,adi.ADMNAME
+	      ,adi.ADMPW	      
+	      ,adi.ADMTEL
+	      ,adi.ADMHP
+	      ,adi.ADMEMAIL
+	      ,adi.ADMZIPCODE
+	      ,adi.ADMADDRS
+	      ,adi.ADMADDRD
+	      ,adi.MEMTYPE
+	      ,adi.MEMJUMIN
+	      ,adi.MEMTEL
+	      ,adi.MEMHP
+	      ,adi.MEMEMAIL
+	      ,adi.EMAILTYPE
+	      ,adi.ADMTYPE
+	      ,DATE_FORMAT(adi.ADMWRITEDATE, '%Y-%m-%d') AS ADMWRITEDATE
+	      ,adi.ADMMEMO
+	      ,tum.USR_SST_ID
+		  FROM ADMININFO adi, TM_USR_MST tum
+		  WHERE adi.ADMID = tum.LGN_ID
+		  <if test="( lgn_id != null) and (! lgn_id.equals(''))">
+          AND adi.ADMID = #{lgn_id}
+         </if> 
+          AND adi.ADMSTATUS = '00'	   
+	</select>
+ 
+	
+	<!-- 관리자 테이블에 저장(이건 insert 한번만 해도된다.) -->
+	<insert id="insertNewMngUsr">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.insertNewMngUsr */
+		INSERT INTO ADMININFO
+		(
+		  ADMID,ADMPW,ADMNAME,ADMTEL,ADMHP,ADMEMAIL,ADMZIPCODE,ADMADDRS,ADMADDRD
+		  ,MEMTYPE,MEMJUMIN,MEMTEL,MEMHP,MEMEMAIL,EMAILTYPE,ADMTYPE,ADMWRITEDATE
+		  ,ADMMODIFYDATE,ADMSTATUS,ADMMEMO
+		)
+		
+		VALUES
+		(          
+           #{lgn_id}
+         , #{pwd}
+         , #{usr_nm}
+         , #{pnn}
+         , #{cpn}
+         , #{eml}
+         , #{zcd}
+         , #{adrs}
+         , #{dtl_adrs} 
+         , #{mempvg}
+         , #{memsecpvg}  
+         , #{memtelpvg}  
+         , #{memphnpgn}  
+         , #{mememlpvg}
+         , #{emailtype}
+         , #{admtype}        
+         , now()
+         , now()
+         , '00'
+         , #{admmemo}
+		)		
+	</insert>
+
+	<!-- 사용자 저장 -->
+	<insert id="insertUsr">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.insertUsr */
+		INSERT INTO tm_usr_mst
+		(
+			  usr_sst_id, ofc_id, usr_nm, lgn_id, pwd, usr_dvs_cod
+			, fst_enlm_dtt, fst_rgst_sst_id, fnl_mdfd_dtt
+			, fnl_mdfr_sst_id, mem_author
+		)
+		
+		VALUES
+		(
+				CONCAT('U', RIGHT(YEAR(now()),2), LPAD(MONTH(now()),2,'0') , LPAD(nextval('UsrMgr'), 4, '0'))
+			, #{ofc_id}
+			, #{usr_nm}
+			, #{lgn_id}
+			, #{pwd}
+			, 'U'
+			, NOW()
+			, #{fst_rgst_sst_id}
+			, NOW()
+			, #{fnl_mdfr_sst_id}
+			, #{mem_author}
+		)		
+	</insert>
+	
+	<!-- 사용자 상세 저장 -->
+	<insert id="insertUsrDtl">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.insertUsrDtl */
+		INSERT INTO tn_usr_dtl_info
+		(
+			  usr_sst_id, dept_cod, ppst_cod, pst_cod
+			, pnn_ctr, pnn_1, pnn_2, pnn_3
+			, cpn_ctr, cpn_1, cpn_2, cpn_3, eml
+			, fst_rgst_dtt, fst_rgst_sst_id, fnl_mdfd_dtt, fnl_mdfr_sst_id,mem_author
+
+		)
+		VALUES
+		(
+			CONCAT('U', RIGHT(YEAR(now()),2), LPAD(MONTH(now()),2,'0') , LPAD(currval('UsrMgr'), 4, '0'))
+			, #{dept_cod}
+			, #{ppst_cod}
+			, #{pst_cod}
+			, #{pnn_ctr}
+			, #{pnn_1}
+			, #{pnn_2}
+			, #{pnn_3}
+			, #{cpn_ctr}
+			, #{cpn_1}
+			, #{cpn_2}
+			, #{cpn_3}
+			, #{eml}
+			, NOW()
+			, #{fst_rgst_sst_id}
+			, NOW()
+			, #{fnl_mdfr_sst_id}
+			, #{mem_author}
+		)		
+	</insert>
+	
+	<!-- 사용자 admininfo 수정  -->
+ 	<update id = "updateNewMngUsr">
+	 UPDATE ADMININFO SET	        
+	          ADMNAME = #{usr_nm} 
+	 <if test="(pwd != null) and (!pwd.equals(''))">
+			, ADMPW	= #{pwd}             
+	 </if>
+			, ADMTEL  = #{pnn}
+			, ADMHP = #{cpn}
+			, ADMEMAIL = #{eml}
+			, ADMZIPCODE = #{zcd}
+			, ADMADDRS = #{adrs}
+			, ADMADDRD = #{dtl_adrs}
+			, MEMTYPE = #{mempvg}
+			, MEMJUMIN = #{memsecpvg}
+			, MEMTEL = #{memtelpgv}
+			, MEMHP = #{memphnpgn}
+			, MEMEMAIL = #{mememlpvg}
+			, EMAILTYPE = #{emailtype}
+			, ADMTYPE = #{admtype}
+			, ADMMODIFYDATE = NOW()
+			, ADMMEMO = #{admmemo}	 	 
+	  WHERE ADMID = #{lgn_id} 
+	  AND  ADMSTATUS = '00' 		  
+	</update>  
+	
+	<!-- 사용자 수정 -->
+	<update id="updateUsr">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updateUsr */
+		UPDATE tm_usr_mst SET
+			usr_nm		= #{usr_nm}
+			<if test="(pwd != null) and (!pwd.equals(''))">
+			, pwd		= #{pwd}             
+			</if>
+			, fnl_mdfd_dtt	= NOW() 
+			, fnl_mdfr_sst_id = #{fnl_mdfr_sst_id}
+			, mem_author = #{mem_author}
+		WHERE	usr_sst_id = #{usrSstId}
+	</update>
+		
+		<!-- 사용자 상세 수정 -->
+	<update id="updateUsrDtl">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updateUsrDtl */
+		UPDATE tn_usr_dtl_info SET
+			dept_cod =        #{dept_cod}
+			, ppst_cod =        #{ppst_cod}
+			, pst_cod =         #{pst_cod}
+			, pnn_ctr =         #{pnn_ctr}
+			, pnn_1 =           #{pnn_1}
+			, pnn_2 =           #{pnn_2}
+			, pnn_3 =           #{pnn_3}
+			, cpn_ctr =         #{cpn_ctr}
+			, cpn_1 =           #{cpn_1}
+			, cpn_2 =           #{cpn_2}
+			, cpn_3 =           #{cpn_3}
+			, eml =             #{eml}
+			, fnl_mdfd_dtt =    NOW()
+			, fnl_mdfr_sst_id = #{fnl_mdfr_sst_id}
+			, mem_author = #{mem_author}
+			WHERE	usr_sst_id = #{usrSstId}
+	</update>
+
+	<!-- 사용자 비밀번호 변경 -->
+	<update id="updatePwd">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updatePwd */
+		UPDATE tm_usr_mst SET
+			, pwd		= #{pwd}             
+			, fnl_mdfd_dtt	= NOW() 
+			, fnl_mdfr_sst_id = #{fnl_mdfr_sst_id}
+		WHERE	usr_sst_id = #{usr_sst_id}
+	</update>
+		
+	
+	<!-- 사용자 사용여부 수정(flag 값 변경) -->
+	<update id="updateUsrUsePoa">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updateUsrUsePoa */
+		UPDATE tm_usr_mst SET
+			use_poa =        #{use_poa}
+			, fnl_mdfd_dtt =    NOW()
+			, fnl_mdfr_sst_id = #{fnl_mdfr_sst_id}
+			WHERE	usr_sst_id = #{usr_sst_id}
+	</update>
+	
+	
+	<!--  사용자 삭제(flag 값 변경)  -->
+	<update id="updateUsrDltPoa">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updateUsrDltPoa */
+		UPDATE tm_usr_mst SET
+				dlt_poa = 'Y'
+			,	use_poa = 'N'
+			,	fnl_mdfd_dtt = NOW()
+			,	fnl_mdfr_sst_id = #{fnl_mdfr_sst_id}
+			WHERE	usr_sst_id = #{usrSstId}
+	</update>
+	
+	<!--  오피스 그룹 사용자 삭제(flag 값 변경)  -->
+	<update id="updateOfcUsrDltPoa">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updateOfcUsrDltPoa */
+		UPDATE tm_usr_mst SET
+				dlt_poa = 'Y'
+			,	use_poa = 'N'
+			,	fnl_mdfd_dtt = NOW()
+			, 	fnl_mdfr_sst_id = #{fnl_mdfr_sst_id}
+			WHERE ofc_id = #{ofc_id}
+	</update>
+	
+	
+	<!--  사용자 삭제일때 admininfo에 업로드  -->
+	<update id="updateDeleteDate">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.updateDeleteDate */
+		UPDATE ADMININFO SET
+		   		ADMDELETEDATE = NOW()
+		   ,	ADMSTATUS = '99'	 	 
+			WHERE	ADMID = #{lgn_id}
+	</update>
+	
+	<!-- 사용자 삭제 -->
+	<delete id="deleteUsr">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.deleteUsr */
+		DELETE FROM tm_usr_mst WHERE usr_sst_id = #{usrSstId}
+	</delete>
+	
+	<!-- 사용자 상세 삭제 -->
+	<delete id="deleteUsrDtl">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.deleteUsrDtl */
+		DELETE FROM tn_usr_dtl_info WHERE usr_sst_id = #{usrSstId}
+	</delete>
+	
+	<!-- 메뉴권한 목록 조회 -->
+	<select id="listUsrAtrt" resultType="kr.happyjob.chainmaker.system.model.UsrArtrMgrModel">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.listUsrAtrt */
+		SELECT	usr_sst_id
+			, mnu_id
+			, fst_enlm_dtt
+			, fst_rgst_sst_id
+			, fnl_mdfd_dtt
+			, fnl_mdfr_sst_id
+		FROM tn_usr_mnu_atrt
+		WHERE 1=1
+		AND usr_sst_id = #{usr_sst_id}
+	</select>
+	
+	<!-- 사용자 메뉴권한 저장 -->
+	<insert id="insertUsrMnuAtrt">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.insertUsrMnuAtrt */
+		INSERT INTO tn_usr_mnu_atrt
+		(
+			usr_sst_id
+			, mnu_id
+			, fst_enlm_dtt
+			, fst_rgst_sst_id
+			, fnl_mdfd_dtt
+			, fnl_mdfr_sst_id
+		)
+		
+		VALUES
+		(
+			#{usr_sst_id}
+			, #{mnu_id}
+			, NOW()
+			, #{fst_rgst_sst_id}
+			, NOW()
+			, #{fnl_mdfr_sst_id}
+		)		
+	</insert>
+	
+	<!-- 사용자 메뉴권한 삭제 -->
+	<delete id="deleteUsrMnuAtrt">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.deleteUsrMnuAtrt */
+		DELETE FROM tn_usr_mnu_atrt WHERE usr_sst_id = #{usr_sst_id} AND mnu_id in (#{mnu_id})
+	</delete>
+	
+	<!-- 사용자 메뉴권한 전체 삭제 -->
+	<delete id="deleteAllUsrMnuAtrt">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.deleteAllUsrMnuAtrt */
+		DELETE FROM tn_usr_mnu_atrt WHERE usr_sst_id = #{usr_sst_id}
+	</delete>
+	
+	
+	
+    <!-- 관리자 목록 조회 -->
+	<select id="adminlistUsr" resultType="kr.happyjob.chainmaker.system.model.UsrMgrModel">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.adminlistUsr */
+		SELECT ADMID as lgn_id
+                  ,TRIM(ADMPW) as pwd
+                  ,ADMNAME as usr_nm
+		FROM admininfo
+	  WHERE ADMID <![CDATA[<>]]> 'admin'
+	</select>
+	
+	<!-- 관리자 메뉴권한 일괄 저장 -->
+	<update id="insertUsrMnuAtrtBatch">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.insertUsrMnuAtrtBatch */
+		INSERT INTO tn_usr_mnu_atrt
+		(
+			usr_sst_id
+			, mnu_id
+			, fst_enlm_dtt
+			, fst_rgst_sst_id
+			, fnl_mdfd_dtt
+			, fnl_mdfr_sst_id
+		)
+		SELECT #{usr_sst_id}
+                   , mnu_id 
+                   , fst_enlm_dtt
+			       , fst_rgst_sst_id
+			       , fnl_mdfd_dtt
+			       , fnl_mdfr_sst_id
+         FROM tn_usr_mnu_atrt 
+       WHERE USR_SST_ID = (select USR_SST_ID from tm_usr_mst where LGN_ID = 'admin')
+	</update>
+	
+	
+	
+	
+    <!-- 프리랜서 목록 조회 -->
+	<select id="freelistUsr" resultType="kr.happyjob.chainmaker.system.model.UsrMgrModel">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.freelistUsr */
+		SELECT NMPEMAIL as lgn_id
+                  ,TRIM(MAX(NMPPW)) as pwd
+                  ,MAX(NMPNAME) as usr_nm
+		FROM meminfo
+		WHERE LENGTH(TRIM(NMPPW)) <![CDATA[>]]> 0 
+		GROUP BY NMPEMAIL
+	</select>
+	
+	<!-- 프리랜서 메뉴권한 일괄 저장 -->
+	<update id="insertFreeMnuAtrtBatch">
+		/* kr.kosmo.jobkorea.system.dao.UsrMgrDao.insertFreeMnuAtrtBatch */
+		INSERT INTO tn_usr_mnu_atrt
+		(
+			  usr_sst_id
+			, mnu_id
+			, fst_enlm_dtt
+			, fst_rgst_sst_id
+			, fnl_mdfd_dtt
+			, fnl_mdfr_sst_id
+		)         
+         SELECT #{usr_sst_id}
+                   , mnu_id 
+                   , NOW()
+			       , #{fst_rgst_sst_id}
+			       , NOW()
+			       , #{fnl_mdfr_sst_id}
+           FROM tm_mnu_mst 
+           WHERE dlt_poa = 'N' 
+              AND use_poa = 'Y' 
+              AND mnu_dvs_cod = 'A'
+	</update>	
+	
+</mapper>

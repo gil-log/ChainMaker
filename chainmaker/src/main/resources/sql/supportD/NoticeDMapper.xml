@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.supportD.dao.NoticeDDao">
+
+	<!-- 공지 사항 수 구하기 -->
+	<select id="noticeTotalCnt" resultType="int">
+		select count(*) as total_cnt from
+			( SELECT nt_seq
+			, nt_title
+			, enr_date
+			, enr_user
+		FROM tb_notice
+		<where>
+			<if test="(searchType != null) and (!searchType.equals(''))">
+				<choose>
+					<when
+						test="(searchType != null) and (searchType eq 'nt_title'.toString())">
+						and nt_title Like CONCAT('%', #{searchkeyword}, '%')
+					</when>
+					<when
+						test="(searchType != null) and (searchType eq 'enr_user'.toString())">
+						and enr_user LIKE CONCAT('%', #{searchkeyword}, '%')
+					</when>
+					<otherwise>
+						AND 1=2
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		)a
+	</select>
+
+	<!-- 공지 사항 리스트 뿌리기 -->
+	<select id="noticeList" resultType="kr.happyjob.chainmaker.supportD.model.NoticeDModel">
+		SELECT
+		nt_seq, nt_title, enr_user, enr_date
+		FROM tb_notice
+		<where>
+			<if test="(searchType != null) and (!searchType.equals(''))">
+				<choose>
+					<when
+						test="(searchType != null) and (searchType eq 'nt_title'.toString())">
+						and nt_title Like CONCAT('%', #{searchkeyword}, '%')
+					</when>
+					<when
+						test="(searchType != null) and (searchType eq 'enr_user'.toString())">
+						and enr_user LIKE CONCAT('%', #{searchkeyword}, '%')
+					</when>
+					<otherwise>
+						AND 1=2
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		ORDER BY enr_date DESC
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+
+	<sql id="search">
+		<if test="searchType == 'nt_title'.toString()">AND nt_tile LIKE 'nt_title%' || #{searchkeyword}</if>
+		<if test="searchType == 'enr_user'.toString()">AND enr_user LIKE 'enr_user%' || #{searchkeyword}</if>
+	</sql>
+
+	<!-- 공지사항 1건 상세정보 -->
+	<select id="detailNotice" resultType="kr.happyjob.chainmaker.supportD.model.NoticeDModel">
+		<![CDATA[
+		select nt_seq
+			 , enr_user
+			 , nt_title
+			 , enr_date
+			 , nt_contents
+			from tb_notice
+			where nt_seq = #{nt_seq}
+			]]>
+			<if test="(searchType != null) and (!searchType.equals(''))">
+				<choose>
+					<when
+						test="(searchType != null) and (searchType eq 'nt_title'.toString())">
+						and nt_title Like CONCAT('%', #{searchkeyword}, '%')
+					</when>
+					<when
+						test="(searchType != null) and (searchType eq 'enr_user'.toString())">
+						cand enr_user LIKE CONCAT('%', #{searchkeyword}, '%')
+					</when>
+					<otherwise>
+						AND 1=2
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+
+	<!-- num 값 +1 하기 / 신규 저장시 사용 (최대 num값 구해서 더할거임) -->
+	<select id="numPlus" resultType="int">
+		select (IFNULL(MAX(nt_no),0) + 1) as nt_seq from tb_notice
+	</select>
+
+
+</mapper>

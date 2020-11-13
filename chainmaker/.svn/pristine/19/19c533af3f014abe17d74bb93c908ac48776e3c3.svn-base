@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.system.dao.UserMgrDao">
+
+	 <!--그룹코드 목록 조회   -->
+	<select id="userTotalCnt" resultType="int">
+      
+      select count(*) as total_cnt from tb_userinfo
+
+	</select> 
+
+	<!-- 회원 목록 조회 -->
+	<select id="listUser" resultType="kr.happyjob.chainmaker.system.model.UserMgrModel">
+       SELECT u.user_type as user_type
+		    , u.name as name
+		    , u.loginID as loginID
+		    , u.reg_date as reg_date
+		    , ifnull(u.vist_ect,1) as vist_ect
+		    , ifnull(sum(o.totalamt),0) as totalamt
+		FROM	tb_userinfo u left outer join tb_order o on u.loginID = o.loginID 
+		<if test="(sname != null) and (!sname.equals(''))">
+          AND name LIKE concat('%', #{sname}, '%')
+        </if>
+		group by u.loginID
+		         , u.user_type
+		         ,u.name
+		         ,u.reg_date
+		         ,u.vist_ect
+		ORDER BY u.user_type DESC
+		LIMIT #{pageIndex}, #{pageSize}
+	
+
+	</select>
+	
+
+
+	<!-- 회원 1건 상세정보 -->
+	<select id="detailUser" resultType="kr.happyjob.chainmaker.system.model.UserMgrModel">
+		select  user_type
+		    , name
+		    , loginID
+		    , email
+		    , email_cop
+		    , tel1
+		    , tel2
+		    , tel3
+		    , vist_ect 
+			from tb_userinfo 
+			where loginID = #{loginID}
+	</select>
+	
+    <!-- num 값  +1 하기 / 신규 저장시 사용 (최대 num값 구해서 더할거임) 
+	<select id="numPlus" resultType="int">
+	 select (IFNULL(MAX(mem_no),0) + 1) as mem_no from tb_userinfo
+	</select>-->
+	
+	<!-- 회원 1건 추가 / 신규등록   -->
+	<insert id="insertUser" parameterType="java.util.Map">
+		insert into tb_userinfo (loginID, user_type, reg_date, name , password, email, email_cop, tel1, tel2, tel3, vist_ect ) 
+			VALUES ( #{rloginID}, 'D', now(), #{name}, #{password}, #{email}, #{email_cop}, #{tel1}, #{tel2}, #{tel3}, #{vist_ect} )
+	</insert>
+	
+	<!--회원정보 1건 수정  -->
+	<update id="updateUser" parameterType="java.util.Map">
+		update tb_userinfo
+			set name = #{name}, password=#{password}, email = #{email}, email_cop = #{email_cop}, tel1 = #{tel1}, tel2 = #{tel2}, tel3 = #{tel3}
+		where loginID = #{rloginID}
+	</update>
+	
+	<!-- 회원 1건 삭제  -->
+	<delete id="deleteUser" parameterType="java.util.Map">
+		delete from tb_userinfo where loginID = #{rloginID}
+	</delete>
+	
+
+
+	
+
+	
+	
+</mapper>

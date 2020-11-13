@@ -1,0 +1,78 @@
+@charset "utf-8";
+
+p.logo	{text-align: center;}
+#background_board  {
+	width: 950px;
+	height: 600px;
+	margin-top: 80px;
+	margin: 80px auto 0;
+	align: center;
+	background: url(/images/admin/login/login.jpg) no-repeat;
+}
+
+
+.login_form {
+	position: relative;
+	width: 600px;
+	height: 400px;
+	padding: 150px;
+	margin: 200px;
+}
+
+.login_form .id #EMP_ID, .login_form .pw #EMP_PWD ,{
+    width:200px;
+    height:39px;
+    line-height:39px;    
+    border:0px;
+    color:#5c6371;
+    background: #e5e9f2;
+}
+
+.login_form .id label, .login_form .pw label {
+    display:inline-block;
+    width:70px;
+    height:39px;
+    line-height:39px;
+    vertical-align: middle;
+    font-family: 'NanumBarunGothic';
+    font-size: 15px;
+} 
+
+.login_form p.pw{margin-top:12px;}
+
+.login_form .member_info	 {
+	width:600px;
+	top: 258px;
+}
+
+
+a.btn_login {
+	position: absolute;
+ 	top: 303px; 
+	left: 25px;
+	width: 300px;
+	height: 52px;
+	line-height: 52px;
+	background: #37ade4;
+	color: #fff;
+	text-align: center;
+	font-size: 26px;
+	left: 300px;
+}
+
+a.btn_log {
+	margin: 0 5px;
+}
+
+p.copy {
+	width: 442px;
+	margin: 20px auto 0;
+}
+
+p.copy span {
+	float: right;
+}
+
+.dashboard>ul>li .col>dl>dd {
+	margin-left: 150px;
+}

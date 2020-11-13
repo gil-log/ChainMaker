@@ -1,0 +1,15 @@
+package kr.happyjob.chainmaker.scm.service;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.happyjob.chainmaker.scm.model.WHInfoFormModel;
+
+public interface WHInfoFormService {
+  
+  //전체 창고 정보
+  public List<WHInfoFormModel> whInfoFormList(Map<String, Object> paramMap) throws Exception;
+  
+  //조회 목록 수 
+  public int totalCnt (Map<String, Object> paramMap) throws Exception;
+}

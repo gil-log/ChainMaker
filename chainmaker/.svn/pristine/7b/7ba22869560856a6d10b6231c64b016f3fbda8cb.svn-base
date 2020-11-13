@@ -1,0 +1,72 @@
+package kr.happyjob.chainmaker.scm.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.happyjob.chainmaker.scm.model.WHInfoFormModel;
+import kr.happyjob.chainmaker.scm.service.WHInfoFormService;
+
+@Controller
+@RequestMapping("scm/")
+public class WHInfoFormController {
+  
+//Set logger
+ private final Logger logger = LogManager.getLogger(this.getClass());
+
+ // Get class name for logger
+ private final String className = this.getClass().toString();
+ 
+ @Autowired
+ WHInfoFormService whInfoFormService;
+
+ //창고 정보 관리 페이지 연결
+ @RequestMapping("whinfoform.do")
+ public String WhInfoForm() {
+   logger.info("창고 정보 관리 페이지");
+   
+   logger.info("Start - " + className + ".initWhInfoForm");
+   
+   return "scm/whInfoForm";
+ }
+
+ @RequestMapping("whInfoFormList.do")
+ public String whInfoFormList(Model model, @RequestParam Map<String, Object> paramMap){
+   
+   String viewLocation = "scm/whInfoList";
+   
+   int currentPage = Integer.parseInt((String) paramMap.get("currentPage")); //현재 페이지 번호
+   int pageSize = Integer.parseInt((String) paramMap.get("pageSize"));  //페이지 사이즈
+   int pageIndex = (currentPage - 1) * pageSize; // 페이지 시작 row 번호
+   
+   paramMap.put("pageIndex", pageIndex);
+   paramMap.put("pageSize", pageSize);
+   
+   Map<String, Object> resultMap = new HashMap<>();
+   
+   //select문 리스트에 담기
+   List<WHInfoFormModel> listWHInfoForm = whInfoFormService.whInfoFormList(paramMap);
+   
+   int totalcnt = whInfoFormService.totalCnt(paramMap);
+   
+   model.addAttribute("totalcnt", totalcnt);
+   model.addAttribute("listWHInfoForm", listWHInfoForm);
+   model.addAttribute("pageSize", pageSize);
+   model.addAttribute("currentPage",currentPage);
+   
+   //Map에 list 담기
+   resultMap.put("listWHInfoForm", listWHInfoForm); 
+   
+  return viewLocation;
+ }
+}

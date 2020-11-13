@@ -1,0 +1,149 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>창고 정보 관리</title>
+<!-- common Include -->
+<jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
+<script>
+//상단테이블 페이징 설정
+var pageSizeWHInfoForm = 5;
+var pageBlockSizeWHInfoForm = 5;
+
+/* //하단테이블 페이징 설정
+var pageSizeWHInfoFormProd = 5;
+var pageBlockSizeWHInfoFormProd = 10;
+ */
+ 
+//페이지로드 작동 메서드
+$(document).ready(function(){
+  
+  // init();
+  
+  //창고별 제품 목록 조회    
+  whInfoFormList();
+});
+
+//창고별 재고 조회
+function whInfoFormList(currentPage){
+  currentPage=currentPage || 1;
+  
+  var param={
+      currentPage : currentPage,
+      pageSize : pageSizeWHInfoForm
+  }
+  
+  var resultCallback = function(data){
+    whInfoFormListResult(data, currentPage);
+  }
+  
+  callAjax("/scm/whInfoFormList.do", "post", "text", true, param, resultCallback);
+}
+//전체 창고 조회 콜백
+function whInfoFormListResult(data, currentPage){
+
+  //alert(data);
+  console.log(data);
+
+  // 기존 목록 삭제
+  $('#listWHInfoForm').empty();
+
+  //var $data = $($(data).html());
+
+  //console.log($data);
+  $("#listWHInfoForm").append(data);
+
+  // 총 개수 추출
+  //var $totalCntComnGrpCod = $data.find("#totalCntComnGrpCod");
+  //var totalCntComnGrpCod = $totalCntComnGrpCod.text();
+  var totalcnt = $("#totalcnt").val();
+  
+  // 페이지 네비게이션 생성
+  var paginationHtml = getPaginationHtml(currentPage, totalcnt, pageSizeWHInfoForm, pageBlockSizeWHInfoForm, 'whInfoFormList');
+  console.log("paginationHtml : " + paginationHtml);
+  
+  $("#WHInfoFormPagination").empty().append(paginationHtml);
+
+  // 현재 페이지 설정
+  $("#WHInfoFormPagination").val(currentPage);
+}
+</script>
+</head>
+<body>
+  <form id="myForm" action="" method="">
+    <input type="hidden">
+    <div id="wrap_area">
+      <!-- header Include -->
+      <jsp:include page="/WEB-INF/view/common/header.jsp"></jsp:include>
+      <div id="container">
+        <ul>
+          <li class="lnb">
+            <!-- lnb Include --> <jsp:include page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include>
+          </li>
+          <li class="contents">
+            <div class="content">
+              <!-- 메뉴 경로 영역 -->
+              <p class="Location">
+                <a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a> <a href="#" class="btn_nav">거래내역</a>
+                <span class="btn_nav bold">창고 정보 관리</span>
+                <a href="#" class="btn_set refresh">새로고침</a>
+              </p>
+              <!-- 검색 영역 -->
+              <p class="search"></p>
+              <p class="conTitle" id="searcharea">
+                <span>창고 정보 관리</span>
+                <span class="fr">
+                  <select id="searchKey" name="searchKey" style="width: 80px;" v-model="searchKey">
+                    <option value="all" id="option1" selected="selected">전체</option>
+                    <option value="ware_nm" id="option1">창고 명</option>
+                    <option value="pro_nm" id="option2">창고 위치</option>
+                  </select> <input type="text" id="searchWord" name="searchWord" v-model="searchWord" placeholder="" style="height: 28px;"> <a class="btnType blue" href="javascript:fListcourse()" onkeydown="enterKey()" name="search"><span id="searchEnter">검색</span></a>
+                </span>
+              </p>
+              <!-- 창고 등록 버튼 영역 -->
+              <!-- 상단 테이블 영역 -->
+              <div class="divWHInfoFormList" id="divWHInfoFormList">
+                <table class="col">
+                  <colgroup>
+                    <col width="7%">
+                    <col width="10%">
+                    <col width="10%">
+                    <col width="18%">
+                    <col width="13%">
+                    <col width="7%">
+                    <col width="35%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col">창고 코드</th>
+                      <th scope="col">창고 명</th>
+                      <th scope="col">담당자</th>
+                      <th scope="col">이메일</th>
+                      <th scope="col">전화 번호</th>
+                      <th scope="col">우편 번호</th>
+                      <th scope="col">창고 위치</th>
+                    </tr>
+                  </thead>
+                  <!-- 상단테이블 DB데이터 출력 영역 -->
+                  <tbody id="listWHInfoForm">
+
+                  </tbody>
+                </table>
+              </div>
+              <!-- .divWHInfoFormList 종료 -->
+              <div class="paging_area"  id="WHInfoFormPagination"> </div>
+            </div>
+            <!-- .content 종료 -->
+          </li>
+          <!-- .contents 종료 -->
+        </ul>
+      </div>
+      <!-- #container 종료 -->
+      <!-- footer Include -->
+      <jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
+    </div>
+    <!-- #wrap_area 종료 -->
+  </form>
+</body>
+</html>
