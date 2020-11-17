@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import kr.happyjob.chainmaker.scm.model.DailyOrderListVO;
 import kr.happyjob.chainmaker.scm.model.OrderDetailByOrderNoAndProNoDTO;
 import kr.happyjob.chainmaker.scm.model.PageAndOrderInfoDTO;
+import kr.happyjob.chainmaker.scm.model.ResponseDTO;
+import kr.happyjob.chainmaker.scm.model.ShippingDirectionDTO;
+import kr.happyjob.chainmaker.scm.model.ShippingDirectionListDTO;
 import kr.happyjob.chainmaker.scm.model.WHInfoByProNoDTO;
 import kr.happyjob.chainmaker.scm.service.DailyOrderHistoryService;
 import kr.happyjob.chainmaker.scm.service.DailyOrderHistroyServiceImpl;
@@ -35,8 +40,9 @@ import kr.happyjob.chainmaker.system.model.ComnGrpCodModel;
 @Controller
 @RequestMapping("/scm/dailyOrderHistory.do")
 public class DailyOrderHistoryController {
-
 	
+	private final Logger logger = LogManager.getLogger(this.getClass());
+
 	@Resource(name="DailyOrderHistoryServiceImpl")
 	private DailyOrderHistoryService dailyOrderHistoryService;
 	
@@ -73,7 +79,6 @@ public class DailyOrderHistoryController {
 		// pathValue listInfo 타입 별로, 일별 리스트 조회 내역 or 해당 주문의 상세 내역 리스트 메소드 호출 
 		Map<String, Object> resultMap = new HashMap<>();
 		
-		
 		switch(listInfo){
 			case "dailyOrder" : {
 				//resultMap에 담아서 결과 리스트 가져온다.
@@ -107,34 +112,17 @@ public class DailyOrderHistoryController {
 				break;
 			}
 			
+			case "refund" : {
+				
+				
+				break;
+			}
+			
 		}
-		/*
-		 * if(listInfo.equals("dailyOrder")) {
-		 * 
-		 * //resultMap에 담아서 결과 리스트 가져온다. resultMap = getListDailyOrder(pageDTO);
-		 * 
-		 * // resultMap의 key들을 set에 가져온다. Set<String> keySet = resultMap.keySet();
-		 * Iterator<String> keyIterator = keySet.iterator();
-		 * 
-		 * // model에 key와 value에 해당하는 값을 담아준다. while(keyIterator.hasNext()) { String key
-		 * = keyIterator.next(); Object value = resultMap.get(key);
-		 * model.addAttribute(key, value); }
-		 * 
-		 * //viewLocation = (String)resultMap.get("viewLocation");
-		 * 
-		 * viewLocation = "/scm/dailyOrderList";
-		 * 
-		 * } else if(listInfo.equals("detailOrder")) {
-		 * 
-		 * resultMap = getListDetailOrder(); }
-		 */
 
 		return viewLocation;
 	}
 	
-	
-	
-
 	/**
 	 *  주문 번호, 제품 번호로 주문 내역 조회
 	 */
@@ -146,13 +134,10 @@ public class DailyOrderHistoryController {
 
 		resultMap = getOrderDetailByOrderNoAndProNo(order_no, pro_no);
 		
-		
-		
 		return resultMap;
 	}
 	
 	// pro_no로 warehouseinfo 얻기
-	
 	@RequestMapping(value = "warehouse/{pro_no}", method=RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getWarehouseInfoByProNo(@PathVariable(value="pro_no") String pro_no) throws Exception {
@@ -165,48 +150,6 @@ public class DailyOrderHistoryController {
 		
 		return resultMap;
 	}
-	
-	
-	
-	
-	
-	
-	/**
-	 * 공통 상세 코드 목록 조회
-	 */
-	@RequestMapping("listComnDtlCod.do")
-	public String listComnDtlCod(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
-
-		
-		int currentPage = Integer.parseInt((String)paramMap.get("currentPage"));	// 현재 페이지 번호
-		int pageSize = Integer.parseInt((String)paramMap.get("pageSize"));			// 페이지 사이즈
-		int pageIndex = (currentPage-1)*pageSize;												// 페이지 시작 row 번호
-		
-
-		paramMap.put("pageIndex", pageIndex);
-		paramMap.put("pageSize", pageSize);
-		
-		// 공통 상세코드 목록 조회
-		//List<ComnDtlCodModel> listComnDtlCodModel = comnCodService.listComnDtlCod(paramMap);
-		//model.addAttribute("listComnDtlCodModel", listComnDtlCodModel);
-		
-		// 공통 상세코드 목록 카운트 조회
-		//int totalCount = comnCodService.countListComnDtlCod(paramMap);
-		//model.addAttribute("totalCntComnDtlCod", totalCount);
-		
-		model.addAttribute("pageSize", pageSize);
-		model.addAttribute("currentPageComnDtlCod",currentPage);
-
-		
-		
-		return "/system/comnDtlCodList";
-	}	
-	
-	
-	
-	
-	
 	
 	// 주문 내역 리스트 조회 method
 	public Map<String, Object> getListDailyOrder(PageAndOrderInfoDTO pageAndOrderInfoDTO) {
@@ -242,8 +185,43 @@ public class DailyOrderHistoryController {
 	}
 	
 	
+	@RequestMapping(value = "/shipdirection", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseDTO postShipDirection(@RequestBody List<ShippingDirectionDTO> shippingDirectionList,
+			HttpSession session) {
+		
+		ResponseDTO responseDTO = new ResponseDTO();
+		
+		// 로그 확인
+		for(ShippingDirectionDTO dto : shippingDirectionList) {
+			logger.info("dto : " + dto.getDeli_master_name());
+		}
+		
+		String writerID = (String) session.getAttribute("loginId");
+		
+		int shipNo = dailyOrderHistoryService.createShippingInfoReturnShipNo(shippingDirectionList, writerID);
+		
+		logger.info("최종 shipNo : " + shipNo);
+		
+		responseDTO.setResult("SUCCESS");
+		responseDTO.setMsg("배송 지시서 작성이 완료 되었습니다.");
+		
+		if(shipNo == -1) {
+			responseDTO.setResult("FAIL");
+			responseDTO.setMsg("배송 지시서 작성이 실패 하였습니다.");
+		}
+		
+		return responseDTO;
+	}
 	
 
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
