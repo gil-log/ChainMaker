@@ -1,13 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>ChainMaker 제품 목록</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>JobKorea</title>
 
 <jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.kr.min.js"></script>
 <script type="text/javascript">
 
 // 그룹코드 페이징 설정
@@ -20,7 +22,57 @@ var pageBlockSizeProductList = 5;
 $(function() {
 	// 그룹코드 조회
 	fListProductList();
+	
+	fRegisterButtonClickEvent();
+	
+	fDatepicker();
+	
 });
+
+function fDatepicker() {
+	$("#startDate").datepicker({
+		minDate : "+1d"
+    	        	
+    })
+	
+    $("#endDate").datepicker({
+    	
+    	minDate : "+1d",
+      maxDate : "+1m"     	
+      })
+}
+/** 버튼 이벤트 등록 */
+function fRegisterButtonClickEvent() {
+	$('a[name=btn]').click(function(e) {
+		e.preventDefault();
+
+		var btnId = $(this).attr('id');
+
+		switch (btnId) {
+		
+			
+			case 'btnSearch' :
+				board_search();
+		
+			case 'btnInOrder' :
+				fInsertOrder();
+				break;
+				
+			case 'btnInBasket' :
+				fInsertBasket();
+				break;	
+				
+			case 'btnCloseProductList' :
+				//alert("잘되나 찍어봅세");
+				gfCloseModal();
+				break;
+				
+				
+			case 'btnOrder' :
+				fOrderProductList();
+		}
+	});
+}
 
 /** 그룹코드 조회 */
 function fListProductList(currentPage) {
@@ -93,11 +145,211 @@ function board_search(currentPage) {
 
 /** 그룹코드 모달 실행 */
 function fPopModalProductList(pro_num) {
-	gfModalPop("#layer1");
+	if (pro_num == null || pro_num == ""){
+		alert("찍어보자");
+		$("#action").val("I");
+		
+		gfModalPop("#layer1");
 	// 신규 저장
+	} else {
+		
+		$("action").val("U");
+		fdetailModal(pro_num);
+		//alert("여기 오는지 찍어봅세");
+	}
+	 /*회원정보 상세 조회*/
+	 
+	 function fdetailModal(pro_num){
+		 //alert(" 상세 조회  ");
+		 
+		 var param = {pro_num : pro_num};
+		 var resultCallback2 = function(data){
+			 fdetailResult(data);
+		 };
+		 
+		 callAjax("/epc/detailProduct.do", "post", "json", true, param, resultCallback2);
+		 //alert("뽑아보자");
+		 
+	 }
+	 
+	 /*  공지사항 상세 조회 -> 콜백함수   */
+	 function fdetailResult(data){
+
+		  //alert("공지사항 상세 조회  33");
+		 if(data.resultMsg == "SUCCESS"){
+			 //모달 띄우기 
+			 gfModalPop("#layer1");
+			 
+			// alert(data.result);
+			// 모달에 정보 넣기 
+			frealPopModal(data.result);
+		 
+		 }else{
+			 alert(data.resultMsg);
+		 }
+	 }
+
+}
+
+
+/* 팝업 _ 초기화 페이지(신규) 혹은 내용뿌리기  */
+function frealPopModal(object){
+	 // 여기는 object 값없을때 여기로 
+	 if(object == "" || object == null || object == undefined){
+		 
+		 $("#pro_model_no").val(""); // pro_model_no 되돌리기
+		 // $("#pro_model_no").attr("readonly", false); // pro_model_no 되돌리기
+		 // $("#pro_model_no").css("border",""); // pro_model_no 되돌리기
+
+		 
+		 $("#btnDeletePro").hide(); // 삭제버튼 숨기기
+		 $("#btnUpdatePro").hide();
+		 $("#btnSavePro").show();
+		
+		 
+	 }else{
+		 $("#pro_num").val(object.pro_num);
+		 $("#pro_num").attr("readonly", true); // 수정불가 
+		 $("#pro_num").css("border","none");  // 보더 없애는거
+		 
+		 $("#pro_manu_nm").val(object.pro_manu_nm);
+		 $("#pro_manu_nm").attr("readonly", true); 
+		 $("#pro_manu_nm").css("border","none"); 
+		 
+		 $("#pro_prc").val(object.pro_prc);
+		 $("#pro_prc").attr("readonly", true); 
+		 $("#pro_prc").css("border","none");  
+		 
+		 $("#pro_det").val(object.pro_det);
+		 $("#pro_det").attr("readonly", true); 
+		 $("#pro_det").css("border","none"); 
+		 
+		 $("#od_qty").val("1");
+		 $("#startDate").val('');
+		 
+		 $("#btnCloseProductList").show(); // 삭제버튼 보이기 
+		
+		
+		
+		 
+	 }
+}
+
+function fnCalCount(type, ths) {
+	var $input = $(ths).parents("td").find("input[name='od_qty']");
+	var tCount = Number($input.val());
+	
+	
+	if(type=="p"){
+		 $input.val(Number(tCount)+1);
+	}else{
+		if(tCount > 0) $input.val(Number(tCount)-1);
+	}
+}
+
+/** 주문 저장 validation */
+function fValidateOrder() {
+	
+	var	chk2 = $("#startDate").val();
+	if (chk2 ==  '') {
+	alert("납품일자를 입력해 주세요.");
+	return; 
+	}
+	
+	return true;
 	
 }
 
+
+/** 주문 저장 */
+function fInsertOrder() {
+
+	// vaildation 체크
+	if ( ! fValidateOrder() ) {
+		return;
+	}
+	
+	var resultCallback = function(data) {
+		fInsertOrderResult(data);
+	};
+	
+	callAjax("/epc/inOrder.do", "post", "json", true, $("#myForm").serialize(), resultCallback);
+}
+
+/** 주문 저장 콜백 함수 */
+function fInsertOrderResult(data) {
+	
+	
+	
+	if (data.result == "SUCCESS") {
+		
+		// 응답 메시지 출력
+		alert(data.resultMsg);
+		
+		// 모달 닫기
+		gfCloseModal();
+		
+		
+		
+	} else {
+		// 오류 응답 메시지 출력
+		alert(data.resultMsg);
+	}
+	
+	
+}
+
+/** 장바구니 저장 validation */
+function fValidateBasket() {
+	
+	var	chk2 = $("#od_qty").val();
+	if (chk2 ==  '') {
+	alert("주문 수량을 확인하세요");
+	return; 
+	}
+	
+	return true;
+	
+}
+
+
+/** 장바구니 저장 */
+function fInsertBasket() {
+
+	// vaildation 체크
+	if ( ! fValidateBasket() ) {
+		return;
+	}
+	
+	var resultCallback = function(data) {
+		fInsertBasketResult(data);
+	};
+	
+	callAjax("/epc/inBasket.do", "post", "json", true, $("#myForm").serialize(), resultCallback);
+}
+
+/** 장바구니 저장 콜백 함수 */
+function fInsertBasketResult(data) {
+	
+	
+	
+	if (data.result == "SUCCESS") {
+		
+		// 응답 메시지 출력
+		alert(data.resultMsg);
+		
+		// 모달 닫기
+		gfCloseModal();
+		
+		
+		
+	} else {
+		// 오류 응답 메시지 출력
+		alert(data.resultMsg);
+	}
+	
+	
+}
 
 </script>
 
@@ -161,7 +413,7 @@ function fPopModalProductList(pro_num) {
 						        
 						      </select>
      	                       <input type="text" style="width: 150px; height: 25px;" id="sname" name="sname">                    
-	                           <a href="javascript:board_search();" class="btnType blue" name="btn"><span>검  색</span></a>
+	                           <a href="" id = "btnSearch" class="btnType blue" name="btn"><span>검  색</span></a>
                            </td> 
                            
                         </tr>
@@ -183,7 +435,6 @@ function fPopModalProductList(pro_num) {
 									<tr>
 										<th scope="col">장비번호</th>
 										<th scope="col">장비구분</th>
-										<th scope="col">모델번호</th>
 										<th scope="col">모델명</th>
 										<th scope="col">제조사</th>
 										<th scope="col">판매가격</th>
@@ -213,7 +464,7 @@ function fPopModalProductList(pro_num) {
 <div id="layer1" class="layerPop layerType2" style="width: 600px;">
 		<dl>
 			<dt>
-				<strong>그룹코드 관리</strong>
+				<strong>제품 상세보기</strong>
 			</dt>
 			<dd class="content">
 				<!-- s : 여기에 내용입력 -->
@@ -228,23 +479,40 @@ function fPopModalProductList(pro_num) {
 
 					<tbody>
 						<tr>
-							<th scope="row">그룹 코드 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" name="grp_cod" id="grp_cod" /></td>
-							<th scope="row">그룹 코드 명 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" name="grp_cod_nm" id="grp_cod_nm" /></td>
+							<th scope="row">모델번호</th>
+							<td><input type="text" maxlength="15" name="pro_num" id="pro_num" ></td>
+							<th scope="row">제품이미지</th>
+							<td colspan="2" style="text-align:center;">
+								 	<img id="" style="object-fit: cover;max-width:100%" src="" alt="제품사진미리보기">
+							</td>
 						</tr>
 						<tr>
-							<th scope="row">코드 설명 <span class="font_red">*</span></th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								name="grp_cod_eplti" id="grp_cod_eplti" /></td>
+							<th scope="row">제조사</th>
+							<td><input type="text" maxlength="15" name="pro_manu_nm" id="pro_manu_nm" /></td>
+								
+							<th scope="row">주문수량</th>
+							
+							<td>
+							<button style= "float:right;" type="button" onclick = "fnCalCount('p', this);">▲</button>
+							<input type="text"  name="od_qty" id="od_qty" value = "1"  />
+							<button style= "float:right;" type="button" onclick = "fnCalCount('m', this);">▼</button>
+							</td>
 						</tr>
 				
 						<tr>
-							<th scope="row">사용 유무 <span class="font_red">*</span></th>
-							<td colspan="3"><input type="radio" id="radio1-1"
-								name="grp_use_poa" id="grp_use_poa_1" value='Y' /> <label for="radio1-1">사용</label>
-								&nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" id="radio1-2"
-								name="grp_use_poa" id="grp_use_poa_2" value="N" /> <label for="radio1-2">미사용</label></td>
+							<th scope="row">판매가격 </th>
+							<td><input type="text" maxlength="10" name="pro_prc" id="pro_prc" " ></td>
+							
+							<th scope="row">납품일자</th>
+							<td><input type="text" id="startDate" name = "startDate" ></td>
+                           	
+						</tr>
+						
+						<tr>
+							<th scope="row">상세정보</th>
+								<td colspan="3">
+							<textarea id="pro_det" maxlength="500" name="pro_det" style="height:130px;outline:none;resize:none;" placeholder="여기에 상세정보를 적어주세요.(500자 이내)"></textarea>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -252,9 +520,9 @@ function fPopModalProductList(pro_num) {
 				<!-- e : 여기에 내용입력 -->
 
 				<div class="btn_areaC mt30">
-					<a href="" class="btnType blue" id="btnSaveGrpCod" name="btn"><span>저장</span></a> 
-					<a href="" class="btnType blue" id="btnDeleteGrpCod" name="btn"><span>삭제</span></a> 
-					<a href=""	class="btnType gray"  id="btnCloseGrpCod" name="btn"><span>취소</span></a>
+					<a href="" class="btnType blue" id="btnInBasket" name="btn"><span>장바구니</span></a> 
+					<a href="" class="btnType blue" id="btnInOrder" name="btn"><span>주문</span></a> 
+					<a href=""	class="btnType gray"  id="btnCloseProductList" name="btn"><span>취소</span></a>
 				</div>
 			</dd>
 		</dl>

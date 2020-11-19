@@ -10,7 +10,6 @@
 		    , p.deli_company as deli_company
 		    , p.pro_name as pro_name
 		    , p.pro_deli_price as pro_deli_price
-		    , p.pro_model_no as pro_model_no
 		    , p.pro_model_name as pro_model_name
 		    , p.pro_manu_name as pro_manu_name
 		    , p.pro_price as pro_price
@@ -21,12 +20,11 @@
 		<where>
 		<if test="(sname != null) and (!sname.equals('')) ">
 			<choose>
-				<when test= "(oname eq 'all'.toString())">
-					AND p.pro_model_no || p.pro_name || p.pro_model_name || p.pro_manu_name  
-					LIKE concat('%', #{sname}, '%')
+				<when test= "oname eq 'all'.toString()">
+					AND concat( p.pro_no, p.pro_name, p.pro_model_name, p.pro_manu_name ) REGEXP concat('.', #{sname}, '.')
 				</when>
-				<when test= "oname eq 'model_no'.toString()">
-					AND p.pro_model_no LIKE concat('%', #{sname}, '%')
+				<when test= "oname eq 'pro_no'.toString()">
+					AND p.pro_no LIKE concat('%', #{sname}, '%')
 				</when>
 				<when test= "oname eq 'pro_nm'.toString()">
 					AND p.pro_name LIKE concat('%', #{sname}, '%')
@@ -59,8 +57,30 @@
 	</select>
 
 	<!-- 제품 목록 수 조회 -->
-	<select id="countProductInfo" resultType="int">
+	<select id="countProductInfo" resultType="int" parameterType="Map">
 		SELECT COUNT(1) FROM tb_product
+		
+		<where>
+		<if test="(sname != null) and (!sname.equals('')) ">
+			<choose>
+				<when test= "oname eq 'all'.toString()">
+					AND concat( pro_no, pro_name, pro_model_name, pro_manu_name ) REGEXP concat('.', #{sname}, '.')
+				</when>
+				<when test= "oname eq 'pro_no'.toString()">
+					AND pro_no LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'pro_nm'.toString()">
+					AND pro_name LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'model_nm'.toString()">
+					AND pro_model_name LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'manu_nm'.toString()">
+					AND pro_manu_name LIKE concat('%', #{sname}, '%')
+				</when>
+			</choose>
+        </if>
+        </where>
 	</select>
 	
 	<!-- 제품 1건 상세정보 -->
@@ -70,13 +90,12 @@
 		    , p.deli_company as deli_company
 		    , p.pro_name as pro_name
 		    , p.pro_deli_price as pro_deli_price
-		    , p.pro_model_no as pro_model_no
 		    , p.pro_model_name as pro_model_name
 		    , p.pro_manu_name as pro_manu_name
 		    , p.pro_price as pro_price
 		    , p.pro_detail as pro_detail
 		    , p.pro_cd as pro_cd
-            , f.file_fname as file_fname
+            , f.file_server_path as file_server_path
             , f.file_ofname as file_ofname
 		FROM tb_product p 
         LEFT OUTER JOIN tb_file f
@@ -94,7 +113,6 @@
 			, pro_name 
 			, deli_company 
 			, pro_deli_price 
-			, pro_model_no
 			, pro_model_name
 			, pro_manu_name
 			, pro_price
@@ -107,7 +125,6 @@
 			, #{pro_name} 
 			, #{deli_company} 
 			, #{pro_deli_price}
-			, #{pro_model_no}
 			, #{pro_model_name}
 			, #{pro_manu_name}
 			, #{pro_price}
@@ -122,17 +139,34 @@
 		INSERT INTO tb_file 
 		
 		(
-			file_fname , file_ofname , file_size , pro_no
+			file_server_path, file_local_path, file_new_name , file_ofname , file_size , pro_no
 		)
 		VALUES
 		
 		(
-			#{file_fname} 
+			#{file_server_path} 
+			, #{file_local_path} 
+			, #{file_new_name} 
 			, #{file_ofname} 
 			, #{file_size} 
 			, #{pro_no}
 		)
 	</insert>
+	
+	
+	<!-- 파일 테이블의 정보 검색 -->
+	<select id="selectFileInfo" parameterType="Map" resultType="kr.happyjob.chainmaker.scm.model.FileModel">
+		SELECT file_server_path as file_server_path
+		, file_local_path as file_local_path
+		, file_new_name as file_new_name
+		, file_ofname as file_ofname
+		, file_size as file_size
+		, pro_no as pro_no
+		FROM tb_file
+		<where>
+			AND pro_no=#{pro_no}
+		</where>
+	</select>
 	
 	<!-- 파일 테이블에 제품 내용 삭제 -->
 	<delete id="deleteProdFile" parameterType="Map">
@@ -160,7 +194,6 @@
 		, deli_company = #{deli_company}
 		, pro_name = #{pro_name}	
 		, pro_deli_price = #{pro_deli_price}
-		, pro_model_no = #{pro_model_no}
 		, pro_model_name = #{pro_model_name}
 		, pro_manu_name = #{pro_manu_name}
 		, pro_price = #{pro_price}

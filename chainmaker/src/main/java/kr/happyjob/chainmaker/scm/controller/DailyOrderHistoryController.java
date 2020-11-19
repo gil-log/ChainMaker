@@ -25,9 +25,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import kr.happyjob.chainmaker.scm.model.DailyOrderListDTO;
 import kr.happyjob.chainmaker.scm.model.DailyOrderListVO;
 import kr.happyjob.chainmaker.scm.model.OrderDetailByOrderNoAndProNoDTO;
-import kr.happyjob.chainmaker.scm.model.PageAndOrderInfoDTO;
+import kr.happyjob.chainmaker.scm.model.OrdersRequestDTO;
+import kr.happyjob.chainmaker.scm.model.ProductDetailDTO;
+import kr.happyjob.chainmaker.scm.model.PurchaseAndShippingInfoDTO;
+import kr.happyjob.chainmaker.scm.model.PurchaseInfoDTO;
 import kr.happyjob.chainmaker.scm.model.ResponseDTO;
 import kr.happyjob.chainmaker.scm.model.ShippingDirectionDTO;
 import kr.happyjob.chainmaker.scm.model.ShippingDirectionListDTO;
@@ -59,16 +63,14 @@ public class DailyOrderHistoryController {
 	@GetMapping
 	@RequestMapping("/orders/{listInfo}")
 	public String getListDailyOrderHistoryOrDetail (@PathVariable(value = "listInfo") String listInfo
-			
-			, Model model, @ModelAttribute PageAndOrderInfoDTO pageAndOrderInfoDTO, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
+			, Model model, @ModelAttribute OrdersRequestDTO ordersRequestDTO) throws Exception {
 
 		
-		int currentPage = pageAndOrderInfoDTO.getCurrentPage();
-		int pageSize = pageAndOrderInfoDTO.getPageSize();
+		int currentPage = ordersRequestDTO.getCurrentPage();
+		int pageSize = ordersRequestDTO.getPageSize();
 		int pageIndex = (currentPage-1)*pageSize;	// 페이지 시작 row 번호
 
-		pageAndOrderInfoDTO.setPageIndex(pageIndex);
+		ordersRequestDTO.setPageIndex(pageIndex);
 		
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("currentPageComnGrpCod",currentPage);
@@ -82,7 +84,7 @@ public class DailyOrderHistoryController {
 		switch(listInfo){
 			case "dailyOrder" : {
 				//resultMap에 담아서 결과 리스트 가져온다.
-				resultMap = getListDailyOrder(pageAndOrderInfoDTO);
+				resultMap = getListDailyOrder(ordersRequestDTO);
 				
 				// resultMap의 key들을 set에 가져온다.
 				Set<String> keySet = resultMap.keySet();
@@ -95,8 +97,6 @@ public class DailyOrderHistoryController {
 					model.addAttribute(key, value);
 				}
 				
-				//viewLocation = (String)resultMap.get("viewLocation");
-				
 				viewLocation = "/scm/dailyOrderList";
 				
 				break;
@@ -104,8 +104,8 @@ public class DailyOrderHistoryController {
 			
 			case "detailOrder" : {
 				
-				int order_no = pageAndOrderInfoDTO.getOrder_no();
-				String pro_no = pageAndOrderInfoDTO.getPro_no();
+				int order_no = ordersRequestDTO.getOrder_no();
+				String pro_no = ordersRequestDTO.getPro_no();
 				resultMap = getOrderDetailByOrderNoAndProNo(order_no, pro_no);
 				
 				viewLocation = "/scm/";
@@ -113,10 +113,68 @@ public class DailyOrderHistoryController {
 			}
 			
 			case "refund" : {
+				resultMap = getListRefundDailyOrder(ordersRequestDTO);
+				// resultMap의 key들을 set에 가져온다.
 				
+				Set<String> keySet = resultMap.keySet();
+				Iterator<String> keyIterator = keySet.iterator();
+				
+				// model에 key와 value에 해당하는 값을 담아준다.
+				while(keyIterator.hasNext()) {
+					String key = keyIterator.next();
+					Object value = resultMap.get(key);
+					model.addAttribute(key, value);
+				}
+				
+				viewLocation = "/scm/dailyOrderList";
 				
 				break;
 			}
+			
+			case "dateOrder" : {
+				
+				ordersRequestDTO.setOrder_cd("order");
+				
+				resultMap = getOrderListSearchByDateAndOrderCD(ordersRequestDTO);
+				// resultMap의 key들을 set에 가져온다.
+				
+				Set<String> keySet = resultMap.keySet();
+				Iterator<String> keyIterator = keySet.iterator();
+				
+				// model에 key와 value에 해당하는 값을 담아준다.
+				while(keyIterator.hasNext()) {
+					String key = keyIterator.next();
+					Object value = resultMap.get(key);
+					model.addAttribute(key, value);
+				}
+				
+				viewLocation = "/scm/dailyOrderList";
+				
+				break;
+			}
+			
+			case "dateRefund" : {
+				
+				ordersRequestDTO.setOrder_cd("refund");
+				
+				resultMap = getOrderListSearchByDateAndOrderCD(ordersRequestDTO);
+				// resultMap의 key들을 set에 가져온다.
+				
+				Set<String> keySet = resultMap.keySet();
+				Iterator<String> keyIterator = keySet.iterator();
+				
+				// model에 key와 value에 해당하는 값을 담아준다.
+				while(keyIterator.hasNext()) {
+					String key = keyIterator.next();
+					Object value = resultMap.get(key);
+					model.addAttribute(key, value);
+				}
+				
+				viewLocation = "/scm/dailyOrderList";
+				
+				break;
+			}
+			
 			
 		}
 
@@ -137,6 +195,37 @@ public class DailyOrderHistoryController {
 		return resultMap;
 	}
 	
+	/**
+	 *  제품 번호로 제품 정보 조회
+	 */
+	@RequestMapping(value ="/product/{pro_no}", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> getProductDetail(@PathVariable(value="pro_no") String pro_no, HttpSession session) throws Exception {
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		resultMap = getProductDetailByProNo(pro_no, session);
+		
+		return resultMap;
+	}
+	
+	// 해당 주문 상세 내역 리스트 조회 method
+	public Map<String, Object> getProductDetailByProNo(String pro_no, HttpSession session) {
+		
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		List<ProductDetailDTO> productDetail = dailyOrderHistoryService.getProductDetailByProNo(pro_no);
+		
+		String login_id = (String)session.getAttribute("loginId");
+		
+		// 항목 1개에 login_id 담아두기
+		productDetail.get(0).setLogin_id(login_id);
+		
+		resultMap.put("productDetail", productDetail);
+		
+		return resultMap;
+	}
+	
 	// pro_no로 warehouseinfo 얻기
 	@RequestMapping(value = "warehouse/{pro_no}", method=RequestMethod.GET)
 	@ResponseBody
@@ -152,242 +241,129 @@ public class DailyOrderHistoryController {
 	}
 	
 	// 주문 내역 리스트 조회 method
-	public Map<String, Object> getListDailyOrder(PageAndOrderInfoDTO pageAndOrderInfoDTO) {
+	public Map<String, Object> getListDailyOrder(OrdersRequestDTO ordersRequestDTO) {
 		
 		Map<String, Object> resultMap = new HashMap<>();
 		
+		// 주문 조회
+		ordersRequestDTO.setOrder_cd("order");
+		
 		// 일별 주문 목록 조회
-		List<DailyOrderListVO> listDailyOrder = dailyOrderHistoryService.listDailyOrder(pageAndOrderInfoDTO);
+		List<DailyOrderListDTO> listDailyOrder = dailyOrderHistoryService.getDailyOrderListByOrderCD(ordersRequestDTO);
 		resultMap.put("listDailyOrder", listDailyOrder);
 		
 		// 일별 주문 목록 카운트 조회
-		int totalCount = dailyOrderHistoryService.countListDailyOrder();
+		String order_cd = "order";
+		int totalCount = dailyOrderHistoryService.countDailyOrderListByOrderCD(order_cd);
 		resultMap.put("totalCntDailyOrder", totalCount);
 		
 		return resultMap;
 	}
+	
+	// 주문 내역 리스트 중 반품 정보만 조회
+	public Map<String, Object> getListRefundDailyOrder(OrdersRequestDTO ordersRequestDTO) {
+		
+		Map<String, Object> resultMap = new HashMap<>();
+
+		// 반품 조회
+		ordersRequestDTO.setOrder_cd("refund");
+		
+		// 일별 주문 목록 조회
+		List<DailyOrderListDTO> refundDailyOrderList = dailyOrderHistoryService.getDailyOrderListByOrderCD(ordersRequestDTO);
+		resultMap.put("listDailyOrder", refundDailyOrderList);
+		
+		// 일별 주문 목록 카운트 조회
+		String order_cd = "refund";
+		int totalCount = dailyOrderHistoryService.countDailyOrderListByOrderCD(order_cd);
+		resultMap.put("totalCntDailyOrder", totalCount);
+		
+		return resultMap;
+	}
+	
+	public Map<String, Object> getOrderListSearchByDateAndOrderCD(OrdersRequestDTO ordersRequestDTO) {
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		
+		// 일별 주문 목록 조회
+		List<DailyOrderListDTO> dailyOrderListByDateAndOrderCD = dailyOrderHistoryService.getDailyOrderListByDateAndOrderCD(ordersRequestDTO);
+		resultMap.put("listDailyOrder", dailyOrderListByDateAndOrderCD);
+		
+		// 일별 주문 목록 카운트 조회
+		int totalCount = dailyOrderHistoryService.countDailyOrderListByDateAndOrderCD(ordersRequestDTO);
+		resultMap.put("totalCntDailyOrder", totalCount);
+		
+		return resultMap;
+	}
+	
+	
+	
 	
 	// 해당 주문 상세 내역 리스트 조회 method
 	public Map<String, Object> getOrderDetailByOrderNoAndProNo(int order_no, String pro_no) {
 		
 		Map<String, Object> resultMap = new HashMap<>();
 		
-		PageAndOrderInfoDTO pageOrderInfoDTO = new PageAndOrderInfoDTO();
+		OrdersRequestDTO ordersRequestDTO = new OrdersRequestDTO();
 		
-		pageOrderInfoDTO.setOrder_no(order_no);
-		pageOrderInfoDTO.setPro_no(pro_no);
+		ordersRequestDTO.setOrder_no(order_no);
+		ordersRequestDTO.setPro_no(pro_no);
 		
-		OrderDetailByOrderNoAndProNoDTO orderDetail = dailyOrderHistoryService.selectOrderDetailByOrderNoAndProNo(pageOrderInfoDTO);
+		OrderDetailByOrderNoAndProNoDTO orderDetail = dailyOrderHistoryService.selectOrderDetailByOrderNoAndProNo(ordersRequestDTO);
 		
 		resultMap.put("orderDetail", orderDetail);
 		
 		return resultMap;
 	}
 	
-	
-	@RequestMapping(value = "/shipdirection", method = RequestMethod.POST)
+	@RequestMapping(value = "/direction/{type}", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseDTO postShipDirection(@RequestBody List<ShippingDirectionDTO> shippingDirectionList,
+	public ResponseDTO postDirection(@PathVariable(value="type") String type, @RequestBody List<PurchaseAndShippingInfoDTO> purchaseAndShippingInfoDTOList,
 			HttpSession session) {
 		
 		ResponseDTO responseDTO = new ResponseDTO();
 		
-		// 로그 확인
-		for(ShippingDirectionDTO dto : shippingDirectionList) {
-			logger.info("dto : " + dto.getDeli_master_name());
-		}
+		logger.info("direction type : "+type);
 		
-		String writerID = (String) session.getAttribute("loginId");
+		switch(type) {
 		
-		int shipNo = dailyOrderHistoryService.createShippingInfoReturnShipNo(shippingDirectionList, writerID);
-		
-		logger.info("최종 shipNo : " + shipNo);
-		
-		responseDTO.setResult("SUCCESS");
-		responseDTO.setMsg("배송 지시서 작성이 완료 되었습니다.");
-		
-		if(shipNo == -1) {
-			responseDTO.setResult("FAIL");
-			responseDTO.setMsg("배송 지시서 작성이 실패 하였습니다.");
+			case "shipping" : {
+				
+				String writerID = (String) session.getAttribute("loginId");
+				
+				int shipNo = dailyOrderHistoryService.createShippingInfoReturnShipNo(purchaseAndShippingInfoDTOList, writerID);
+				
+				logger.info("최종 shipNo : " + shipNo);
+				
+				responseDTO.setResult("SUCCESS");
+				responseDTO.setMsg("배송 지시서 작성이 완료 되었습니다.");
+				
+				if(shipNo == -1) {
+					responseDTO.setResult("FAIL");
+					responseDTO.setMsg("배송 지시서 작성이 실패 하였습니다.");
+				}
+				break;
+			}
+			
+			case "purchase" : {
+				
+				int purchaseNo = dailyOrderHistoryService.createPurchaseInfoReturnPurchaseNo(purchaseAndShippingInfoDTOList);
+				
+				logger.info("최종 purchaseNo : " + purchaseNo);
+				
+				responseDTO.setResult("SUCCESS");
+				responseDTO.setMsg("발주 지시서 작성이 완료 되었습니다.");
+				
+				if(purchaseNo == -1) {
+					responseDTO.setResult("FAIL");
+					responseDTO.setMsg("발주 지시서 작성이 실패 하였습니다.");
+				}
+				break;
+			}
+			
 		}
 		
 		return responseDTO;
 	}
 	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/**
-	 *  공통 그룹 코드 저장
-	 */
-	@RequestMapping("saveComnGrpCod.do")
-	//Map 형태 redirect안할때 씀 즉 값만 바꾸겠다.라는 이야기
-	@ResponseBody
-	public Map<String, Object> saveComnGrpCod(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
-
-		String action = (String)paramMap.get("action");
-		String result = "SUCCESS";
-		String resultMsg = "저장 되었습니다.";
-		
-		// 사용자 정보 설정
-		paramMap.put("fst_rgst_sst_id", session.getAttribute("usrSstId"));
-		paramMap.put("fnl_mdfr_sst_id", session.getAttribute("usrSstId"));
-		
-		if ("I".equals(action)) {
-			// 그룹코드 신규 저장
-			//comnCodService.insertComnGrpCod(paramMap);
-		} else if("U".equals(action)) {
-			// 그룹코드 수정 저장
-			//comnCodService.updateComnGrpCod(paramMap);
-		} else {
-			result = "FALSE";
-			resultMsg = "알수 없는 요청 입니다.";
-		}
-		
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("result", result);
-		resultMap.put("resultMsg", resultMsg);
-
-		
-		
-		
-		return resultMap;
-	}
-	
-
-	
-	/**
-	 *  그룹코드 삭제
-	 */
-	@RequestMapping("deleteComnGrpCod.do")
-	@ResponseBody
-	public Map<String, Object> deleteComnGrpCod(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
-
-		String result = "SUCCESS";
-		String resultMsg = "삭제 되었습니다.";
-		
-		// 그룹코드 삭제
-		//comnCodService.deleteComnGrpCod(paramMap);
-		
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("result", result);
-		resultMap.put("resultMsg", resultMsg);
-
-		
-		
-		return resultMap;
-	}
-	
-	
-
-
-	
-	/**
-	 *  공통 상세 코드 단건 조회
-	 */
-	@RequestMapping("selectComnDtlCod.do")
-	@ResponseBody
-	public Map<String, Object> selectComnDtlCod (Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
-
-		
-		
-		String result = "SUCCESS";
-		String resultMsg = "조회 되었습니다.";
-		
-		// 공통 상세 코드 단건 조회
-		//ComnDtlCodModel comnDtlCodModel = comnCodService.selectComnDtlCod(paramMap);
-		
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("result", result);
-		resultMap.put("resultMsg", resultMsg);
-		//resultMap.put("comnDtlCodModel", comnDtlCodModel);
-
-		
-		
-		return resultMap;
-	}
-	
-	
-	/**
-	 *  공통 상세 코드 저장
-	 */
-	@RequestMapping("saveComnDtlCod.do")
-	@ResponseBody
-	public Map<String, Object> saveComnDtlCod(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
-		
-
-		
-		
-		String action = (String)paramMap.get("action");
-		String result = "SUCCESS";
-		String resultMsg = "저장 되었습니다.";
-		
-		// 사용자 정보 설정
-		paramMap.put("fst_rgst_sst_id", session.getAttribute("usrSstId"));
-		paramMap.put("fnl_mdfr_sst_id", session.getAttribute("usrSstId"));
-		
-		if ("I".equals(action)) {
-			// 상세코드 신규 저장
-			//comnCodService.insertComnDtlCod(paramMap);
-		} else if("U".equals(action)) {
-			// 상세코드 수정 저장
-			//comnCodService.updateComnDtlCod(paramMap);
-		} else {
-			result = "FALSE";
-			resultMsg = "알수 없는 요청 입니다.";
-		}
-		
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("result", result);
-		resultMap.put("resultMsg", resultMsg);
-
-		
-		
-		
-		return resultMap;
-	}
-	
-		
-	/**
-	 *  상세코드 삭제
-	 */
-	@RequestMapping("deleteComnDtlCod.do")
-	@ResponseBody
-	public Map<String, Object> deleteComnDtlCod(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
-			HttpServletResponse response, HttpSession session) throws Exception {
-
-		
-		
-		
-		String result = "SUCCESS";
-		String resultMsg = "삭제 되었습니다.";
-		
-		// 상세코드 삭제
-		//comnCodService.deleteComnDtlCod(paramMap);
-		
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("result", result);
-		resultMap.put("resultMsg", resultMsg);
-
-		
-		
-		
-		
-		return resultMap;
-	}
 	
 }

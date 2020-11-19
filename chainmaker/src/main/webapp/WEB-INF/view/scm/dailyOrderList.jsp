@@ -3,9 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 									
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
-						    
-						
+	
 							<c:if test="${totalCntDailyOrder eq 0 }">
 								<tr>
 									<td colspan="13">데이터가 존재하지 않습니다.</td>
@@ -37,20 +35,20 @@
 										</td>
 										<c:if test="${list.deposit_cd eq  0}">
 											<td>미입금</td>
-											<td><a class="btnType3 color1" href="javascript:fNotDepositPopUp();"><span>배송</span></a></td>
-											<td><a class="btnType3 color1" href="javascript:fPopModalComnGrpCod('${list.order_no}');"><span>발주</span></a></td>
+											<td><a class="btnType3 color2" href="javascript:fNotDepositPopUp();"><span>배송</span></a></td>
+											<td><a class="btnType3 color1" href="javascript:fPopModalPurchaseDirection('${list.pro_no}');"><span>발주</span></a></td>
 										</c:if>
 										<c:if test="${list.deposit_cd eq  1}">
 											<td>입금</td>
 											
 											<c:if test="${list.pro_ware_qty >= list.order_qty}">
-												<td><a class="btnType3 color1" href="javascript:fPopModalDeliDirection('${list.order_no}','${list.pro_no}');"><span>배송</span></a></td>
+												<td><a class="btnType3 color2" href="javascript:fPopModalDeliDirection('${list.order_no}','${list.pro_no}');"><span>배송</span></a></td>
 											</c:if>
 											<c:if test="${list.pro_ware_qty < list.order_qty}">
-												<td><a class="btnType3 color1" href="javascript:fNoneWareQtyPopUp();"><span>배송</span></a></td>
+												<td><a class="btnType3 color2" href="javascript:fNoneWareQtyPopUp();"><span>배송</span></a></td>
 											</c:if>
 											
-											<td><a class="btnType3 color1" href="javascript:fPopModalComnGrpCod('${list.order_no}');"><span>발주</span></a></td>
+											<td><a class="btnType3 color1" href="javascript:fPopModalPurchaseDirection('${list.pro_no}');"><span>발주</span></a></td>
 										</c:if>
 									</tr>
 									<c:set var="nRow" value="${nRow + 1}" />

@@ -13,8 +13,15 @@
 <script type="text/javascript">
 </script>
 <script src="${CTX_PATH}/js/view/scm/dailyOrderHistory/dailyOrder.js"></script>
-<script src="${CTX_PATH}/js/view/scm/dailyOrderHistory/dtlOrder.js"></script>
 
+	<style>
+ 		input[name=date].datetype{
+ 			padding:4px 2px 5px 25px; width:95px; border:1px solid #CACACA;
+      font-size:11px; color:#666; 
+      background:url('http://cfile23.uf.tistory.com/image/26100D4F5864C76827F535') no-repeat 2px 2px; background-size:15px
+    } 
+	</style>
+	
 </head>
 <body>
 	<input type="hidden" id="currentPageDailyOrder" value="1">
@@ -24,7 +31,8 @@
 	<input type="hidden" name="action" id="action" value="">
 
 	<div id="whInfoData"></div>
-
+	
+	<div id="productDetail"></div>
 
 	<!-- 모달 배경 -->
 	<div id="mask"></div>
@@ -54,6 +62,11 @@
 
 						<p class="conTitle">
 							<span>일별 수주 내역</span> <span class="fr"> 
+							
+								<input class="datetype" type="text" name = "date" id="startDate">
+							
+								<input class="datetype" type="text" name = "date" id="endDate">
+								
 								<label><input type="checkbox" id="refundCheck" name="refundCheck" value="refund"> 반품 요청 목록 조회</label>  
 							</span>
 						</p>
@@ -99,8 +112,6 @@
 						</div>
 						<div class="paging_area" id="dailyOrderPagination"></div>
 
-
-						<div class="paging_area" id="comnDtlCodPagination"></div>
 
 					</div> <!--// content -->
 
@@ -163,8 +174,9 @@
 					<caption>caption</caption>
 					<colgroup>
 						<col width="15%">
+						<col width="5%">
 						<col width="10%">
-						<col width="10%">
+						<col width="15%">
 					</colgroup>
 
 					<tbody>
@@ -233,7 +245,7 @@
 				<!-- e : 여기에 내용입력 -->
 
 				<div class="btn_areaC mt30">
-					<a href="" class="btnType gray" id="shippingDoneBtn" name="btn"><span>완료</span></a>
+					<a href="" class="btnType blue" id="shippingDoneBtn" name="btn"><span>완료</span></a>
 					<a href="" class="btnType gray" id="btnClose" name="btn"><span>취소</span></a>
 				</div>
 			</dd>
@@ -241,87 +253,111 @@
 		<a href="" class="closePop"><span class="hidden">닫기</span></a>
 	</div>
 
-	<div id="layer2" class="layerPop layerType2" style="width: 600px;">
+	<div id="purchaseDirection" class="layerPop layerType2" style="width: 900px;">
 		<dl>
 			<dt>
-				<strong>상세코드 관리</strong>
+				<strong>발주 지시서 작성</strong>
 			</dt>
 			<dd class="content">
 
 				<!-- s : 여기에 내용입력 -->
 
+
+				<table class="col">
+					<caption>caption</caption>
+					<colgroup>
+						<col width="10%">
+						<col width="12%">
+						<col width="10%">
+						<col width="6%">
+					</colgroup>
+
+					<thead>
+						<tr>
+							<th scope="col">제품번호</th>
+							<th scope="col">제품명</th>
+							<th scope="col">납품기업</th>
+							<th scope="col">발주자</th>
+						</tr>
+					</thead>
+					<tbody>
+
+						<tr>
+							<td id="pur_pro_no"></td>
+							<td id="pur_pro_name"></td>
+							<td id="pur_deli_company"></td>
+							<td id="pur_login_id"></td>
+						</tr>
+					</tbody>
+				</table>
+
 				<table class="row">
 					<caption>caption</caption>
 					<colgroup>
-						<col width="120px">
-						<col width="*">
-						<col width="120px">
-						<col width="*">
+						<col width="15%">
+						<col width="5%">
+						<col width="10%">
+						<col width="15%">
 					</colgroup>
 
 					<tbody>
 						<tr>
-							<th scope="row">그룹 코드 ID <span class="font_red">*</span></th>
+							<th scope="row">창고 선택</th>
+							<td><select style="width: 160px" id="pur_ware_name_option"
+								name="pur_ware_name_option"
+								onchange="fPurchaseSelectedOptions(this.options[this.selectedIndex].value, pur_ware_name_option)">
+							</select></td>
+
+							<th scope="row">재고 개수 <span class="font_red"></span></th>
 							<td><input type="text" class="inputTxt p100"
-								id="dtl_grp_cod" name="dtl_grp_cod" /></td>
-							<th scope="row">그룹 코드 명 <span class="font_red">*</span></th>
+							id="pur_pro_ware_qty_upper" readonly="readonly" /></td>
+							<th scope="row">발주 개수 <span class="font_red"></span></th>
 							<td><input type="text" class="inputTxt p100"
-								id="dtl_grp_cod_nm" name="dtl_grp_cod_nm" /></td>
+							id="pur_order_qty_upper" /></td>
+							<td>
+							<a href="javascript:faddPurchaseBtn();"
+							 class="btnType blue"><span>추가</span></a>
+							</td>
 						</tr>
+
+					</tbody>
+				</table>
+				
+				<table class="col" id ="purchaseDiretionTable">
+					<caption>caption</caption>
+					<colgroup>
+					
+						<col width="10%">
+						<col width="12%">
+						<col width="10%">
+						<col width="3%">
+						<col width="10%">
+						<col width="3%">
+						<col width="8%">
+						<col width="3%">
+					</colgroup>
+
+					<thead>
 						<tr>
-							<th scope="row">상세 코드 ID <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" id="dtl_cod"
-								name="dtl_cod" /></td>
-							<th scope="row">상세 코드 명 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" id="dtl_cod_nm"
-								name="dtl_cod_nm" /></td>
+							<th scope="col">제품번호</th>
+							<th scope="col">제품명</th>
+							<th scope="col">납품기업</th>
+							<th scope="col">창고번호</th>
+							<th scope="col">창고명</th>
+							<th scope="col">발주개수</th>
+							<th scope="col">발주자</th>
+							<th scope="col">비고</th>
 						</tr>
-						<tr>
-							<th scope="row">순서</th>
-							<td colspan="3"><input type="text" class="inputTxt"
-								id="dtl_odr" name="dtl_odr" /></td>
-						</tr>
-						<tr>
-							<th scope="row">코드 설명</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_cod_eplti" name="dtl_cod_eplti" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 01</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_01" name="dtl_tmp_fld_01" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 02</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_02" name="dtl_tmp_fld_02" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 03</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_03" name="dtl_tmp_fld_03" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 04</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_04" name="dtl_tmp_fld_04" /></td>
-						</tr>
-						<tr>
-							<th scope="row">사용 유무 <span class="font_red">*</span></th>
-							<td colspan="3"><input type="radio" id="dtl_use_poa_1"
-								name="dtl_use_poa" value="Y" /> <label for="radio1-1">사용</label>
-								&nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" id="dtl_use_poa_2"
-								name="dtl_use_poa" value="N" /> <label for="radio1-2">미사용</label></td>
-						</tr>
+					</thead>
+					<tbody id="purchase_tbody">
 					</tbody>
 				</table>
 
 				<!-- e : 여기에 내용입력 -->
 
 				<div class="btn_areaC mt30">
-					<a href="" class="btnType blue" id="btnSaveDtlCod" name="btn"><span>저장</span></a>
-					<a href="" class="btnType blue" id="btnDeleteDtlCod" name="btn"><span>삭제</span></a>
-					<a href="" class="btnType gray" id="btnCloseDtlCod" name="btn"><span>취소</span></a>
+					<a href="" class="btnType blue" id="btnPurDirDone" name="btn"><span>신청</span></a>
+					<a href="" class="btnType gray" id="btnClosePurDir" name="btn"><span>취소</span></a>
 				</div>
 			</dd>
 		</dl>

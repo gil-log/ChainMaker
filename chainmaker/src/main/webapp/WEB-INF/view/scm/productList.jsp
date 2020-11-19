@@ -7,7 +7,7 @@
 		<!-- 갯수가 0인 경우  -->
 		<c:if test="${totalCnt eq 0 }">
 			<tr>
-				<td colspan="6">데이터가 존재하지 않습니다.</td>
+				<td colspan="9">데이터가 존재하지 않습니다.</td>
 			</tr>
 		</c:if>
 		
@@ -18,7 +18,6 @@
 			<c:forEach items="${listModel}" var="list">
 				<tr>
 				        <td>${nRow + 1}</td>
-						<td>${list.pro_model_no}</td>
 						<td>${list.pro_model_name}</td>
 						<td><a href="javascript:fUserModal('${list.pro_no}');">${list.pro_no}</a></td>   
 					    <td><a href="javascript:fUserModal('${list.pro_no}');">${list.pro_name}</a></td>

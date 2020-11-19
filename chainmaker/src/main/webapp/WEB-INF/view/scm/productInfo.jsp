@@ -44,9 +44,9 @@
 				//alert("삭제버튼 클릭!!!이벤트!!");		
 				break;
 			case 'btnClose' : gfCloseModal();  // 모달닫기 
-			selectNoticeList(); // 첫페이지 다시 로딩 
+			
 				break;
-			case 'btnUpdatePro' : fUpdateUser();  // 수정하기
+			case 'btnUpdatePro' : fUpdateProduct();  // 수정하기
 				break;
 			case 'searchBtn' : board_search();  // 검색하기
 			break;
@@ -212,13 +212,9 @@
 		 
 		 if(object == "" || object == null || object == undefined){
 			 
-			 $("#pro_model_no").val(""); // pro_model_no 되돌리기
-			 $("#pro_model_no").attr("readonly", false); // pro_model_no 되돌리기
-			 $("#pro_model_no").css("border",""); // pro_model_no 되돌리기
-
-			 $("#pro_no").val(""); // pro_model_no 되돌리기
-			 $("#pro_no").attr("readonly", false); // pro_model_no 되돌리기
-			 $("#pro_no").css("border",""); // pro_model_no 되돌리기
+			 $("#pro_no").val(""); // pro_no 되돌리기
+			 $("#pro_no").attr("readonly", false); // pro_no 되돌리기
+			 $("#pro_no").css("border",""); // pro_no 되돌리기
 			 
 			 
 			 $("#pro_model_name").val("");
@@ -239,10 +235,6 @@
 			
 			 
 		 }else{
-			 $("#pro_model_no").val(object.pro_model_no);
-			 $("#pro_model_no").attr("readonly", true); // pro_model_no 수정불가 
-			 $("#pro_model_no").css("border","none"); // pro_model_no 수정불가 
-			 
 			 $("#pro_no").val(object.pro_no);
 			 $("#pro_no").attr("readonly", true); // pro_no 수정불가 
 			 $("#pro_no").css("border","none"); // pro_no 수정불가 
@@ -258,8 +250,8 @@
 			 $("#pro_deli_price").val(object.pro_deli_price);
 			 $("#pro_detail").val(object.pro_detail);
 			 $("#thumbnail").val("");
-			 $("#tempImg").attr("src", object.file_fname); // !!!!!!!!여기에 파일 저장 경로 추가하기!!!!!!!
-			 
+			alert(object.file_server_path);
+			 $("#tempImg").attr("src", object.file_server_path); // !!!!!!!!여기에 파일 저장 경로 추가하기!!!!!!!
 			 $("#btnDeletePro").show(); // 삭제버튼 보이기 
 			 $("#btnSavePro").hide();
 			 $("#btnUpdatePro").css("display","");
@@ -278,12 +270,12 @@
 					 ["pro_no", "제품번호를 입력해주세요!"],
 					 ["pro_name", "제품명을 입력해주세요!"],
 					 ["pro_cd", "제품코드를 선택해주세요!"],
-					 ["pro_model_no", "모델번호를 입력해주세요!"],
 					 ["pro_model_name", "모델명을 입력해주세요!"],
 					 ["pro_manu_name", "제조사를 입력해주세요!"],
 					 ["pro_price", "제품 가격을 입력해주세요!"],
 					 ["deli_company", "납품업체명을 입력해주세요!"],
-					 ["pro_deli_price", "납품단가를 입력해주세요!"]
+					 ["pro_deli_price", "납품단가를 입력해주세요!"],
+					 ["thumbnail", "대표 이미지를 업로드해주세요!"]
 				 ]
 		 );
 		 
@@ -341,20 +333,26 @@
 		 frealPopModal();// 입력폼 초기화
 	 }
 	 
-	 /* 회원 등록(수정) */
-	 function fUpdateUser(){
+	 /* 제품 수정 */
+	 function fUpdateProduct(){
 		 
-		 //alert("수정  함수 타는지!!!!!?? ");
+		 alert("수정  함수 타는지!!!!!?? ");
 		 // validation 체크 
 		 if(!(fValidatePopup())){ return; }
+		 
+		
 		 
 		 var resultCallback3 = function(data){
 			 fSaveProductResult(data);
 		 };
 		 
+		 var frm = document.getElementById("myProduct");
+		frm.enctype = 'multipart/form-data';
+		var dataWithFile = new FormData(frm);
+		
 		 $("#action").val("U");  // update
 		 
-		 callAjax("/system/userSave.do", "post", "json", true, $("#myUser").serialize(), resultCallback3);
+		 callAjaxFileUploadSetFormData("/scm/productUpd.do", "post", "json", true, dataWithFile, resultCallback3);
 	 	// $("#myQna").serialize() => 직렬화해서 name 값들을 그냥 넘김.
 	 	
 	 	
@@ -424,7 +422,7 @@
 							<a href="#" class="btn_set home">메인으로</a> 
 							<a href="#" class="btn_nav">기준 정보</a> 
 								<span class="btn_nav bold">제품정보 관리</span> 
-								<a href="#" class="btn_set refresh">새로고침</a>
+								<a onClick="top.location='javascript:location.reload()'" class="btn_set refresh">새로고침</a>
 						</p>
 
 						<p class="conTitle">
@@ -443,9 +441,8 @@
                            <td width="100" height="25" style="font-size: 120%">&nbsp;&nbsp;</td>
                            <td width="50" height="25" style="font-size: 100%; text-align:right;padding-right:25px;">
      	                       <select id="oname" name="oname" style="width:130px;height:27px">
-						        <option value="all" disabled selected>검색 조건</option>
 						        <option value="all">전체</option>
-						        <option value="model_no">모델 번호</option>
+						        <option value="pro_no">제품 번호</option>
 						        <option value="pro_nm">제품명</option>
 						        <option value="model_nm">모델명</option>
 						        <option value="manu_nm">제조사</option>
@@ -465,9 +462,8 @@
 								<thead>
 									<tr>
 									      <th scope="col"></th>
-									      <th scope="col">모델 번호</th>
 							              <th scope="col">모델명</th>
-							              <th scope="col">제품 번호</th>
+									      <th scope="col">제품 번호</th>							              
 							              <th scope="col">제품명</th>
 							              <th scope="col">제조사</th>
 							              <th scope="col">판매가</th>
@@ -511,7 +507,7 @@
 	</div>
 
 	<!-- 회원관리 모달 -->
-		<div id="user" class="layerPop layerType2" style="width: 1000px; height: auto;">
+		<div id="user" class="layerPop layerType2" style="width: 900px; height: auto;">
 		<input type="hidden" id="loginID" name="loginID"> <!-- 수정시 필요한 num 값을 넘김  -->
            <dl>
 			<dt>
@@ -536,11 +532,8 @@
 													
 						</tr>
 						<tr>
-							<th scope="row">모델 번호 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="15" name="pro_model_no" id="pro_model_no"/></td>
-							
 							<th scope="row">제품 코드 <span class="font_red">*</span></th>
-							<td>  
+							<td colspan="3">  
 							<select name="pro_cd" id="pro_cd" style="width:129px; height:16.25px">
 							<!--model or session에서 넘어온 데이터 자바스크립트에서 뿌리기 11/12 21:21 note -->
 								<c:forEach var="tempCdlist" items="${cdListObj}">
@@ -629,7 +622,7 @@
 		                            </span>
 								 </td>
 								 <td colspan="2" style="text-align:center;">
-								 	<img id="tempImg" style="object-fit: cover;" src="/images/admin/comm/no_image.png" alt="제품사진미리보기">
+								 	<img id="tempImg" style="object-fit: cover;max-width:100%" src="/images/admin/comm/no_image.png" alt="제품사진미리보기">
 								 </td>
                 	</tr>		
 						

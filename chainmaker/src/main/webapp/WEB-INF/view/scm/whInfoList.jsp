@@ -6,18 +6,16 @@
   </tr>
 </c:if>
 <c:if test="${totalcnt > 0 }">
-  <c:set var="nRow" value="${pageSize*(currentPage-1)}" />
   <c:forEach items="${listWHInfo}" var="list">
     <tr>
       <td>${list.ware_no}</td>
-      <td><a href="javascript:fPopModalComnGrpCod();">${list.ware_name}</a></td>
+      <td><a href="javascript:whInitModal(modify,${list.ware_no})" id="modifyBtn" name="btn" >${list.ware_name}</a></td>
       <td>${list.name}</td>
       <td>${list.user_email}</td>
       <td>${list.user_tel1}-${list.user_tel2}-${list.user_tel3}</td>
       <td>${list.ware_zipcode}</td>
       <td>${list.ware_address} ${list.ware_dt_address}</td>
     </tr>
-    <c:set var="nRow" value="${nRow + 1}" />
   </c:forEach>
 </c:if>
 <input type="hidden" id="totalcnt" name="totalcnt" value="${totalcnt}" />

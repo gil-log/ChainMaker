@@ -1,5 +1,6 @@
 package kr.happyjob.chainmaker.pcm.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,21 +51,17 @@ public class PurchaseOrderController {
 		
 		//DB의 목록 list에 담아 purchaseOrderList.jsp로 전달
 		List<PurchaseOrderModel> listPurchaseOrder=purchaseOrderService.purchaseOrderList(paramMap);
-		
-		//가상 더미데이터
-		PurchaseOrderModel pur=new PurchaseOrderModel(1, "서울컴즈", "11ax무선공유기", 5, "purchase", "1");
-		listPurchaseOrder.add(pur);		
-		
+				
 		model.addAttribute("listPurchaseOrder", listPurchaseOrder);
 		
 		//DB목록의 total row를 담아 purchaseOrderList.jsp로 전달
 		int purchaseOrderTotal=purchaseOrderService.countPurchaseOrderList(paramMap);
+		logger.info("purchaseOrderList.do ==> listPurchaseOrder");
+		logger.info(listPurchaseOrder);
 		
-		//가상 더미데이터
-		purchaseOrderTotal=1;
 		
-		model.addAttribute("purchaseOrderTotal", purchaseOrderTotal);
-		
+		//페이지 네비게이션 정보
+		model.addAttribute("purchaseOrderTotal", purchaseOrderTotal);		
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("currentPagePurchaseOrderList", currentPage);
 		
@@ -73,9 +70,18 @@ public class PurchaseOrderController {
 	
 	@RequestMapping("purchaseOrderSelect.do")
 	@ResponseBody
-	public PurchaseOrderModel purchaseOrderSelect(int purchase_no){
+	public Map<String,Object> purchaseOrderSelect(Model model, @RequestParam Map<String, Object> paramMap){
 		logger.info("구매담당자 - 제품 발주/반품 단품 목록 => 데이터 전송");		
+
+		Map<String, Object> resultMap = new HashMap<>();
+				
+		PurchaseOrderModel purchaseOrderModel = purchaseOrderService.purchaseOrderSelect(paramMap);
 		
-		return purchaseOrderService.purchaseOrderSelect(purchase_no);
+		resultMap.put("purchaseOrderModel", purchaseOrderModel);		
+		
+		logger.info("purchaseOrderSelect.do ==> resultMap.purchaseOrderModel");
+		logger.info(resultMap.get(purchaseOrderModel));
+		
+		return resultMap;
 	}
 }

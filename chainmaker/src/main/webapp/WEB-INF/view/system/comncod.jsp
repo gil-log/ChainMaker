@@ -224,7 +224,7 @@
 		
 		// 신규 저장
 		if (grp_cod == null || grp_cod=="") {
-		
+			alert("여기도 찍어봅세  ");
 			// Tranjection type 설정
 			$("#action").val("I");
 			
@@ -236,7 +236,6 @@
 
 		// 수정 저장
 		} else {
-			
 			// Tranjection type 설정
 			$("#action").val("U");
 			

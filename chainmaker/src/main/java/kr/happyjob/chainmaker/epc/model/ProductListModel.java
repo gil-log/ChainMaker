@@ -1,5 +1,7 @@
 package kr.happyjob.chainmaker.epc.model;
 
+import java.util.Date;
+
 public class ProductListModel {
 		// 장비번호
 		private String pro_num;
@@ -15,11 +17,54 @@ public class ProductListModel {
 
 		// 제조사
 		private String pro_manu_nm;
-
+		
 		// 판매가격
 		private int pro_prc;
 		
+		// 상세설명
+		private String pro_det;
 		
+		// 로그인 id
+		private String login_id;
+		
+		// 납품일자
+		private Date startDate;
+		
+		// 주문수량
+		private int od_qty;
+		
+		
+		public int getOd_qty() {
+			return od_qty;
+		}
+
+		public void setOd_qty(int od_qty) {
+			this.od_qty = od_qty;
+		}
+
+		public Date getOd_date() {
+			return startDate;
+		}
+
+		public void setOd_date(Date startDate) {
+			this.startDate = startDate;
+		}
+
+		public String getLogin_id() {
+			return login_id;
+		}
+
+		public void setLogin_id(String login_id) {
+			this.login_id = login_id;
+		}
+		
+		public String getPro_det() {
+			return pro_det;
+		}
+
+		public void setPro_det(String pro_det) {
+			this.pro_det = pro_det;
+		}
 
 		public ProductListModel() {
 			super();

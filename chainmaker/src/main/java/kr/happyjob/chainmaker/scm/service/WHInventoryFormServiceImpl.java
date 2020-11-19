@@ -27,9 +27,7 @@ public class WHInventoryFormServiceImpl implements WHInventoryFormService {
 	@Override
 	public int countWHInventoryList(Map<String, Object> paramMap) {
 		
-		int total=whInventoryFormDao.countWHInventoryList(paramMap);
-		
-		return total;
+		return whInventoryFormDao.countWHInventoryList(paramMap);
 	}
 
 	@Override
@@ -42,10 +40,7 @@ public class WHInventoryFormServiceImpl implements WHInventoryFormService {
 
 	@Override
 	public int countWHProductList(Map<String, Object> paramMap) {
-		
-		int total=whInventoryFormDao.countWHProductList(paramMap);
-		
-		return total;
+				
+		return whInventoryFormDao.countWHProductList(paramMap);
 	}
-
 }

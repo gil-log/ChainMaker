@@ -14,5 +14,5 @@ public interface PurchaseOrderService {
 	public int countPurchaseOrderList(Map<String, Object> paramMap);
 	
 	//구매담당자_발주 지시서 목록 조회
-	public PurchaseOrderModel purchaseOrderSelect(int purchase_no);
+	public PurchaseOrderModel purchaseOrderSelect(Map<String, Object> paramMap);
 }

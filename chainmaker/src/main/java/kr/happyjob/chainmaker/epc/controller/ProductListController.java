@@ -1,5 +1,6 @@
 package kr.happyjob.chainmaker.epc.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import kr.happyjob.chainmaker.epc.model.ProductListModel;
 import kr.happyjob.chainmaker.epc.service.ProductListService;
@@ -81,5 +83,110 @@ public class ProductListController {
 		return "/epc/listProductList";
 	}	
 	
-	
+	//  제품 단일 정보 ajax 통신
+		@RequestMapping("detailProduct.do")
+		@ResponseBody
+		public Map<String,Object> detailProduct(Model model, @RequestParam Map<String,Object> paramMap, HttpServletRequest request,
+				HttpServletResponse response, HttpSession session) throws Exception {
+			
+			System.out.println("상세정보 보기를 위한 param에서 넘어온 값을 찍어봅시다.: " + paramMap);
+			  logger.info("+ Start " + className + ".detailProduct");
+			  logger.info("   - paramMap : " + paramMap);
+			  
+			String resultMsg="";
+			
+			// 선택된 회원 1건 조회 
+			ProductListModel detail = productListService.selectProductDetail(paramMap);
+			//List<CommentsVO> comments = null;
+			
+			if(detail != null) {
+				
+				resultMsg = "SUCCESS";  // 성공시 찍습니다. 
+				
+			}else {
+				resultMsg = "FAIL / 불러오기에 실패했습니다.";  // null이면 실패입니다.
+			}
+			
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("result", detail); // 리턴 값 해쉬에 담기 
+			//resultMap.put("resultComments", comments);
+			resultMap.put("resultMsg", resultMsg); // success 용어 담기 
+			
+			//System.out.println("결과 글 찍어봅세 " + resultMsg);
+			//System.out.println("결과 글 찍어봅세 " + detail);
+			
+			logger.info("+ End " + className + ".detailProduct");
+			
+			return resultMap;
+		}	
+		
+		/**
+		 *  주문 기능
+		 */
+		@RequestMapping("inOrder.do")
+		@ResponseBody
+		public Map<String, Object> inOrder(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+				HttpServletResponse response, HttpSession session) throws Exception {
+			
+			logger.info("+ Start " + className + ".inOrder");
+			logger.info("   - paramMap : " + paramMap);
+			
+			
+			String result = "SUCCESS";
+			String resultMsg = "주문 되었습니다.";
+			
+			
+			// 사용자 정보 설정
+			paramMap.put("login_id", session.getAttribute("loginId"));
+			
+			
+			
+				
+				productListService.insertOrder(paramMap);
+		
+			
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("result", result);
+			resultMap.put("resultMsg", resultMsg);
+			
+			logger.info("+ End " + className + ".inOrder");
+			
+			return resultMap;
+		}
+		
+		/**
+		 *  주문 기능
+		 */
+		@RequestMapping("inBasket.do")
+		@ResponseBody
+		public Map<String, Object> inBasket(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+				HttpServletResponse response, HttpSession session) throws Exception {
+			
+			logger.info("+ Start " + className + ".inBasket");
+			logger.info("   - paramMap : " + paramMap);
+			
+			
+			String result = "SUCCESS";
+			String resultMsg = "장바구니에 넣었습니다.";
+			
+			
+			// 사용자 정보 설정
+			paramMap.put("login_id", session.getAttribute("loginId"));
+			
+			
+			
+				
+				productListService.insertBasket(paramMap);
+		
+			
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("result", result);
+			resultMap.put("resultMsg", resultMsg);
+			
+			logger.info("+ End " + className + ".inBasket");
+			
+			return resultMap;
+		}	
+		
+		
 }

@@ -13,7 +13,7 @@
 <script>
 	//상단테이블 페이징 설정
 	var pageSizeWHInventory = 5;
-	var pageBlockSizeWHInventory = 5;
+	var pageBlockSizeWHInventory = 10;
 	
 	//하단테이블 페이징 설정
 	var pageSizeWHProduct = 5;
@@ -35,7 +35,7 @@
 	function init(){
 		
 		searchvm = new Vue({
-			el:"#searcharea",
+			el:"#searchArea",
 			data:{
 				searchKey:'all',
 				searchWord:''
@@ -49,6 +49,8 @@
 			},
 			data:{
 				items:[],
+				ware_name:'',
+				pro_name:'',
 				ware_no:'',
 				pro_no:'',
 			},
@@ -74,10 +76,11 @@
 					console.log("tdArr[4] : " + tdArr[4]);					
 					console.log("tdArr[5] : " + tdArr[5]);					
 					console.log("tdArr[6] : " + tdArr[6]);					
-					console.log("tdArr[7] : " + tdArr[7]);					
 					
 					this.ware_no = tdArr[0];
 					this.pro_no = tdArr[1];
+					this.ware_name = tdArr[2];
+					this.pro_name = tdArr[3];
 					
 					whProductList();
 				}
@@ -104,6 +107,9 @@
 	function whInventoryList(currentPage){
 		currentPage=currentPage || 1;
 		
+		/* console.log("currentPage : " + currentPage + "\npageSizeWHInventory : " + pageSizeWHInventory 
+				+ "\nsearchvm.searchKey : " + searchvm.searchKey + "\nsearchvm.searchWord : " + searchvm.searchWord); */
+		
 		var param={
 				currentPage : currentPage,
 				pageSize : pageSizeWHInventory,
@@ -112,7 +118,28 @@
 		}
 		
 		var resultCallback = function(data){
-			whInventoryListResult(data, currentPage);
+			whInventoryListResult(data, currentPage);			
+		}
+		
+		callAjax("/scm/whInventoryList.do", "post", "json", true, param, resultCallback);
+	}
+	//창고별 재고 조회 검색
+	function searchWHInventoryList(currentPage){
+		currentPage=currentPage || 1;
+				
+		var param={
+				currentPage : currentPage,
+				pageSize : pageSizeWHInventory,
+				searchKey : searchvm.searchKey,
+				searchWord : searchvm.searchWord
+		}
+		
+		if(searchvm.searchKey === "all"){
+			alert("검색조건을 선택해 주세요.");
+		}
+		
+		var resultCallback = function(data){
+			whInventoryListResult(data, currentPage);			
 		}
 		
 		callAjax("/scm/whInventoryList.do", "post", "json", true, param, resultCallback);
@@ -142,32 +169,32 @@
 		currentPage=currentPage || 1;
 		
 		//알람 삭제 예정
-		//alert("no : " + whInventoryvm.ware_no);
+		//alert("ware_name : " + whInventoryvm.ware_name + "\npro_name : " + whInventoryvm.pro_name + "\n서브그리드 작동 확인");
 		
 		var param={
 				currentPage : currentPage,
 				pageSize : pageSizeWHProduct,	
-				ware_no : whInventoryvm.ware_no,
+				ware_name : whInventoryvm.ware_name,
+				pro_name : whInventoryvm.pro_name,
+				ware_no :  whInventoryvm.ware_no,
 				pro_no : whInventoryvm.pro_no
 		}
+		//alert("param : " + param + "\nparam 진행 확인");
 		
 		var resultCallback = function(data){
 			whProductListResult(data, currentPage);
-			console.log("whProductList 콜백 데이터 : "+data);
 		}
 		
 		callAjax("/scm/whProductList.do", "post", "json", true, param, resultCallback);
 	}
 	//제품별 입출고 내역 (특정 창고의 특정 제품 입출고 내역) 콜백
 	function whProductListResult(data, currentPage){
-		console.log("whProductList 데이터 : " + data);
 		
 		whproductvm.items=[];
 		whproductvm.items=data.listWHProduct;
 		
 		//총 개수 추출
 		var whProductTotal=data.whProductTotal;
-		console.log("whProductTotal : " + whProductTotal)
 		//페이지 네비게이션 생성
 		var paginationHtml = getPaginationHtml(currentPage, whProductTotal, pageSizeWHProduct, pageBlockSizeWHProduct, "whProductList");
 		
@@ -181,7 +208,7 @@
 <body>	
 	<form id="myForm" action=""  method="">
 		<input type="hidden" name="currentPageWHInventory" id="currentPageWHInventory" value="">
-		<input type="hidden" name="whProduct" id="whProduct" value="">
+		<input type="hidden" name="currentPageWHProduct" id="currentPageWHProduct" value="">
 		
 		<div id="wrap_area">
 		
@@ -202,7 +229,7 @@
 							<!-- 메뉴 경로 영역 -->
 							<p class="Location">
 								<a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a> <a href="#"
-									class="btn_nav">거래내역</a> <span class="btn_nav bold">창고별 재고 현황</span> <a href="#" class="btn_set refresh">새로고침</a>
+									class="btn_nav">거래내역</a> <span class="btn_nav bold">창고별 재고 현황</span> <a href="/scm/whInventoryForm.do" class="btn_set refresh">새로고침</a>
 							</p>
 							
 							<!-- 검색 영역 -->
@@ -213,13 +240,13 @@
 								 <span>창고별 재고 현황</span>
 								 <span class="fr"> 
 									<select id="searchKey" name="searchKey" style="width: 80px;" v-model="searchKey">
-									    <option value="all" id="option1" selected="selected">ㅡㅡㅡㅡ</option>
-										<option value="ware_no" id="option2">창고명</option>
-										<option value="pro_no" id="option3">제품명</option>
+									    <option value="all" id="option1" selected="selected" >검색 조건</option>
+										<option value="ware_name" id="option2">창고 명</option>
+										<option value="pro_name" id="option3">제품 명</option>
 									</select> 
 									<input type="text" id="searchWord" name="searchWord" v-model="searchWord"
 										placeholder="" style="height: 28px;"> <a
-										class="btnType blue" href="javascript:whInventoryList()"
+										class="btnType blue" href="javascript:searchWHInventoryList()"
 										onkeydown="enterKey()" name="search"><span id="searchEnter">검색</span></a>			
 								</span>
 							</p>
@@ -257,7 +284,7 @@
 												<td>{{ row.ware_name }}</td>
 												<td>{{ row.pro_name }}</td>
 												<td>{{ row.pro_ware_qty }}</td>
-												<td>{{ row.ware_address + " " + row.ware_dt_address }}</td>						
+												<td>{{ row.ware_address + " " + row.ware_dt_address }}</td>		
 											</tr>
 										</template>
 									</tbody>
@@ -276,18 +303,21 @@
 							<div class="divWHProductList" id="divWHProductList">
 								<table class="col">
 									<colgroup>
-										<col width="25%">
-										<col width="25%">
-										<col width="25%">
-										<col width="25%">
+										<col width="15%">
+										<col width="10%">
+										<col width="20%">
+										<col width="20%">
+										<col width="10%">
 									</colgroup>
 		
 									<thead>
 										<tr>
+										    <th scope="col">날 짜</th>
+										    <th scope="col">입고 / 출고</th>
 										    <th scope="col">제품 번호</th>
-											<th scope="col">제품 명</th>
-											<th scope="col">입고 량</th>
-											<th scope="col">출고 량</th>
+											<th scope="col">제품 명</th>											
+											<th scope="col">수 량</th>
+											<th scope="col">비 고</th>
 										</tr>
 									</thead>
 									
@@ -295,10 +325,17 @@
 									<tbody id="listWHProduct">
 										<template v-for="(row, index) in items" v-if="items.length">
 											<tr>
+												<td>{{ row.pro_io_date }}</td>
+												<td>{{ row.pro_io_cd }}</td>
 												<td>{{ row.pro_no }}</td>
 												<td>{{ row.pro_name }}</td>
 												<td>{{ row.pro_io_qty }}</td>					
-												<td>{{ row.pro_io_qty }}</td>					
+												<td>{{ row.pro_io_memo }}</td>																	
+											</tr>
+										</template>
+										<template v-else>
+											<tr>
+											    <td colspan=6>데이터가 존재하지 않습니다.</td>
 											</tr>
 										</template>
 									</tbody>

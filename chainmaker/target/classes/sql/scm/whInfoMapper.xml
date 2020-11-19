@@ -4,6 +4,7 @@
 
    <!-- 창고 수 구하기 -->
   <select id="totalCnt" resultType="int">
+  /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.totalCnt */
   SELECT count(*) as totalcnt 
     FROM tb_warehouse as wh
     <where>
@@ -22,6 +23,7 @@
 
   <!-- 창고별 조회 -->
   <select id="whInfoList" resultType="kr.happyjob.chainmaker.scm.model.WHInfoVO">
+  /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.whInfoList */
     SELECT   wh.ware_no,
              wh.ware_name, 
              wh.ware_address, 
@@ -58,6 +60,81 @@
     LIMIT  #{pageIndex}, #{pageSize}
   </select>
   
+  <!-- 배송담당자 정보 구하기 -->
+<select id="whMngInfoList" resultType="kr.happyjob.chainmaker.scm.model.WHInfoVO">
+/** kr.happyjob.chainmaker.scm.dao.WHInfoDao.whMngInfoList */
+    SELECT loginID, 
+           name, 
+           user_tel1, 
+           user_tel2, 
+           user_tel3, 
+           user_email
+      FROM tb_userinfo
+     WHERE user_type = 'B'
+  </select>
+  
+<!-- 창고 정보 구하기 -->
+<select id="whMngWareInfoList" resultType="kr.happyjob.chainmaker.scm.model.WHInfoVO">
+/** kr.happyjob.chainmaker.scm.dao.WHInfoDao.whMngWareInfoList */
+    SELECT   wh.ware_no,
+             wh.ware_name, 
+             wh.ware_address, 
+             wh.ware_dt_address, 
+             wh.ware_zipcode, 
+             ui.name,
+             ui.user_tel1,
+             ui.user_tel2,
+             ui.user_tel3,
+             ui.user_email
+    FROM     tb_warehouse as wh
+    JOIN     tb_userinfo  as ui
+    ON       wh.loginID = ui.loginID
+    WHERE    user_type = 'B'
+</select>
+  
+  <!-- 창고 정보 등록 -->
+  <insert id="insertWhInfo">
+  /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.insertWhInfo */
+    INSERT INTO tb_warehouse
+    (
+    ware_no,
+    ware_cd, 
+    ware_name, 
+    ware_address, 
+    ware_dt_address, 
+    ware_zipcode, 
+    loginID
+    )
+    
+    VALUES 
+     ( 
+    #{ware_no},
+    (SELECT detail_code
+       FROM (SELECT * FROM tb_detail_code WHERE group_code = 'wareCD') as cd
+      WHERE cd.detail_name = #{ware_cd}), 
+    #{ware_name}, 
+    #{ware_address}, 
+    #{ware_dt_address}, 
+    #{ware_zipcode}, 
+    #{loginID}
+     )
+  </insert>
+  
+  <update id="updateWhInfo">
+  /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.updateWhInfo */
+    UPDATE tb_warehouse
+       SET ware_cd = (SELECT detail_code
+                        FROM (SELECT * FROM tb_detail_code WHERE group_code = 'wareCD') as cd
+                       WHERE cd.detail_name = #{ware_cd}),
+           ware_name = #{ware_name},
+           ware_address = #{ware_address},
+           ware_dt_address = #{ware_dt_address},
+           ware_zipcode = #{ware_zipcode},
+           loginID = #{loginID}
+     WHERE ware_no = #{ware_no}
+  </update> 
+  
+  <!-- 창고 정보 삭제 처리 -->
   
   
 </mapper>

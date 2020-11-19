@@ -45,6 +45,8 @@ public class WHInventoryFormController {
 	@ResponseBody
 	public Map<String, Object> whInventoryList(Model model, @RequestParam Map<String, Object> paramMap){
 		
+		logger.info("@@@ Ajax컨트롤러 => whInventoryList.do 작동 @@@");
+		
 		int currentPage=Integer.parseInt((String) paramMap.get("currentPage"));	//현재 페이지 번호
 		int pageSize=Integer.parseInt((String) paramMap.get("pageSize"));	//페이지 사이즈
 		int pageIndex=(currentPage-1)*pageSize;	//페이지 시작 row 번호
@@ -73,6 +75,8 @@ public class WHInventoryFormController {
 	@ResponseBody
 	public Map<String, Object> whProductList(Model model, @RequestParam Map<String, Object> paramMap){
 		
+		logger.info("@@@ Ajax컨트롤러 => whProductList.do 작동 @@@");
+		
 		int currentPage=Integer.parseInt((String) paramMap.get("currentPage"));	//현재 페이지 번호
 		int pageSize=Integer.parseInt((String) paramMap.get("pageSize"));	//페이지 사이즈
 		int pageIndex=(currentPage-1)*pageSize;	//페이지 시작 row 번호
@@ -80,7 +84,7 @@ public class WHInventoryFormController {
 		paramMap.put("pageIndex", pageIndex);
 		paramMap.put("pageSize", pageSize);		
 		
-		Map<String, Object> resultMap = new HashMap<>();
+		Map<String, Object> resultMap = new HashMap<>();		
 		
 		//select문 리스트에 담기
 		List<WHInventoryFormModel> listWHProduct=whInventoryFormService.whProductList(paramMap);
@@ -93,6 +97,8 @@ public class WHInventoryFormController {
 		resultMap.put("whProductTotal", whProductTotal);
 		resultMap.put("pageSize", pageSize);
 		resultMap.put("currentPage", currentPage);		
+		
+		logger.info("resultMap : " + resultMap);
 		
 		return resultMap;
 	}	

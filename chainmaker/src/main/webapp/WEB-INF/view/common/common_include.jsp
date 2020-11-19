@@ -41,10 +41,3 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script> 
 
-<!-- <script· src="https://unpkg.com/@livelybone/vue-datepicker/lib/umd/DatetimePicker.js"></script>
-
-<script· src="https://unpkg.com/@livelybone/vue-datepicker/lib/umd/Timepicker.js"></script> -->
-<!-- <script src="https://unpkg.com/@livelybone/vue-datepicker"></script>
-<script· src="https://unpkg.com/@livelybone/vue-datepicker/lib/umd/Datepicker.js"></script> -->
-
-<script type="text/javascript" charset="utf-8" src="${CTX_PATH}/js/bootstrap-datepicker.js"></script>

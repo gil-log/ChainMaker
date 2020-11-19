@@ -39,9 +39,12 @@ public class ProductInfoController {
 	// 1. 제품정보 관리 초기페이지
 	
 	@RequestMapping("productInfo")
-	private String productInfo() {
+	private String productInfo(HttpServletRequest request) {
 		
 		logger.info("+ Start " + className + ".initProductInfo");
+		//상세코드 조회
+		List<DetailCdVO> cdList = service.selectDetailCode();
+		request.setAttribute("cdListObj", cdList); // 세션으로 넣는 이유... 옵션값 뽑기 위해..
 		
 		return "scm/productInfo";
 	}
@@ -65,16 +68,11 @@ public class ProductInfoController {
 		model.addAttribute("listModel", list);
 		
 		// 상풍 목록 카운트 조회
-		int totalCount = service.countProductInfo();
+		int totalCount = service.countProductInfo(paramMap);
 		model.addAttribute("totalCnt", totalCount);
 		
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("currentPage", currentPage);
-		
-		//상세코드 조회
-		List<DetailCdVO> cdList = service.selectDetailCode();
-		session.setAttribute("cdListObj", cdList); // 세션으로 넣는 이유... 옵션값 뽑기 위해..
-		
 		
 		return "scm/productList";
 		
@@ -92,7 +90,7 @@ public class ProductInfoController {
 		  
 		String resultMsg="";
 		
-		// 선택된 회원 1건 조회 
+		// 선택 제품 1건 조회 
 		ProductInfoModel detail = service.selectProductDetail(paramMap);
 		//List<CommentsVO> comments = null;
 		
@@ -147,14 +145,14 @@ public class ProductInfoController {
 	// 5. 제품 정보 및 파일 삭제
 	@ResponseBody
 	@RequestMapping("productDel.do")
-	public Map<String,Object> productDel(Model model, @RequestParam Map<String,Object> paramMap,
+	public Map<String,Object> productDel(Model model, @RequestParam Map<String,Object> paramMap, HttpServletRequest request,
 			HttpServletResponse response, HttpSession session) throws Exception {
 		logger.info("+ Start " + className + ".productDel");
 		logger.info("   - paramMap : " + paramMap);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String resultMsg = "";
 		
-		boolean flag = service.deleteProduct(paramMap);
+		boolean flag = service.deleteProduct(paramMap, request);
 		
 		if(flag) {
 			resultMsg = "SUCCESS";
@@ -166,6 +164,35 @@ public class ProductInfoController {
 		resultMap.put("resultMsg", resultMsg); // success 용어 담기
 		
 		logger.info("+ End " + className + ".productDel");
+		
+		return resultMap;
+		
+	}
+	
+	// 6. 제품 정보 및 파일 수정
+	@ResponseBody
+	@RequestMapping("productUpd.do")
+	public Map<String,Object> productUpd(Model model, @RequestParam Map<String,Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+		logger.info("+ Start " + className + ".productUpd");
+		logger.info("   - paramMap : " + paramMap);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		String resultMsg = "";
+		
+		boolean flag = service.deleteProduct(paramMap, request);
+		
+		boolean flag2 = service.insertProduct(paramMap, request);
+		
+		if(flag && flag2) {
+			resultMsg = "SUCCESS";
+		}else {
+			resultMsg = "FAIL / 불러오기에 실패했습니다.";
+		}
+		
+		System.out.println("결과 글 찍어봅세 " + resultMsg);
+		resultMap.put("resultMsg", resultMsg); // success 용어 담기
+		
+		logger.info("+ End " + className + ".productUpd");
 		
 		return resultMap;
 		

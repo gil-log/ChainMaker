@@ -47,4 +47,36 @@ public class SupplierInfoServiceImpl implements SupplierInfoService{
 		int totalCntProduct = supplierInfoDao.totalCntProduct(paramMap);
 		return totalCntProduct;
 	}
+	//납품 업체 등록
+	@Override
+	public int insertDelivery(Map<String, Object> paramMap) throws Exception {
+		int ret = supplierInfoDao.insertDelivery(paramMap);
+		return ret;
+	}
+	//납품 업체 수정
+	@Override
+	public int updateDelivery(Map<String, Object> paramMap) throws Exception {
+		int ret = supplierInfoDao.updateDelivery(paramMap);
+		return ret;
+	}
+	//납품 업체 단건 조회
+	@Override
+	public SupplierInfoModel selectDelivery(Map<String, Object> paramMap) throws Exception {
+		SupplierInfoModel selectDelivery = supplierInfoDao.selectDelivery(paramMap);
+		return selectDelivery;
+	}
+	//납품 업체 삭제
+	@Override
+	public int deleteDelivery(Map<String, Object> paramMap) throws Exception {
+		int ret = supplierInfoDao.deleteDelivery(paramMap);
+		return ret;
+	}
+	//납품 업체 복원
+	@Override
+	public int recoveryDelivery(Map<String, Object> paramMap) throws Exception {
+		int ret = supplierInfoDao.recoveryDelivery(paramMap);
+		return ret;
+	}
+	
+	
 }

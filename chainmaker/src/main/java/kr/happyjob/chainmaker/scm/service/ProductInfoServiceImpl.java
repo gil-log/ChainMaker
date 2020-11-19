@@ -1,9 +1,12 @@
 package kr.happyjob.chainmaker.scm.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +33,14 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 	@Value("${fileUpload.rootPath}")
 	private String rootPath;
 	
+	// Virtual Root Path for file upload (Web Module)
+	@Value("${fileUpload.virtualRootPath}")
+	private String virtualRootPath;
+	
 	@Value("${fileUpload.prducimage}")
 	private String prducimage;	
+	
+	
 	
 	
 	@Override
@@ -47,8 +56,8 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 	}
 	
 	@Override
-	public int countProductInfo() {
-		int count = dao.countProductInfo();
+	public int countProductInfo(Map<String, Object> paramMap) {
+		int count = dao.countProductInfo(paramMap);
 		return count;
 	}
 
@@ -59,11 +68,11 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 	}
 
 	@Override
-	public boolean insertProduct(Map<String, Object> paramMap, MultipartHttpServletRequest request) {
+	public boolean insertProduct(Map<String, Object> paramMap, HttpServletRequest request) {
 		
 		String itemFilePath = prducimage + File.separator; // 파일 구분자(os별로 다르기 때문에 java에서 자동 적용)
 		
-		NewFileUtil fileUtil = new NewFileUtil(request, rootPath, itemFilePath); //request와 파일저장루트, 디렉토리루트 전달
+		NewFileUtil fileUtil = new NewFileUtil(request, rootPath, virtualRootPath, itemFilePath); //request와 파일저장루트, 디렉토리루트 전달
 		
 		List<FileModel> fileInfo = null;
 		try {
@@ -72,18 +81,25 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 			e.printStackTrace();
 		}
 		Iterator<FileModel> iter = fileInfo.iterator();
-		String file_fname = "";
+
+		String file_server_path = "";	
+		String file_local_path = "";
+		String file_new_name = "";
 		String file_ofname = "";
 		int file_size = 0;
 		
 		while(iter.hasNext()) {
 			FileModel tempFileInfo = (FileModel)iter.next();
-			file_fname = rootPath+tempFileInfo.getFile_fname();
+			file_server_path = tempFileInfo.getFile_server_path();
+			file_local_path = tempFileInfo.getFile_local_path();
+			file_new_name = tempFileInfo.getFile_new_name();
 			file_ofname = tempFileInfo.getFile_ofname();
 			file_size = tempFileInfo.getFile_size();
 		}
 		//쿼리 파라미터 값 넣기
-		paramMap.put("file_fname", file_fname);
+		paramMap.put("file_server_path", file_server_path);
+		paramMap.put("file_local_path", file_local_path);
+		paramMap.put("file_new_name", file_new_name);
 		paramMap.put("file_ofname", file_ofname);
 		paramMap.put("file_size", file_size);
 		
@@ -96,7 +112,18 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 	}
 
 	@Override
-	public boolean deleteProduct(Map<String, Object> paramMap) {
+	public boolean deleteProduct(Map<String, Object> paramMap, HttpServletRequest request) {
+		
+		List<FileModel> listFileUtilModel = new ArrayList<FileModel>(); //빈 리스트 생성 (한번에 많은 파일 삭제 대비용으로)
+		String itemFilePath = prducimage + File.separator; //
+		NewFileUtil fileUtil = new NewFileUtil(request, rootPath, virtualRootPath, itemFilePath);
+		FileModel fModel = dao.selectFileInfo(paramMap);
+		listFileUtilModel.add(fModel);
+		try {
+			fileUtil.deleteFiles(listFileUtilModel);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		int flag = dao.deleteProdInfo(paramMap);
 		int flag2 = dao.deleteProdFile(paramMap);
 
@@ -104,7 +131,7 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 	}
 
 	@Override
-	public boolean updateProduct(Map<String, Object> paramMap, MultipartHttpServletRequest request) {
+	public boolean updateProduct(Map<String, Object> paramMap, HttpServletRequest request) {
 	
 		
 		return true;

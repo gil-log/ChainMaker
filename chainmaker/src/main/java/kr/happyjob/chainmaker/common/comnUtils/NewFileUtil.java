@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +27,13 @@ public class NewFileUtil {
 	private final Logger logger = LogManager.getLogger(this.getClass());
 		
 	// MultipartHttpServletRequest
-	private MultipartHttpServletRequest multipartHttpServletRequest;
+	private HttpServletRequest HttpServletRequest;
 	
 	// root file path
 	private String rootFilePath;
+	
+	// virtual file path
+	private String virtualRootPath;
 	
 	// item file path
 	private String itemFilePath;	
@@ -41,11 +46,12 @@ public class NewFileUtil {
 	
 	
 	
-	public NewFileUtil(MultipartHttpServletRequest multipartHttpServletRequest, String rootFilePath,
+	public NewFileUtil(HttpServletRequest request, String rootFilePath, String virtualRootPath,
 			String itemFilePath) {
 		super();
-		this.multipartHttpServletRequest = multipartHttpServletRequest;
+		this.HttpServletRequest = request;
 		this.rootFilePath = rootFilePath;
+		this.virtualRootPath = virtualRootPath;
 		this.itemFilePath = itemFilePath;
 	}
 
@@ -63,6 +69,8 @@ public class NewFileUtil {
 		// 디렉토리 생성
 		makeDir();
         
+		MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest)HttpServletRequest;
+		
         Iterator<String> files = multipartHttpServletRequest.getFileNames();
         
         while(files.hasNext()){
@@ -77,84 +85,35 @@ public class NewFileUtil {
             	
             	FileModel fileModel = new FileModel();
             
-            	String fileName = multipartFile.getOriginalFilename(); // a.jpg
-                String fileExtension = fileName.substring(fileName.lastIndexOf(".")+1); //jpg
-                String tmpFileName = File.separator + itemFilePath + fileName; // /product/a.jpg
+            	String ofileName = multipartFile.getOriginalFilename(); // a.jpg
+                String fileExtension = ofileName.substring(ofileName.lastIndexOf(".")+1); //jpg
+                
+                String newFileName = renameOfFile(ofileName); // uuid 붙인 파일 이름 생성
+               
+                String dirFileName = File.separator + itemFilePath + newFileName; // /product/a.jpg
+                String localFilePath = rootFilePath+dirFileName;
+                String serverFilePath = virtualRootPath+dirFileName; // web module에 등록된 가상 디렉토리
                 int fileSize = (int)multipartFile.getSize(); // 532
 
-                File orgFile = new File(rootFilePath+tmpFileName); // /user/filedirectory/product/a.jpg
-                logger.info("   - tempFilePath : " + rootFilePath+tmpFileName);
+               //파일 실제 업로드 로직
+                File orgFile = new File(localFilePath); // 실제 시스템 디렉토리에 저장
+                logger.info("   - localFilePath : " + localFilePath);
+                logger.info("   - serverFilePath : " + serverFilePath);
                 multipartFile.transferTo(orgFile);
-                /*
-                 * 11/12 20:52 renameOfFile때문에 파일 업로드가 안됬으니꼭 살펴볼것!!!!!!!!!!!!!!!!
-                 * 중복 해결할것!!!!!!
-                 */
-                //String newFileName = renameOfFile(orgFile, fileName);
-                //String newFilePath = File.separator + itemFilePath+newFileName;
-                logger.info("   - originalFileName : " + fileName);
-                logger.info("   - fileExtension : " + fileExtension);
-                fileModel.setFile_ofname(fileName);
-                fileModel.setFile_fname(rootFilePath+tmpFileName);
-                fileModel.setFile_exts(fileExtension);
-                fileModel.setFile_size(fileSize);
-                
-                
-                listFileUtilModel.add(fileModel);
-                
-            }
-        }
-        logger.info("   - uploadFiles() finished ");
-        return listFileUtilModel;
-	}	
-	
-	/** 
-	 * 이미지 파일만 업로드 
-	 * @return 저장된 파일 메타 정보
-	 * @author som
-	 */
-	public List<FileModel> uploadImgs() throws Exception {
-		
-		logger.info("   - uploadFiles() started ");
-		
-		// Return value
-		List<FileModel> listFileUtilModel = new ArrayList<FileModel>();
-		
-		// 디렉토리 생성
-		makeDir();
-        
-        Iterator<String> files = multipartHttpServletRequest.getFileNames();
-        
-        while(files.hasNext()){
-        	
-            String uploadFile = files.next();
-
-            MultipartFile multipartFile = multipartHttpServletRequest.getFile(uploadFile);
-            String fileDvsCod = multipartFile.getName();
-            logger.info("   - fileDvsCod : " + fileDvsCod);
-
-            if (!multipartFile.isEmpty()) {
-            	
-            	FileModel fileModel = new FileModel();
-            
-            	String fileName = multipartFile.getOriginalFilename();
-                String fileExtension = fileName.substring(fileName.lastIndexOf(".")+1);
-                
-                String tmpFileName = itemFilePath + fileName;
-                String newFileName = tmpFileName;
-                int fileSize = (int)multipartFile.getSize();
-                logger.info("   - originalFileName : " + fileName);
-                logger.info("   - fileExtension : " + fileExtension);
+               
+                //디비 등록 용 로직
+                logger.info("   - originalFileName : " + ofileName);
                 logger.info("   - newFileName : " + newFileName);
-                fileModel.setFile_ofname(fileName);
-                fileModel.setFile_fname(newFileName);
+                logger.info("   - fileExtension : " + fileExtension);
+                fileModel.setFile_ofname(ofileName);
+                fileModel.setFile_new_name(newFileName);
+                fileModel.setFile_server_path(serverFilePath);
+                fileModel.setFile_local_path(localFilePath);
                 fileModel.setFile_exts(fileExtension);
                 fileModel.setFile_size(fileSize);
                 
                 
                 listFileUtilModel.add(fileModel);
-                
-                File orgFile = new File(rootFilePath+newFileName);
-                multipartFile.transferTo(orgFile);
                 
             }
         }
@@ -162,41 +121,20 @@ public class NewFileUtil {
         return listFileUtilModel;
 	}	
 	
-
-	
-	/**
-	 * 파일 삭제
-	 * @param listFileUtilModel
-	 * @param uploadFilePath
-	 * @throws Exception
-	 */
-	public void deleteFiles(List<FileUtilModel> listFileUtilModel, String rootFilePath) throws Exception {
-		
-		this.rootFilePath = rootFilePath;
-		deleteFiles(listFileUtilModel);
-	}
-	
 	/**
 	 * 파일 삭제
 	 * @param listFileUtilModel
 	 * @throws Exception
 	 */
-	public void deleteFiles(List<FileUtilModel> listFileUtilModel) throws Exception {
+	public void deleteFiles(List<FileModel> listFileUtilModel) throws Exception {
 		
 		if (listFileUtilModel != null) {
-			for(FileUtilModel fileUtilModel : listFileUtilModel) {
+			for(FileModel fileUtilModel : listFileUtilModel) {
 				
 				// 원본 파일 삭제
-				String pscFilNm = fileUtilModel.getPsc_fil_nm();
-				if (pscFilNm != null && !"".equals(pscFilNm)) {
-					File file = new File(rootFilePath + pscFilNm);
-					if (file.exists()) file.delete();
-				}
-				
-				// 썸네일 파일 삭제
-				String smlPscFilNm = fileUtilModel.getSml_psc_fil_nm();
-				if (smlPscFilNm != null && !"".equals(smlPscFilNm)) {
-					File file = new File(rootFilePath + smlPscFilNm);
+				String local_path = fileUtilModel.getFile_local_path();
+				if (local_path != null && !"".equals(local_path)) {
+					File file = new File(local_path);
 					if (file.exists()) file.delete();
 				}
 			}
@@ -210,20 +148,13 @@ public class NewFileUtil {
 	 * @param File file, String OriginalName
 	 * @throws Exception
 	 */
-    private	String renameOfFile(File file, String originalName) throws Exception{
+    private	String renameOfFile(String originalName) throws Exception{
         // uuid 생성(Universal Unique IDentifier, 범용 고유 식별자)
         UUID uuid = UUID.randomUUID();
         // 랜덤생성+파일이름 저장
         String newFileName = uuid.toString()+"_"+originalName;
-        File newFile = new File(newFileName);
-        if( file.exists() ) {
-        	file.renameTo( newFile );
-        	return newFileName;
-        }
-        return null;
-        
-    }
-    
+        return newFileName;
+    }    
 	/**
 	 * 디렉토리 생성
 	 */

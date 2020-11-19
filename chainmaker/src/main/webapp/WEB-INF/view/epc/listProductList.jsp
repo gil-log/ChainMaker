@@ -15,7 +15,6 @@
 									<tr>
 										<td><a href = "javascript:fPopModalProductList('${list.pro_num}');">${list.pro_num}</a></td>
 										<td>${list.pro_cod}</td>
-										<td>${list.pro_cod_num}</td>
 										<td>${list.pro_cod_nam}</td>
 										<td>${list.pro_manu_nm}</td>
 										<td>${list.pro_prc}</td>

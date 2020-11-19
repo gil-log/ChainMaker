@@ -32,9 +32,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	}
 
 	@Override
-	public PurchaseOrderModel purchaseOrderSelect(int purchase_no) {
+	public PurchaseOrderModel purchaseOrderSelect(Map<String, Object> paramMap) {
 		
-		PurchaseOrderModel purchaseOrderSelect=purchaseOrderDao.purchaseOrderSelect(purchase_no);
+		PurchaseOrderModel purchaseOrderSelect=purchaseOrderDao.purchaseOrderSelect(paramMap);
 		
 		return purchaseOrderSelect;
 	}

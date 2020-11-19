@@ -12,7 +12,7 @@
 							<c:set var="nRow" value="${pageSize*(currentPageProduct-1)}" />	
 							<c:forEach items="${listProductModel}" var="list">
 									<tr>
-										<td>${list.pro_model_no}</td>
+										<td>${list.pro_no}</td>
 										<td>${list.pro_name}</td>
 							
 										<td>${list.pro_deli_price}</td>
