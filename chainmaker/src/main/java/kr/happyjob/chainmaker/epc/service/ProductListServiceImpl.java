@@ -33,6 +33,8 @@ public class ProductListServiceImpl implements ProductListService {
 		return listProductList;
 	}
 	
+	
+	
 	/** 그룹코드 목록 카운트 조회 */
 	public int countListProductList(Map<String, Object> paramMap) throws Exception {
 		
@@ -67,9 +69,9 @@ public class ProductListServiceImpl implements ProductListService {
 	/** 동적 셀렉트 조회 */
 	public List<ProductListModel> selectProduct(Map<String, Object> paramMap) throws Exception {
 		
-		List<ProductListModel> selProduct = productListDao.selectProduct(paramMap);
+		List<ProductListModel> selectProduct = productListDao.selectProduct(paramMap);
 		
-		return selProduct;
+		return selectProduct;
 	}
 	
 }

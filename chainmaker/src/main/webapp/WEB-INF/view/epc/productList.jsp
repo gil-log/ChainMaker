@@ -22,8 +22,10 @@ var pageBlockSizeProductList = 5;
 $(function() {
 	// 그룹코드 조회
 	fListProductList();
-	
 	fRegisterButtonClickEvent();
+	
+	
+	fSelect();
 	
 	fDatepicker();
 	
@@ -53,7 +55,7 @@ function fRegisterButtonClickEvent() {
 			
 			case 'btnSearch' :
 				board_search();
-		
+				break;
 			case 'btnInOrder' :
 				fInsertOrder();
 				break;
@@ -61,6 +63,10 @@ function fRegisterButtonClickEvent() {
 			case 'btnInBasket' :
 				fInsertBasket();
 				break;	
+			
+			case 'btnSelect' :
+				fSelect();
+				break;
 				
 			case 'btnCloseProductList' :
 				//alert("잘되나 찍어봅세");
@@ -76,14 +82,22 @@ function fRegisterButtonClickEvent() {
 
 /** 그룹코드 조회 */
 function fListProductList(currentPage) {
+	var v = $("#good option:selected").val();
+	var p = $("#searchKey option:selected").val();
+    var sname = $('#sname');
+    var searchKey = document.getElementById("searchKey");
+	var oname = searchKey.options[searchKey.selectedIndex].value;
 	
 	currentPage = currentPage || 1;
-	
 	console.log("currentPage : " + currentPage);
 	
 	var param = {
-				currentPage : currentPage
-			,	pageSize : pageSizeProductList
+				v:v
+			  ,	p:p
+			  ,	sname:sname.val()
+			  , oname:oname
+	          ,	currentPage : currentPage
+			  ,	pageSize : pageSizeProductList
 	}
 	
 	var resultCallback = function(data) {
@@ -107,8 +121,12 @@ function flistProductListResult(data, currentPage) {
 	
 	// 총 개수 추출
 	var totalCntProductList = $("#totalCntProductList").val();
+	//alert(totalCntProductList);
+	
 	
 	// 페이지 네비게이션 생성
+	
+	
 	var paginationHtml = getPaginationHtml(currentPage, totalCntProductList, pageSizeProductList, pageBlockSizeProductList, 'fListProductList');
 	console.log("paginationHtml : " + paginationHtml);
 	//alert(paginationHtml);
@@ -120,6 +138,8 @@ function flistProductListResult(data, currentPage) {
 // 검색 기능
 function board_search(currentPage) {
     
+	var v = $("#good option:selected").val();
+	var p = $("#searchKey option:selected").val();
     var sname = $('#sname');
     var searchKey = document.getElementById("searchKey");
 	var oname = searchKey.options[searchKey.selectedIndex].value;
@@ -129,7 +149,9 @@ function board_search(currentPage) {
 	console.log("currentPage : " + currentPage);     
 	
     var param = {
-    		  sname : sname.val()
+    			v:v
+    	  ,		p:p
+    	  ,	  sname : sname.val()
     	  ,	  oname : oname
           ,   currentPage : currentPage
           ,   pageSize : pageSizeProductList
@@ -141,12 +163,15 @@ function board_search(currentPage) {
     
     callAjax("/epc/listProductList.do", "post", "text", true, param, resultCallback);
     
-} 
+}
 
-/** 그룹코드 모달 실행 */
+
+
+
+/**  모달 실행 */
 function fPopModalProductList(pro_num) {
 	if (pro_num == null || pro_num == ""){
-		alert("찍어보자");
+		//alert("찍어보자");
 		$("#action").val("I");
 		
 		gfModalPop("#layer1");
@@ -220,6 +245,8 @@ function frealPopModal(object){
 		 $("#pro_prc").attr("readonly", true); 
 		 $("#pro_prc").css("border","none");  
 		 
+		 $("#pro_cd").val(object.pro_cod).change();
+		 
 		 $("#pro_det").val(object.pro_det);
 		 $("#pro_det").attr("readonly", true); 
 		 $("#pro_det").css("border","none"); 
@@ -234,12 +261,12 @@ function frealPopModal(object){
 		 
 	 }
 }
-
+/** 숫자 증가 감소 */
 function fnCalCount(type, ths) {
 	var $input = $(ths).parents("td").find("input[name='od_qty']");
 	var tCount = Number($input.val());
 	
-	
+
 	if(type=="p"){
 		 $input.val(Number(tCount)+1);
 	}else{
@@ -250,14 +277,15 @@ function fnCalCount(type, ths) {
 /** 주문 저장 validation */
 function fValidateOrder() {
 	
+	var	chk = $("#od_qty").val();
 	var	chk2 = $("#startDate").val();
-	if (chk2 ==  '') {
-	alert("납품일자를 입력해 주세요.");
+	if (chk ==  0 || chk2 =="") {
+		
+	alert("주문수량, 배송일자를  확인하세요");
 	return; 
 	}
 	
 	return true;
-	
 }
 
 
@@ -303,7 +331,7 @@ function fInsertOrderResult(data) {
 function fValidateBasket() {
 	
 	var	chk2 = $("#od_qty").val();
-	if (chk2 ==  '') {
+	if (chk2 ==  0) {
 	alert("주문 수량을 확인하세요");
 	return; 
 	}
@@ -345,11 +373,67 @@ function fInsertBasketResult(data) {
 		
 	} else {
 		// 오류 응답 메시지 출력
-		alert(data.resultMsg);
+		alert(data.result);
 	}
 	
 	
 }
+
+
+
+
+
+/** 셀렉트박스 */
+function fSelect() {
+	var v = $("#good option:selected").val();
+	var p = $("#searchKey option:selected").val();
+	var param = {p:p
+				,v:v};
+	
+	var resultCallback = function(data) {
+		fSelectResult(data);
+	};
+	
+	callAjax("/epc/selectProduct.do", "post", "json", true, param, resultCallback);
+}
+
+/** 셀렉트박스 콜백 함수 */
+function fSelectResult(data) {
+	
+	
+	$('#good').empty();
+	//console.log("data" + data.cListobj);
+	//alert(JSON.stringify(data.cListobj[0].pro_manu_nm));
+	
+	var json = data.cListobj; 
+	//alert(data.cListobj);
+	
+	var target = document.getElementById("good");
+	 json.forEach(function(data){
+		 var i = data.pro_manu_nm;
+		 var opt = document.createElement("option");
+		 opt.value = i;
+		 opt.innerText = i;
+		 target.appendChild(opt);
+		//console.log(data.pro_manu_nm);		 
+	 });
+	 
+	/** 
+	 for (x in json) {
+		    var opt = document.createElement("option");
+		    opt.value =json;
+		    opt.innerText = json[1];
+		    target.appendChild(opt);
+		  } 
+	*/
+	
+		// 오류 응답 메시지 출력
+		//alert(data.cListobj);
+	
+	
+}
+
+
 
 </script>
 
@@ -357,8 +441,8 @@ function fInsertBasketResult(data) {
 <body>
 <form id="myForm" action=""  method="">
 	<input type="hidden" id="currentPageProductList" value="1">
-	<input type="hidden" id="tmpGrpCod" value="">
-	<input type="hidden" id="tmpGrpCodNm" value="">
+	<input type="hidden" id="tmpProductList" value="">
+	<input type="hidden" id="tmpProductListNm" value="">
 	<input type="hidden" name="action" id="action" value="">
 	
 	<!-- 모달 배경 -->
@@ -395,23 +479,31 @@ function fInsertBasketResult(data) {
 							</span>
 						</p>
 						
-						<table width="100%" cellpadding="5" cellspacing="0" border="1"
-                        align="left"
+						<table width="100%" cellpadding="5" cellspacing="0" border="1" align="left"
                         style="border-collapse: collapse; border: 1px #50bcdf;">
                         <tr style="border: 0px; border-color: blue">
                            <td width="100" height="25" style="font-size: 120%">&nbsp;&nbsp;</td>
                            <td width="50" height="25" style="font-size: 100%; text-align:right;padding-right:25px;">
-     	                       <select id="searchKey" name="searchKey" style="width: 150px;" v-model="searchKey">
-									<option value="pro_cod_num" >그룹코드</option>
-									<option value="" >그룹코드명</option>
-							   </select> 
-     	                       <select style="width:130px;">
-						        <option value="" disabled selected>제조사선택</option>
-						        <option value="1">전체</option>
-						        <option value="2">모델 번호</option>
-						        <option value="3">제조사</option>
-						        
-						      </select>
+     	                       <select id="searchKey" name="searchKey" style="width: 150px;" v-model="searchKey" onchange="fSelect(this)">
+									<option value="pro_cod_num">장비구분</option>
+									<option value="all" >전체</option>
+									<option value="board" >메인보드</option>
+									<option value="computer" >컴퓨터</option>
+									<option value="fireextinguisher" >소화기</option>
+									<option value="graphiccard" >그래픽카드</option>
+									<option value="keyboard" >키보드</option>
+									<option value="memorycard" >메모리카드</option>
+									<option value="monitor" >모니터</option>
+									<option value="mouse" >마우스</option>
+									<option value="router" >라우터</option>
+									<option value="switch" >스위치</option>
+									<option value="ups" >UPS</option>
+							    </select> 
+							   
+     	                      	<select  style="width:150px; "id="good" >
+									<option></option>					
+							 	</select>
+								
      	                       <input type="text" style="width: 150px; height: 25px;" id="sname" name="sname">                    
 	                           <a href="" id = "btnSearch" class="btnType blue" name="btn"><span>검  색</span></a>
                            </td> 

@@ -14,14 +14,15 @@
           wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
           </when>
           <when test="(searchKey != null) and (searchKey eq 'ware_address'.toString() || searchKey eq 'ware_dt_address'.toString())">
-          wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%')
+          (wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%'))
           </when>
         </choose>
       </if>
+     AND del_cd = '0'
     </where>
   </select> 
 
-  <!-- 창고별 조회 -->
+  <!-- 창고 검색 조회 -->
   <select id="whInfoList" resultType="kr.happyjob.chainmaker.scm.model.WHInfoVO">
   /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.whInfoList */
     SELECT   wh.ware_no,
@@ -41,20 +42,21 @@
       <if test="(searchKey != null) and (!searchKey.equals(''))">
         <choose>
           <when test="(searchKey != null) and (searchKey eq 'ware_name'.toString())">
-          wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
+         AND wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
           </when>
           <when test="(searchKey != null) and (searchKey eq 'ware_address'.toString() || searchKey eq 'ware_dt_address'.toString())">
-          wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%')
+         AND (wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%'))
           </when>
           <when test="(searchKey != null) and (searchKey eq 'all'.toString())">
-          ui.name LIKE CONCAT('%', #{searchWord}, '%')
+         AND (ui.name LIKE CONCAT('%', #{searchWord}, '%')
           OR wh.ware_no LIKE CONCAT('%', #{searchWord}, '%')
           OR wh.ware_name LIKE CONCAT('%', #{searchWord}, '%')
           OR (wh.ware_address LIKE CONCAT('%', #{searchWord}, '%') 
-          OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%'))
+          OR wh.ware_dt_address LIKE CONCAT('%', #{searchWord}, '%')))
           </when>
         </choose>
       </if>
+     AND wh.del_cd = '0'
     </where>
     ORDER BY wh.ware_no
     LIMIT  #{pageIndex}, #{pageSize}
@@ -89,7 +91,8 @@
     FROM     tb_warehouse as wh
     JOIN     tb_userinfo  as ui
     ON       wh.loginID = ui.loginID
-    WHERE    user_type = 'B'
+    WHERE    user_type = 'B' 
+      AND    wh.del_cd = '0'
 </select>
   
   <!-- 창고 정보 등록 -->
@@ -120,6 +123,7 @@
      )
   </insert>
   
+  <!-- 창고 정보 수정 -->
   <update id="updateWhInfo">
   /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.updateWhInfo */
     UPDATE tb_warehouse
@@ -135,6 +139,12 @@
   </update> 
   
   <!-- 창고 정보 삭제 처리 -->
+  <update id="deleteWhInfo">
+  /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.deleteWhInfo */
+   UPDATE tb_warehouse
+      SET del_cd = '1'
+    WHERE ware_no = #{ware_no}
+  </update>
   
   
 </mapper>

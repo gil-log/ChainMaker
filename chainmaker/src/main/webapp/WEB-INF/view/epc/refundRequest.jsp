@@ -12,8 +12,7 @@
 
 <script type="text/javascript">
 </script>
-<script src="${CTX_PATH}/js/view/scm/dailyOrderHistory/dailyOrder.js"></script>
-<script src="${CTX_PATH}/js/view/scm/dailyOrderHistory/dtlOrder.js"></script>
+<script src="${CTX_PATH}/js/view/epc/refundRequest/refundRequest.js"></script>
 
 	<style>
  		input[name=date].datetype{
@@ -31,9 +30,7 @@
 	<input type="hidden" id="tmpGrpCodNm" value="">
 	<input type="hidden" name="action" id="action" value="">
 
-	<div id="whInfoData"></div>
-	
-	<div id="productDetail"></div>
+	<div id="productDetails"></div>
 
 	<!-- 모달 배경 -->
 	<div id="mask"></div>
@@ -62,57 +59,96 @@
 						</p>
 
 						<p class="conTitle">
-							<span>일별 수주 내역</span> <span class="fr"> 
-							
-								<input class="datetype" type="text" name = "date" id="startDate">
-							
-								<input class="datetype" type="text" name = "date" id="endDate">
-								
-								<label><input type="checkbox" id="refundCheck" name="refundCheck" value="refund"> 반품 요청 목록 조회</label>  
+							<span>반품 신청</span> <span class="fr"> 
 							</span>
 						</p>
-
+						<p class="conTitle">
+							
+								<label >모델명      </label> 
+								<input type="text" style="text-align: center; width:30%; margin-left: 1%">
+								
+								
+								<label style="margin-left: 25%">구매일자      </label> 
+								<input class="datetype" style="margin-left: 1%" type="text" name = "date" id="startDate">
+							
+								<input class="datetype" type="text" name = "date" id="endDate">
+						
+						</p>
+						
+						<p class="conTitle">
+							<span>주문 내역</span> <span class="fr"> 
+							</span>
+						</p>
 						<div class="divComGrpCodList">
 							<table class="col">
 								<caption>caption</caption>
 								<colgroup>
 									<col width="5%">
-									<col width="12%">
+									<col width="20%">
+									<col width="5%">
 									<col width="10%">
 									<col width="15%">
-									<col width="6%">
-									<col width="8%">
-									<col width="7%">
-									<col width="8%">
-									<col width="6%">
-									<col width="12%">
-									<col width="9%">
-									<col width="7%">
-									<col width="7%">
+									<col width="15%">
 								</colgroup>
 
 								<thead>
 									<tr>
 										<th scope="col">주문 번호</th>
-										<th scope="col">주문 일자</th>
-										<th scope="col">고객기업명</th>
-										<th scope="col">주문제품명</th>
-										<th scope="col">재고 개수</th>
-										<th scope="col">공급가</th>
-										<th scope="col">주문 개수</th>
-										<th scope="col">금액 합계</th>
-										<th scope="col">주문구분</th>
-										<th scope="col">납품희망날짜</th>
-										<th scope="col">입금여부</th>
-										<th scope="col">배송지시서 작성</th>
-										<th scope="col">발주지시서 작성</th>
+										<th scope="col">주문 제품</th>
+										<th scope="col">총 수량</th>
+										<th scope="col">결제 금액</th>
+										<th scope="col">구매 일자</th>
+										<th scope="col">배송 일자</th>
 									</tr>
 								</thead>
-								<tbody id="listDailyOrderHistroy"></tbody>
+								<tbody id="orderList"></tbody>
 							</table>
 						</div>
-						<div class="paging_area" id="dailyOrderPagination"></div>
+						<div class="paging_area" id="orderListPagination"></div>
 
+
+						<p class="conTitle">
+							<span>상세 내역</span> <span class="fr"> 
+							</span>
+						</p>
+						<div class="divComGrpCodList">
+							<table class="col">
+								<caption>caption</caption>
+								<colgroup>
+									<col width="5%">
+									<col width="7%">
+									<col width="10%">
+									<col width="8%">
+									<col width="12%">
+									<col width="8%">
+									<col width="8%">
+									<col width="7%">
+									<col width="8%">
+									<col width="7%">
+								</colgroup>
+
+								<thead>
+									<tr>
+										<th scope="col">체크</th>
+										<th scope="col">주문 번호</th>
+										<th scope="col">제품 번호</th>
+										<th scope="col">제품 구분</th>
+										<th scope="col">제품 명</th>
+										<th scope="col">제조사</th>
+										<th scope="col">주문 수량</th>
+										<th scope="col">결제 금액</th>
+										<th scope="col">환불 수량</th>
+										<th scope="col">환불 금액</th>
+									</tr>
+								</thead>
+								<tbody id="orderDetailList"></tbody>
+							</table>
+							
+							<div class="paging">
+							<a href="javascript:faddRefundBtn();" class="btnType blue"><span>반품 요청</span></a>
+							 </div>
+						</div>
+						
 					</div> <!--// content -->
 
 					<h3 class="hidden">풋터 영역</h3> <jsp:include
@@ -245,7 +281,7 @@
 				<!-- e : 여기에 내용입력 -->
 
 				<div class="btn_areaC mt30">
-					<a href="" class="btnType blue" id="shippingDoneBtn" name="btn"><span>완료</span></a>
+					<a href="" class="btnType blue" id="shippingDoneBtn" name="btn"><span>반품신청</span></a>
 					<a href="" class="btnType gray" id="btnClose" name="btn"><span>취소</span></a>
 				</div>
 			</dd>
@@ -253,116 +289,5 @@
 		<a href="" class="closePop"><span class="hidden">닫기</span></a>
 	</div>
 
-	<div id="purchaseDirection" class="layerPop layerType2" style="width: 900px;">
-		<dl>
-			<dt>
-				<strong>발주 지시서 작성</strong>
-			</dt>
-			<dd class="content">
-
-				<!-- s : 여기에 내용입력 -->
-
-
-				<table class="col">
-					<caption>caption</caption>
-					<colgroup>
-						<col width="10%">
-						<col width="12%">
-						<col width="10%">
-						<col width="6%">
-					</colgroup>
-
-					<thead>
-						<tr>
-							<th scope="col">제품번호</th>
-							<th scope="col">제품명</th>
-							<th scope="col">납품기업</th>
-							<th scope="col">발주자</th>
-						</tr>
-					</thead>
-					<tbody>
-
-						<tr>
-							<td id="pur_pro_no"></td>
-							<td id="pur_pro_name"></td>
-							<td id="pur_deli_company"></td>
-							<td id="pur_login_id"></td>
-						</tr>
-					</tbody>
-				</table>
-
-				<table class="row">
-					<caption>caption</caption>
-					<colgroup>
-						<col width="15%">
-						<col width="5%">
-						<col width="10%">
-						<col width="15%">
-					</colgroup>
-
-					<tbody>
-						<tr>
-							<th scope="row">창고 선택</th>
-							<td><select style="width: 160px" id="pur_ware_name_option"
-								name="pur_ware_name_option"
-								onchange="fPurchaseSelectedOptions(this.options[this.selectedIndex].value, pur_ware_name_option)">
-							</select></td>
-
-							<th scope="row">재고 개수 <span class="font_red"></span></th>
-							<td><input type="text" class="inputTxt p100"
-							id="pur_pro_ware_qty_upper" readonly="readonly" /></td>
-							<th scope="row">발주 개수 <span class="font_red"></span></th>
-							<td><input type="text" class="inputTxt p100"
-							id="pur_order_qty_upper" /></td>
-							<td>
-							<a href="javascript:faddPurchaseBtn();"
-							 class="btnType blue"><span>추가</span></a>
-							</td>
-						</tr>
-
-					</tbody>
-				</table>
-				
-				<table class="col" id ="purchaseDiretionTable">
-					<caption>caption</caption>
-					<colgroup>
-					
-						<col width="10%">
-						<col width="12%">
-						<col width="10%">
-						<col width="3%">
-						<col width="10%">
-						<col width="3%">
-						<col width="8%">
-						<col width="3%">
-					</colgroup>
-
-					<thead>
-						<tr>
-							<th scope="col">제품번호</th>
-							<th scope="col">제품명</th>
-							<th scope="col">납품기업</th>
-							<th scope="col">창고번호</th>
-							<th scope="col">창고명</th>
-							<th scope="col">발주개수</th>
-							<th scope="col">발주자</th>
-							<th scope="col">비고</th>
-						</tr>
-					</thead>
-					<tbody id="purchase_tbody">
-					</tbody>
-				</table>
-
-				<!-- e : 여기에 내용입력 -->
-
-				<div class="btn_areaC mt30">
-					<a href="" class="btnType blue" id="btnPurDirDone" name="btn"><span>신청</span></a>
-					<a href="" class="btnType gray" id="btnClosePurDir" name="btn"><span>취소</span></a>
-				</div>
-			</dd>
-		</dl>
-		<a href="" class="closePop"><span class="hidden">닫기</span></a>
-	</div>
-	<!--// 모달팝업 -->
 </body>
 </html>

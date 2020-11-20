@@ -114,13 +114,13 @@ public class WHInfoController {
         break;
       
       case "delete":
-        logger.info(isSuccess);
+        isSuccess = whInfoService.deleteWhInfo(whInfoDTO);
+        logger.info("----------- isSuccess = " + isSuccess);
         if (isSuccess > 0) resultMsg = "삭제에 성공 하였습니다.";
         else {
           result = "FALSE";
           resultMsg = "삭제에 실패 하였습니다.";
         }
-        
         break;
       
       default:

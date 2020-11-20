@@ -27,4 +27,7 @@ public interface WHInfoService {
   // 창고 정보 수정
   public int updateWhInfo(WHInfoDTO whInfoDTO);
   
+  // 창고 정보 삭제 처리
+  public int deleteWhInfo(WHInfoDTO whinfoDTO);
+  
 }

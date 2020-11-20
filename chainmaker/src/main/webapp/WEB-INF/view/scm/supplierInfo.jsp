@@ -91,13 +91,13 @@
 	}
 	/** 납품업체 저장 validation */
 	function fValidateDelivery() {
-		var chk = checkNotEmpty([ [ "deli_company", "납품 업체명을 입력하세요." ],
+		var chk = checkNotEmpty([ 
+		        [ "deli_company", "납품 업체명을 입력하세요." ],
 				[ "deli_id", "Login ID를 입력하세요." ],
 				[ "deli_password", "비밀번호룰 입력하세요." ],
 				[ "deli_name", "담당자명을 입력하세요." ],
-				[ "deli_phone", "담당자 연락처를 입력하세요." ] ]
-
-		);
+				[ "deli_phone", "담당자 연락처를 입력하세요." ] 
+		       ]);
 		if (!chk) {
 			return;
 		}
@@ -295,7 +295,6 @@
 
 		//alert(data);
 		console.log(data);
-
 		//기존 목록 삭제
 		$('#listDelivery').empty();
 
@@ -330,7 +329,9 @@
 			,	pageSize : pageSizeProduct
 
 		}
-
+		//console.log("param:" + JSON.stringify(param));
+		
+		
 		console.log("deli_company : " + deli_company);
 		console.log("deli_no : " + deli_no);
 
@@ -419,11 +420,11 @@
 </head>
 <body>
 	<form id="myForm" action="" method="">
-		<input type="hidden" id="currentPageDelivery" value="1"> <input
-			type="hidden" id="currentPageProduct" value="1"> <input
-			type="hidden" id="tmpdeli_company" value=""> <input
-			type="hidden" id="tmpdeli_no" value=""> <input type="hidden"
-			name="action" id="action" value="">
+		<input type="hidden" id="currentPageDelivery" value="1"> 
+		<input type="hidden" id="currentPageProduct" value="1"> 
+		<input type="hidden" id="tmpdeli_company" value=""> 
+		<input type="hidden" id="tmpdeli_no" value=""> 
+		<input type="hidden" name="action" id="action" value="">
 		<div id="mask"></div>
 		<div id="wrap_area">
 
@@ -443,31 +444,39 @@
 						<div class="content">
 
 							<p class="Location">
-								<a href="#" class="btn_set home">메인으로</a> <a href="#"
-									class="btn_nav">기준 정보</a> <span class="btn_nav bold">납품
-									업체 정보</span> <a href="#" class="btn_set refresh">새로고침</a>
+								<a href="#" class="btn_set home">메인으로</a> 
+								<a href="#"class="btn_nav">기준 정보</a>
+								 <span class="btn_nav bold">납품 업체 정보</span> 
+								<a href="#" class="btn_set refresh">새로고침</a>
 							</p>
 
 							<p class="conTitle">
-								<span>납품 업체 정보</span> 
-								
+								<span>납품 업체 정보</span>
 								<span class="fr"> 
-								<label><input type="checkbox" id="delcheck" name="delcheck" value="del"> 삭제된 정보 표시</label> 
-								<select id="searchKey" name="searchKey" style="width: 80px;" v-model="searchKey">
-										<option value="del_nm" selected="selected">납품 업체</option>
-										<option value="pro_nm">제품명</option>
-								</select> 
-								<input type="text" style="width: 160px; height: 30px;" id="sname" name="sname">
-								 <a href="" class="btnType blue" id="searchBtn" name="btn">
-								 <span>검 색</span></a> 
-								 <a href="javascript:fPopModalDelivery()" class="btnType blue" name="modal">
-								 <span>신규등록</span>
-								 </a>
+									
+									
+									<a href="javascript:fPopModalDelivery()" class="btnType blue" name="modal">
+									<span>신규등록</span>
+									</a>
 								</span>
 							</p>
 
 
 							<div class="DeliveryList">
+							<div class="conTitle" style="margin: 0 25px 10px 0; float: right;">
+								<label>
+									<input type="checkbox" id="delcheck" name="delcheck" value="del">
+									삭제된 정보 표시
+								</label> 
+							<select id="searchKey" name="searchKey" style="width: 100px;" v-model="searchKey">
+										<option value="del_nm" selected="selected">납품 업체</option>
+										<option value="pro_nm">제품명</option>
+									</select> 
+									<input type="text" style="width: 160px; height: 30px;" id="sname" name="sname">
+									<a href="" class="btnType blue" id="searchBtn" name="btn"> 
+										<span>검 색</span>
+									</a> 
+									</div>
 								<table class="col">
 									<caption>caption</caption>
 									<colgroup>
@@ -583,7 +592,7 @@
 								<td colspan="3"><input type="text" class="inputTxt p100"
 									name="del_cd" id="del_cd" /></td>
 							</tr>
-							
+
 						</tbody>
 					</table>
 
@@ -591,8 +600,9 @@
 					<div class="btn_areaC mt30">
 						<a href="" class="btnType blue" id="btnSaveDelivery" name="btn"><span>저장</span></a>
 						<a href="" class="btnType blue" id="btnDeleteDelivery" name="btn"><span>삭제</span></a>
-						<a href="" class="btnType blue" id="btnRecoveryDelivery" name="btn"><span>복원</span></a>
-						<a href="" class="btnType gray" id="btnCloseDelivery" name="btn"><span>취소</span></a>
+						<a href="" class="btnType blue" id="btnRecoveryDelivery"
+							name="btn"><span>복원</span></a> <a href="" class="btnType gray"
+							id="btnCloseDelivery" name="btn"><span>취소</span></a>
 					</div>
 				</dd>
 			</dl>

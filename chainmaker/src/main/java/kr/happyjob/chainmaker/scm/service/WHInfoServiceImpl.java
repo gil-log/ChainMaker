@@ -83,8 +83,15 @@ public class WHInfoServiceImpl implements WHInfoService {
   }
 
   @Override
+  // 창고 정보 수정 - 수정한 컬럼 개수를 리턴
   public int updateWhInfo(WHInfoDTO whInfoDTO) {
     return whInfoDAO.updateWhInfo(whInfoDTO);
+  }
+
+  @Override
+  // 창고 정보 삭제 처리 - 수정한 컬럼 개수를 리턴
+  public int deleteWhInfo(WHInfoDTO whinfoDTO) {
+    return whInfoDAO.deleteWhInfo(whinfoDTO);
   }
  
 }

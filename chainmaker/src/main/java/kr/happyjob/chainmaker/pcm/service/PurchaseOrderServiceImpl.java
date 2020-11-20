@@ -18,25 +18,31 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	@Override
 	public List<PurchaseOrderModel> purchaseOrderList(Map<String, Object> paramMap) {
 		
-		List<PurchaseOrderModel> purchaseOrderList=purchaseOrderDao.purchaseOrderList(paramMap);
-		
-		return purchaseOrderList;
+		return purchaseOrderDao.purchaseOrderList(paramMap);
 	}
 
 	@Override
 	public int countPurchaseOrderList(Map<String, Object> paramMap) {
-		
-		int total=purchaseOrderDao.countPurchaseOrderList(paramMap);
-		
-		return total;
+				
+		return purchaseOrderDao.countPurchaseOrderList(paramMap);
+	}
+	
+	@Override
+	public PurchaseOrderModel purchaseOrderSelect(Map<String, Object> paramMap) {
+
+		return purchaseOrderDao.purchaseOrderSelect(paramMap);
 	}
 
 	@Override
-	public PurchaseOrderModel purchaseOrderSelect(Map<String, Object> paramMap) {
-		
-		PurchaseOrderModel purchaseOrderSelect=purchaseOrderDao.purchaseOrderSelect(paramMap);
-		
-		return purchaseOrderSelect;
+	public List<PurchaseOrderModel> purchaseDtlList(Map<String, Object> paramMap) {
+
+		return purchaseOrderDao.purchaseDtlList(paramMap);
+	}
+
+	@Override
+	public int countPurchaseDtlList(Map<String, Object> paramMap) {
+
+		return purchaseOrderDao.countPurchaseDtlList(paramMap);
 	}
 
 }

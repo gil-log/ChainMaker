@@ -17,12 +17,13 @@
 								<c:forEach items="${listPurchaseOrder}" var="list">
 									<tr>										
 										<td>${list.purchase_no}</td>
-										<td>${list.deli_company}</td>
 										<td>${list.pro_name}</td>
-										<td>${list.purchase_qty}</td>
+										<td>${list.deli_company}</td>
+										<td>${list.deli_name}</td>
 										<td>
 										<fmt:formatDate value="${list.purchase_date}" pattern="yyyy-MM-dd"/>										
 										</td>
+										<td>${list.total_price}</td>
 										<c:if test="${list.purchase_cd == 1}">
 											<td>승인</td>
 											<td>
@@ -31,7 +32,11 @@
 										</c:if>
 										<c:if test="${list.purchase_cd == 0}">
 											<td>미승인</td>
-											<td> </td>
+											<td style="color: skyblue;font-weight: bold;">미입금</td>
+										</c:if>
+										<c:if test="${list.purchase_cd == 2}">
+											<td>승인</td>
+											<td style="color: red;font-weight: bold;">입금 확인</td>
 										</c:if>
 										
 									</tr>									

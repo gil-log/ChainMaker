@@ -11,8 +11,13 @@
 <title>제품정보 관리</title>
 
 <jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
+<!-- chosen import -->
+<link rel="stylesheet" href="${CTX_PATH}/css/chosen/chosen.css">
+<script src="${CTX_PATH}/js/chosen/chosen.jquery.js"></script>
 
 <script type="text/javascript">
+
+
 
 	// 페이징 설정 
 	var userPageSize = 10;    	// 화면에 뿌릴 데이터 수 
@@ -25,12 +30,21 @@
 		
 		// 버튼 이벤트 등록 (저장, 수정, 삭제, 모달창 닫기)
 		fButtonClickEvent();
+		
+		// chosen load 
+		$(".chosen-select").chosen({
+			width: '-webkit-fill-available',
+			rtl: true
+		});
+		
+		$('textarea').addClass("ui-corner-all ui-widget-content");
+		
 	});
 	
 	/* 버튼 이벤트 등록 - 저장, 수정, 삭제  */
 	function fButtonClickEvent(){
 		$('a[name=btn]').click(function(e){
-			e.preventDefault();   // ?? 
+			e.preventDefault();   
 					
 			var btnId = $(this).attr('id');
 			
@@ -155,6 +169,7 @@
 	 
 	 /* 회원관리 모달창(팝업) 실행  여기부터 */
 	 function fUserModal(pro_no) {
+		 
 		 //alert("모달");
 		 // 신규저장 하기 버튼 클릭시 (값이 null)
 		 if(pro_no == null || pro_no==""){
@@ -219,39 +234,50 @@
 			 
 			 $("#pro_model_name").val("");
 			 $("#pro_name").val("");
-			 $("#pro_cd").val("");
+			 
+			 $("#ware_no option").prop("selected", false).trigger("chosen:updated");
 			 $("#pro_manu_name").val("");
 			 $("#pro_price").val("");
-			 
-			 $("#deli_company").val("");
+
 			 $("#pro_deli_price").val("");
 			 $("#pro_detail").val("");
 			 $("#thumbnail").val("");
 			 $("#tempImg").attr("src", "/images/admin/comm/no_image.png");
 			 
+			 // chosen option setting
+			 $("#pro_cd").val("").trigger("chosen:updated");
+			 $("#deli_no").val("").trigger("chosen:updated");
 			 $("#btnDeletePro").hide(); // 삭제버튼 숨기기
 			 $("#btnUpdatePro").hide();
 			 $("#btnSavePro").show();
 			
 			 
 		 }else{
-			 $("#pro_no").val(object.pro_no);
+			 $("#ware_no option").prop("selected", false).trigger("chosen:updated");
+			 
+			 $("#pro_no").val(object[0].pro_no);
 			 $("#pro_no").attr("readonly", true); // pro_no 수정불가 
 			 $("#pro_no").css("border","none"); // pro_no 수정불가 
 			 
-			 $("#pro_model_name").val(object.pro_model_name);
-			 $("#pro_name").val(object.pro_name);
+			 $("#pro_model_name").val(object[0].pro_model_name);
+			 $("#pro_name").val(object[0].pro_name);
 			 //$("#pro_cd option:selected").val(object.pro_cd);
-			 $("#pro_cd").val(object.pro_cd).change(); 
-			 $("#pro_manu_name").val(object.pro_manu_name);
-			 $("#pro_price").val(object.pro_price);
-			 
-			 $("#deli_company").val(object.deli_company);
-			 $("#pro_deli_price").val(object.pro_deli_price);
-			 $("#pro_detail").val(object.pro_detail);
+
+			 $("#pro_manu_name").val(object[0].pro_manu_name);
+			 $("#pro_price").val(object[0].pro_price);
+			 $("#pro_deli_price").val(object[0].pro_deli_price);
+			 $("#pro_detail").val(object[0].pro_detail);
 			 $("#thumbnail").val("");
-			alert(object.file_server_path);
-			 $("#tempImg").attr("src", object.file_server_path); // !!!!!!!!여기에 파일 저장 경로 추가하기!!!!!!!
+			 $("#tempImg").attr("src", object[0].file_server_path); // !!!!!!!!여기에 파일 저장 경로 추가하기!!!!!!!
+			 
+			 // chosen option setting
+			 for ( var i = 0 ; i < object.length ; i++ ){
+				 $('#ware_no option[value=' + object[i].ware_no + ']').attr('selected', 'selected').trigger("chosen:updated");
+			 }
+			 $("#pro_cd").val(object[0].pro_cd).trigger("chosen:updated");
+			 $("#deli_no").val(object[0].deli_no).trigger("chosen:updated");
+			 
+			 
 			 $("#btnDeletePro").show(); // 삭제버튼 보이기 
 			 $("#btnSavePro").hide();
 			 $("#btnUpdatePro").css("display","");
@@ -269,11 +295,12 @@
 				 [
 					 ["pro_no", "제품번호를 입력해주세요!"],
 					 ["pro_name", "제품명을 입력해주세요!"],
+					 ["ware_cd", "저장창고를 선택해주세요!"],
 					 ["pro_cd", "제품코드를 선택해주세요!"],
 					 ["pro_model_name", "모델명을 입력해주세요!"],
 					 ["pro_manu_name", "제조사를 입력해주세요!"],
 					 ["pro_price", "제품 가격을 입력해주세요!"],
-					 ["deli_company", "납품업체명을 입력해주세요!"],
+					 ["deli_cd", "납품업체를 선택해주세요!"],
 					 ["pro_deli_price", "납품단가를 입력해주세요!"],
 					 ["thumbnail", "대표 이미지를 업로드해주세요!"]
 				 ]
@@ -447,7 +474,7 @@
 						        <option value="model_nm">모델명</option>
 						        <option value="manu_nm">제조사</option>
 						      </select>
-     	                       <input type="text" style="width: 150px; height: 25px;" id="sname" name="sname">                    
+     	                       <input type="text" style="width: 150px ; height: 25px;" id="sname" name="sname">                    
 	                           <a href="" class="btnType blue" id="searchBtn" name="btn"><span>검  색</span></a>
                            </td> 
                            
@@ -528,47 +555,62 @@
 					<tbody>
 						<tr>
 							<th scope="row">제품 번호 <span class="font_red">*</span></th>
-							<td colspan="3"><input type="text" maxlength="15" name="pro_no" id="pro_no" /></td>
+							<td colspan="3"><input class = "ui-widget ui-widget-content ui-corner-all" style="height:20px;" type="text" maxlength="15" name="pro_no" id="pro_no" /></td>
 													
 						</tr>
 						<tr>
 							<th scope="row">제품 코드 <span class="font_red">*</span></th>
 							<td colspan="3">  
-							<select name="pro_cd" id="pro_cd" style="width:129px; height:16.25px">
-							<!--model or session에서 넘어온 데이터 자바스크립트에서 뿌리기 11/12 21:21 note -->
+							<select name="pro_cd" id="pro_cd" style="width:webkit-fill-available; height:16.25px" data-placeholder="제품 코드를 선택하세요." class="chosen-select">
 								<c:forEach var="tempCdlist" items="${cdListObj}">
 						         	<option value="${tempCdlist.detail_code}">${tempCdlist.detail_name}</option>
 						        </c:forEach>
 							</select>
-							<!--<input type="text" maxlength="15" name="pro_cd" id="pro_cd" >--></td>	
+							</td>
+						</tr>	
+						<tr>
+							<th scope="row">저장 창고<span class="font_red">*</span></th>
+							<td colspan="3">  
+							<select name="ware_no[]" id="ware_no" data-placeholder="1개 이상의 창고를 선택하세요." 
+							multiple class="chosen-select">
+								<c:forEach var="tempCdlist2" items="${whListObj}">
+						         	<option value="${tempCdlist2.ware_no}">${tempCdlist2.ware_name}( ${tempCdlist2.ware_dt_address} )</option>
+						        </c:forEach>
+							</select>
+							</td>	
 						</tr>					
 						<tr>
 							<th scope="row">제품명 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="15" name="pro_name" id="pro_name" ></td>
+							<td><input class = "ui-widget ui-widget-content ui-corner-all" style="height:20px;" type="text" maxlength="15" name="pro_name" id="pro_name" ></td>
 							
 							<th scope="row">모델명 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="15" name="pro_model_name" id="pro_model_name" /></td>
+							<td><input class = "ui-widget ui-widget-content ui-corner-all" style="height:20px;" type="text" maxlength="15" name="pro_model_name" id="pro_model_name" /></td>
 						</tr>
 						<tr>
 							<th scope="row">제조사 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="15" name="pro_manu_name" id="pro_manu_name" /></td>
+							<td><input class = "ui-widget ui-widget-content ui-corner-all" style="height:20px;" type="text" maxlength="15" name="pro_manu_name" id="pro_manu_name" /></td>
 							
 							<th scope="row">제품 가격 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="10" name="pro_price" id="pro_price" onkeydown="fFilterNumber(event)" ></td>							
+							<td><input class = "ui-widget ui-widget-content ui-corner-all" style="height:20px;" type="text" maxlength="10" name="pro_price" id="pro_price" onkeydown="fFilterNumber(event)" ></td>							
 						</tr>
 						<tr>
 							<th scope="row">납품 업체 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="15" name="deli_company" id="deli_company" /></td>
-							
+							<td>  
+							<select name="deli_no" id="deli_no" style="width:129px; height:16.25px" data-placeholder="납품업체를 선택하세요."class="chosen-select">
+								<c:forEach var="tempCdlist3" items="${deliListObj}">
+						         	<option value="${tempCdlist3.deli_no}">${tempCdlist3.deli_company}</option>
+						        </c:forEach>
+							</select>
+							</td>
 							<th scope="row">납품 단가 <span class="font_red">*</span></th>
-							<td><input type="text" maxlength="10" name="pro_deli_price" id="pro_deli_price" onkeydown="fFilterNumber(event)" ></td>							
+							<td><input class = "ui-widget ui-widget-content ui-corner-all" style="height:20px;" type="text" maxlength="10" name="pro_deli_price" id="pro_deli_price" onkeydown="fFilterNumber(event)" ></td>							
 						</tr>
 						
 						<tr>
 							
 							<th scope="row">상세 정보</th>
 							<td colspan="3">
-							<textarea id="pro_detail" maxlength="500" name="pro_detail" style="height:130px;outline:none;resize:none;" placeholder="여기에 상세정보를 적어주세요.(500자 이내)"></textarea>
+							<textarea class = "ui-widget ui-widget-content ui-corner-all" id="pro_detail" maxlength="500" name="pro_detail" style="height:130px;outline:none;resize:none;" placeholder="여기에 상세정보를 적어주세요.(500자 이내)"></textarea>
 							</td>
 								
 						</tr>		

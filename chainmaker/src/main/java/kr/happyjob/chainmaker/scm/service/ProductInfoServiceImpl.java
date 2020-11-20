@@ -18,9 +18,11 @@ import kr.happyjob.chainmaker.common.comnUtils.FileUtil;
 import kr.happyjob.chainmaker.common.comnUtils.FileUtilModel;
 import kr.happyjob.chainmaker.common.comnUtils.NewFileUtil;
 import kr.happyjob.chainmaker.scm.dao.ProductInfoDao;
+import kr.happyjob.chainmaker.scm.model.DeliveryModel;
 import kr.happyjob.chainmaker.scm.model.DetailCdVO;
 import kr.happyjob.chainmaker.scm.model.FileModel;
 import kr.happyjob.chainmaker.scm.model.ProductInfoModel;
+import kr.happyjob.chainmaker.scm.model.WHInventoryFormModel;
 
 @Transactional
 @Service
@@ -56,14 +58,26 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 	}
 	
 	@Override
+	public List<WHInventoryFormModel> selectWareHouse() {
+		List<WHInventoryFormModel> list = dao.selectWareHouse();
+		return list;
+	}
+	
+	@Override
+	public List<DeliveryModel> selectDelivery() {
+		List<DeliveryModel> list = dao.selectDelivery();
+		return list;
+	}
+	
+	@Override
 	public int countProductInfo(Map<String, Object> paramMap) {
 		int count = dao.countProductInfo(paramMap);
 		return count;
 	}
 
 	@Override
-	public ProductInfoModel selectProductDetail(Map<String, Object> paramMap) {
-		ProductInfoModel detail = dao.selectProductDetail(paramMap);
+	public List<ProductInfoModel> selectProductDetail(Map<String, Object> paramMap) {
+		List<ProductInfoModel> detail = dao.selectProductDetail(paramMap);
 		return detail;
 	}
 
@@ -105,6 +119,7 @@ public class ProductInfoServiceImpl implements ProductInfoService {
 		
 		dao.insertProdInfo(paramMap);
 		dao.insertProdFile(paramMap);
+		dao.insertProdWareHouse(paramMap);
 		
 		return true;
 				

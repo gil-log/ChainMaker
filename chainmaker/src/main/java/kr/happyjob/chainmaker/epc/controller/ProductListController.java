@@ -43,10 +43,10 @@ public class ProductListController {
 	public String initProductList(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
 			HttpServletResponse response, HttpSession session) throws Exception {
 		
-		logger.info("+ Start " + className + ".initComnCod");
+		logger.info("+ Start " + className + ".initProductList");
 		logger.info("   - paramMap : " + paramMap);
 		
-		logger.info("+ End " + className + ".initComnCod");
+		logger.info("+ End " + className + ".initProductList");
 
 		return "epc/productList";
 	}
@@ -82,6 +82,7 @@ public class ProductListController {
 
 		return "/epc/listProductList";
 	}	
+	
 	
 	//  제품 단일 정보 ajax 통신
 		@RequestMapping("detailProduct.do")
@@ -188,5 +189,25 @@ public class ProductListController {
 			return resultMap;
 		}	
 		
+		@RequestMapping("selectProduct.do")
+		@ResponseBody
+		public Map<String, Object> selectProduct(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+				HttpServletResponse response, HttpSession session)  throws Exception{
+		
+			logger.info("+ Start " + className + ".selectProduct" );
+			
+			List<ProductListModel> cList =  productListService.selectProduct(paramMap);
+			model.addAttribute("cListobj", cList);
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			
+			
+			resultMap.put("cListobj", cList);
+			
+			
+			
+			logger.info("+ End " + className + ".selectProduct");
+			
+			return resultMap;
+		}
 		
 }

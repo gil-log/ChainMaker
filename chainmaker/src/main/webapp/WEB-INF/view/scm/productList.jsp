@@ -17,7 +17,7 @@
 			<c:set var="nRow" value="${pageSize*(currentPage-1)}" /> 
 			<c:forEach items="${listModel}" var="list">
 				<tr>
-				        <td>${nRow + 1}</td>
+				        <td>${nRow + 1}</td>  
 						<td>${list.pro_model_name}</td>
 						<td><a href="javascript:fUserModal('${list.pro_no}');">${list.pro_no}</a></td>   
 					    <td><a href="javascript:fUserModal('${list.pro_no}');">${list.pro_name}</a></td>

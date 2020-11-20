@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import kr.happyjob.chainmaker.scm.model.DeliveryModel;
 import kr.happyjob.chainmaker.scm.model.DetailCdVO;
 import kr.happyjob.chainmaker.scm.model.ProductInfoModel;
+import kr.happyjob.chainmaker.scm.model.WHInventoryFormModel;
 import kr.happyjob.chainmaker.scm.service.ProductInfoService;
 
 @Controller
@@ -44,7 +46,11 @@ public class ProductInfoController {
 		logger.info("+ Start " + className + ".initProductInfo");
 		//상세코드 조회
 		List<DetailCdVO> cdList = service.selectDetailCode();
+		List<WHInventoryFormModel> whList = service.selectWareHouse();
+		List<DeliveryModel> deliList = service.selectDelivery();
 		request.setAttribute("cdListObj", cdList); // 세션으로 넣는 이유... 옵션값 뽑기 위해..
+		request.setAttribute("whListObj", whList); // 세션으로 넣는 이유... 옵션값 뽑기 위해..
+		request.setAttribute("deliListObj", deliList); // 세션으로 넣는 이유... 옵션값 뽑기 위해..
 		
 		return "scm/productInfo";
 	}
@@ -90,8 +96,8 @@ public class ProductInfoController {
 		  
 		String resultMsg="";
 		
-		// 선택 제품 1건 조회 
-		ProductInfoModel detail = service.selectProductDetail(paramMap);
+		// 선택 제품 정보 조회 ( 창고 여러개 넣어져 있을 시 여러 개 리턴) 
+		List<ProductInfoModel> detail = service.selectProductDetail(paramMap);
 		//List<CommentsVO> comments = null;
 		
 		if(detail != null) {

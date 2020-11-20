@@ -7,7 +7,8 @@
 	<select id="selectProductInfo" parameterType="Map" resultType="kr.happyjob.chainmaker.scm.model.ProductInfoModel">
 		SELECT @rownum:=@rownum+1 as row_num
 			,p.pro_no as pro_no
-		    , p.deli_company as deli_company
+		    , d.deli_company as deli_company
+		    , d.deli_no as deli_no
 		    , p.pro_name as pro_name
 		    , p.pro_deli_price as pro_deli_price
 		    , p.pro_model_name as pro_model_name
@@ -16,7 +17,8 @@
 		    , p.pro_detail as pro_detail
 		    , p.pro_cd as pro_cd
 		FROM tb_product p
-
+		JOIN tb_delivery d
+		on p.deli_no = d.deli_no
 		<where>
 		<if test="(sname != null) and (!sname.equals('')) ">
 			<choose>
@@ -43,17 +45,31 @@
 		LIMIT #{pageIndex}, #{pageSize}
 	</select>
 	
-	<!-- 상세 코드 조회 -->
+	<!-- 제품 상세 코드 및 창고 코드 조회 -->
 	<select id="selectDetailCode" resultType="kr.happyjob.chainmaker.scm.model.DetailCdVO">
 		
 		SELECT detail_code as detail_code
-			 , detail_name as detail_name 
-		FROM tb_detail_code 
+			 , detail_name as detail_name
+		FROM tb_detail_code
 		<where>
 			AND group_code = 'proCD'
 			AND use_yn = 'Y'
 		</where>
 	
+	</select>
+	
+	<select id="selectWareHouse" resultType="kr.happyjob.chainmaker.scm.model.WHInventoryFormModel">
+		SELECT ware_no as ware_no
+			 , ware_name as ware_name
+			 , ware_address as ware_address
+			 , ware_dt_address as ware_dt_address
+		FROM tb_warehouse 
+	</select>
+	
+	<select id="selectDelivery" resultType="kr.happyjob.chainmaker.scm.model.DeliveryModel">
+		SELECT deli_no as deli_no
+			 , deli_company as deli_company
+		FROM tb_delivery
 	</select>
 
 	<!-- 제품 목록 수 조회 -->
@@ -87,7 +103,7 @@
 	<select id="selectProductDetail" resultType="kr.happyjob.chainmaker.scm.model.ProductInfoModel">
 
 		SELECT p.pro_no as pro_no
-		    , p.deli_company as deli_company
+		    , d.deli_company as deli_company
 		    , p.pro_name as pro_name
 		    , p.pro_deli_price as pro_deli_price
 		    , p.pro_model_name as pro_model_name
@@ -95,11 +111,17 @@
 		    , p.pro_price as pro_price
 		    , p.pro_detail as pro_detail
 		    , p.pro_cd as pro_cd
+		    , p.deli_no as deli_no
+		    , w.ware_no as ware_no
             , f.file_server_path as file_server_path
             , f.file_ofname as file_ofname
 		FROM tb_product p 
         LEFT OUTER JOIN tb_file f
         ON p.pro_no = f.pro_no
+        LEFT OUTER JOIN tb_delivery d
+        on p.deli_no = d.deli_no
+        LEFT OUTER JOIN tb_product_warehouse w
+        on p.pro_no = w.pro_no
 		<where> 
 			AND p.pro_no=#{pro_no}
 		</where> 
@@ -111,7 +133,7 @@
 		(
 			pro_no 
 			, pro_name 
-			, deli_company 
+			, deli_no
 			, pro_deli_price 
 			, pro_model_name
 			, pro_manu_name
@@ -123,7 +145,7 @@
 		(
 			#{pro_no} 
 			, #{pro_name} 
-			, #{deli_company} 
+			, #{deli_no} 
 			, #{pro_deli_price}
 			, #{pro_model_name}
 			, #{pro_manu_name}
@@ -186,12 +208,27 @@
 		</where>
 	</delete>
 	
+	<!-- 제품 창고 테이블에 제품 등록 -->
+	<insert id="insertProdWareHouse" parameterType="Map">
+		INSERT INTO tb_product_warehouse 
+		
+		(
+			ware_no, pro_no
+		)
+		VALUES
+		
+		(
+			#{ware_no} 
+			, #{pro_no}
+		)
+	</insert>
+	
 
 	<!-- 제품 테이블에 제품 수정 -->		
 	<update id="updateProdInfo" parameterType="Map">
 		UPDATE tb_product
 		SET pro_no = #{pro_no}
-		, deli_company = #{deli_company}
+		, deli_no = #{deli_no}
 		, pro_name = #{pro_name}	
 		, pro_deli_price = #{pro_deli_price}
 		, pro_model_name = #{pro_model_name}
@@ -215,6 +252,8 @@
 			AND pro_no=#{pro_no}
 		</where> 
 	</update>
+	
+	
 	
 	
 
