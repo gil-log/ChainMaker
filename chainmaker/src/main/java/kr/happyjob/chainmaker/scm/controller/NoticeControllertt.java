@@ -19,15 +19,15 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartRequest;
 
 import kr.happyjob.chainmaker.scm.model.NoticeModel;
-import kr.happyjob.chainmaker.scm.service.NoticeService;
+import kr.happyjob.chainmaker.scm.service.NoticeServicett;
 
 
 @Controller
 @RequestMapping("/scm/")
-public class NoticeController {
+public class NoticeControllertt {
 
 	@Autowired
-	NoticeService noticeService;
+	NoticeServicett noticeService;
 	
 	// Set logger
 	private final Logger logger = LogManager.getLogger(this.getClass());

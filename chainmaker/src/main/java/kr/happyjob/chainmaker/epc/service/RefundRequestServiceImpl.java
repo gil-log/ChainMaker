@@ -1,8 +1,10 @@
 package kr.happyjob.chainmaker.epc.service;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,6 +18,7 @@ import kr.happyjob.chainmaker.epc.model.OrderDetailVO;
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateDTO;
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
+import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
 import kr.happyjob.chainmaker.scm.dao.DailyOrderHistoryDao;
 
 @Transactional
@@ -68,6 +71,66 @@ public class RefundRequestServiceImpl implements RefundRequestService {
 		}
 		
 		return orderDetailDTOList;
+	}
+
+	@Override
+	public int putRefundDirection(List<RefundInfoDTO> refundInfoDTOList){
+		
+		int refundNo = 0;
+		int orderNo = 0;
+		try {
+			RefundInfoDTO firstRefundInfoDTO = refundInfoDTOList.remove(0);
+
+			
+			Map<String, Object> map = new HashMap<>();
+			
+			// 반품 정보가 하나인 상황
+			if(refundInfoDTOList.isEmpty()) {
+
+				refundRequestDao.insertOneRefundDirection(firstRefundInfoDTO);
+				refundNo = firstRefundInfoDTO.getRefund_no();
+				
+				logger.info("refund_no : " + refundNo);
+				refundRequestDao.updateOneOrderCDtoRefundByOrderNoAndProNo(firstRefundInfoDTO);
+				
+			} 
+			// 반품 정보가 둘 이상인 상황
+			else {
+
+				// refund_no 가져오기위해
+				refundRequestDao.insertOneRefundDirection(firstRefundInfoDTO);
+				refundNo = firstRefundInfoDTO.getRefund_no();
+
+				logger.info("refund_no : " + refundNo);
+				
+				// 리스트에 남아있는 DTO들에게 첫 삽입된 refund_no 삽입
+				for(RefundInfoDTO refundInfoDTO : refundInfoDTOList) {
+					refundInfoDTO.setRefund_no(refundNo);
+				}
+				
+				// 삽입된 refund_no로 refund Direction List 삽입
+				map.put("refundInfoDTOList", refundInfoDTOList);
+				refundRequestDao.insertRefundDirectionList(map);
+				
+				// 전체 정보 update 하기
+				map.clear();
+				
+				refundInfoDTOList.add(firstRefundInfoDTO);
+
+				orderNo = firstRefundInfoDTO.getOrder_no();
+
+				map.put("order_no", orderNo);
+				map.put("refundInfoDTOList", refundInfoDTOList);
+				refundRequestDao.updateListOrderCDtoRefundByOrderNoAndProNo(map);
+				
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			refundNo = -1;
+		}
+		
+		return refundNo;
 	}
 
 }

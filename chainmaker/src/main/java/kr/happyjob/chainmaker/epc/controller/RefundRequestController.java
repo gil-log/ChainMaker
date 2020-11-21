@@ -15,14 +15,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import kr.happyjob.chainmaker.epc.model.OrderDetailDTO;
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateDTO;
 import kr.happyjob.chainmaker.epc.service.RefundRequestService;
-import kr.happyjob.chainmaker.scm.model.DailyOrderListDTO;
+import kr.happyjob.chainmaker.epc.model.ResponseDTO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
-import kr.happyjob.chainmaker.scm.service.DailyOrderHistoryService;
+import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
 
 @Controller
 @RequestMapping(value="/epc/refundrequest.do")
@@ -136,20 +139,37 @@ public class RefundRequestController {
 		return resultMap;
 	}
 	
-	// 날짜와 주문 코드로 주문 내역 검색
-	public Map<String, Object> getOrderListSearchByDateAndOrderCD(OrdersRequestDTO ordersRequestDTO) {
-		Map<String, Object> resultMap = new HashMap<>();
+	@RequestMapping(value = "/direction/{type}", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseDTO postDirection(@PathVariable(value="type") String type, @RequestBody List<RefundInfoDTO> refundInfoList) {
 		
+		ResponseDTO responseDTO = new ResponseDTO();
 		
-		// 일별 주문 목록 조회
-		List<DailyOrderListDTO> dailyOrderListByDateAndOrderCD = dailyOrderHistoryService.getDailyOrderListByDateAndOrderCD(ordersRequestDTO);
-		resultMap.put("listDailyOrder", dailyOrderListByDateAndOrderCD);
+		logger.info("direction type : "+type);
 		
-		// 일별 주문 목록 카운트 조회
-		int totalCount = dailyOrderHistoryService.countDailyOrderListByDateAndOrderCD(ordersRequestDTO);
-		resultMap.put("totalCntDailyOrder", totalCount);
+		switch(type) {
 		
-		return resultMap;
+			case "refund" : {
+				
+				int refundResult = refundRequestServiceImpl.putRefundDirection(refundInfoList);
+				
+				logger.info("반품 결과 : " + refundResult);
+				
+				responseDTO.setResult("SUCCESS");
+				responseDTO.setMsg("반품 신청이 완료 되었습니다.");
+				
+				if(refundResult == -1) {
+					responseDTO.setResult("FAIL");
+					responseDTO.setMsg("반품 신청에 실패 하였습니다.");
+				}
+				break;
+			}
+			
+		}
+		
+		return responseDTO;
 	}
+	
+	
 	
 }

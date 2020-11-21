@@ -5,7 +5,7 @@ import java.util.Map;
 
 import kr.happyjob.chainmaker.scm.model.NoticeModel;
 
-public interface NoticeDao {
+public interface NoticeDaott {
 	
 
 	public int noticeTotalCnt(Map<String, Object> paramMap) throws Exception;

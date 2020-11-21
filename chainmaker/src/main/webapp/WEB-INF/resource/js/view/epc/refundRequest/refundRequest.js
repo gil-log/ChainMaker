@@ -23,23 +23,82 @@ $(function() {
 
 function faddRefundBtn(){
 	
+	$("#refundDetails").children().remove();
 	
-}
-
-function fCheckBox(){
+	$("#refund_tbody").children().remove();
 	
 	let checkLength = $('input[name=refundCheck]:checked').length;
 	
-	var refundInfoList = new Array(checkLength);
+	if(checkLength == 0){
+		alert("반품을 원하시는 제품을 체크해주세요.");
+		return
+	}
+	
+	var order_no = order_no = $("#orderDetailList").find('input[name=refundCheck]:checked').eq(0).parent().parent().children().eq(1).text();
+	var pro_no = 1;
+	var pro_name = 1;
+	var refund_qty = 1;
+	var refund_price = 1;
+	
+	var total_refund_price = 0;
+	
+	for(let i = 0; i < checkLength; i++){
+		pro_no = $("#orderDetailList").find('input[name=refundCheck]:checked').eq(i).parent().parent().children().eq(2).text();
+		pro_name = $("#orderDetailList").find('input[name=refundCheck]:checked').eq(i).parent().parent().children().eq(4).text();
+		refund_qty = $("#orderDetailList").find('input[name=refundCheck]:checked').eq(i).parent().parent().children().eq(8).children().eq(0).val();
+		refund_price = $("#orderDetailList").find('input[name=refundCheck]:checked').eq(i).parent().parent().children().eq(9).text();
+		
+		
+		console.log(i+"번째 : "+" order_no : " + order_no + " pro_no : " + pro_no + 
+				" refund_qty : " + refund_qty
+				+ " pro_name : " + pro_name + " refund_price : " + refund_price);
+		
+		
+		$("#refund_tbody").append("<tr>");
+		
+		$("#refund_tbody").append("<td>" + order_no + "</td>");
+		$("#refund_tbody").append("<td>" + pro_no + "</td>");
+		$("#refund_tbody").append("<td>" + pro_name + "</td>");
+		$("#refund_tbody").append("<td>" + refund_qty + "</td>");
+		$("#refund_tbody").append("<td>" + refund_price + "</td>");
+		
+		$("#refund_tbody").append("</tr>");
+		
+		total_refund_price = total_refund_price * 1 + refund_price * 1;
+		
+
+		$("#refundDetails").append("<div class='refund_list_"+ pro_no+"'>");
+
+		$(".refund_list_"+pro_no).append("<input type='hidden' class='fd_order_no' value='"+order_no+"'>");
+		$(".refund_list_"+pro_no).append("<input type='hidden' class='fd_pro_no' value='"+pro_no+"'>");
+		$(".refund_list_"+pro_no).append("<input type='hidden' class='fd_refund_qty' value='"+refund_qty+"'>");
+
+		$("#refundDetails").append("</div>");
+		
+	}
+	
+	$("#refundDirectionTotalPrice").text(total_refund_price);
+	
+	
+	gfModalPop("#refundDirection");
+	
+}
+
+
+function fsendRefundInfo(){
+	
+	let refundLength = $('#refundDetails').children().length;
+	
+	var refundInfoList = new Array(refundLength);
 	
 	var order_no = 1;
 	var pro_no = 1;
 	var refund_qty = 1;
 	
-	for(let i = 0; i < checkLength; i++){
-		order_no = $("#orderDetailList").children().eq(i).children().eq(1).text();
-		pro_no = $("#orderDetailList").children().eq(i).children().eq(2).text();
-		refund_qty = $("#orderDetailList").children().eq(i).children().eq(8).val();
+	for(let i = 0; i < refundLength; i++){
+		order_no = $("#refundDetails").children().eq(i).children().eq(0).val();
+		pro_no = $("#refundDetails").children().eq(i).children().eq(1).val();
+		refund_qty = $("#refundDetails").children().eq(i).children().eq(2).val();
 		
 		
 		var refundInfoDTO = {
@@ -54,38 +113,64 @@ function fCheckBox(){
 				" refund_qty : " + refundInfoList[i].refund_qty);
 	}
 	
-/*	var resultCallback = function(data) {
-		const result = data.result;
-		if(result == 'SUCCESS'){
-			alert(data.msg);
-			
-			fListDailyOrderHistroy();
-			
-			gfCloseModal();
-		} else if(result =='FAIL'){
-			alert(data.msg);
-		}
-	};
+
 	
-	let url = "/scm/dailyOrderHistory.do/direction/purchase";
+	let url = "/epc/refundrequest.do/direction/refund";
 	
 	$.ajax({
         url: url,
         contentType: 'application/json',
         dataType: "json", //json 형태의 타입
-        data: JSON.stringify(purchaseDirectionList),
+        data: JSON.stringify(refundInfoList),
         type: "POST",
         success: function(data){
-        	resultCallback(data);
+        	fsendRefundInfoResult(data);
         },
         error: function(xhr, status, error){
             console.log("xhr:"+xhr+", status:"+ status + ", error:"+error);
         }
-});
+        
+	});
 	
 	
-	*/
+		
 	
+}
+
+
+
+function fsendRefundInfoResult(data){
+	const result = data.result;
+	if(result == 'SUCCESS'){
+		alert(data.msg);
+		
+		fListDailyOrderHistroy();
+		
+		$("#orderDetailList").children().remove();
+		
+		
+		
+		gfCloseModal();
+	} else if(result =='FAIL'){
+		alert(data.msg);
+	}
+}
+
+
+function fCheckBox(pro_no, order_qty, pro_price){
+	
+	let alreadyInputRefundQty = $("#orderDetailList").find('.'+pro_no).val();
+	if(alreadyInputRefundQty !=0){
+		$("#orderDetailList").find('.'+pro_no).val(0);
+		$("#orderDetailList").find('.'+pro_no).parent().parent().children().eq(9).text('0');
+		return;
+	}
+
+	$("#orderDetailList").find('.'+pro_no).val(order_qty);
+
+	let refundPrice = (pro_price * 1) * (order_qty * 1);
+	
+	$("#orderDetailList").find('.'+pro_no).parent().parent().children().eq(9).text(refundPrice);
 	
 }
 
@@ -97,9 +182,10 @@ function frefundAmount(pro_no, pro_price){
 	
 	$("input[id="+pro_no+"CheckBox]").prop("checked", true);
 	
-	if(amount < 0){
-		$("#orderDetailList").find('.'+pro_no).val(0);
-		amount = 0;
+	if(amount <= 0){
+		alert('1개 이상의 수량만 반품 가능합니다.');
+		$("#orderDetailList").find('.'+pro_no).val(1);
+		amount = 1;
 	}
 	
 	if(amount > limitAmount){
@@ -141,7 +227,6 @@ function fOrderDetailList(data) {
 
 	  $("#orderDetailList").append(data);
 	  
-	  $("#productDetails")
 
 }
 
@@ -256,8 +341,8 @@ function fRegisterButtonClickEvent() {
 		var btnId = $(this).attr('id');
 
 		switch (btnId) {
-			case 'shippingDoneBtn' :
-				fShippingDone();
+			case 'refundDoneBtn' :
+				fsendRefundInfo();
 				break;
 			case 'btnPurDirDone' :
 				fPurchaseDone();

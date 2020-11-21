@@ -5,6 +5,7 @@ import java.util.List;
 import kr.happyjob.chainmaker.epc.model.OrderDetailDTO;
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateDTO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
+import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
 
 public interface RefundRequestService {
 	
@@ -15,4 +16,7 @@ public interface RefundRequestService {
 
 	// 주문번호로 주문 디테일 제품 정보 가져오기
 	public List<OrderDetailDTO> getOrderDetailProductInfoByOrderNo(OrdersRequestDTO ordersRequestDTO);
+	
+	// 반품 지시서 작성
+	public int putRefundDirection(List<RefundInfoDTO> refundInfoDTO);
 }

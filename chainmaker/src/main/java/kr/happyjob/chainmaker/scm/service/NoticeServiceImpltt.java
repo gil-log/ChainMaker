@@ -14,15 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import kr.happyjob.chainmaker.common.comnUtils.NewFileUtil;
-import kr.happyjob.chainmaker.scm.dao.NoticeDao;
+import kr.happyjob.chainmaker.scm.dao.NoticeDaott;
 import kr.happyjob.chainmaker.scm.model.FileModel;
 import kr.happyjob.chainmaker.scm.model.NoticeModel;
 @Transactional 
 @Service
-public class NoticeServiceImpl implements NoticeService {
+public class NoticeServiceImpltt implements NoticeServicett {
 
 	@Autowired
-	NoticeDao noticeDao;
+	NoticeDaott noticeDao;
 	
 	
 	private final static String rootPath = "c"+File.pathSeparator;

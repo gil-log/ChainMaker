@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartRequest;
 
 import kr.happyjob.chainmaker.scm.model.NoticeModel;
 
-public interface NoticeService {
+public interface NoticeServicett {
 
 	public List<NoticeModel> noticeList(Map<String, Object> paramMap)throws Exception;
 
