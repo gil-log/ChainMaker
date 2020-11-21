@@ -3,17 +3,20 @@
 <mapper namespace="kr.happyjob.chainmaker.epc.dao.RefundRequestDao">
 
 	<select id ="selectOrderListQtyAndDate" resultType="kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO">
-		SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
+        SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
         order_date.order_mod_date, order_date.order_expdate, order_names.pro_name
 		FROM  
 		(SELECT	order_no, sum(order_qty) as order_total_qty
 		FROM tb_order
+        WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
 		GROUP BY order_no
 		) order_qty LEFT JOIN
 		(
 		SELECT tb_order.order_no, sum(tb_product.pro_price * tb_order.order_qty) as amount_payment
 		FROM tb_order tb_order LEFT JOIN tb_product tb_product
 		ON tb_order.pro_no = tb_product.pro_no
+        
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
 		GROUP BY tb_order.order_no
 		) order_price ON order_qty.order_no = order_price.order_no
         
@@ -22,6 +25,7 @@
 		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
 		tb_order.order_expdate, tb_order.order_cd
 		FROM tb_order tb_order
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
 		GROUP BY tb_order.order_no
 		) order_date ON order_qty.order_no = order_date.order_no
         LEFT JOIN
@@ -29,6 +33,7 @@
         SELECT orders.order_no, GROUP_CONCAT(product.pro_name) as pro_name
         FROM tb_order orders, tb_product product
         WHERE orders.pro_no = product.pro_no
+        AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
         GROUP BY orders.order_no
         ) order_names ON order_qty.order_no = order_names.order_no
 		
@@ -44,17 +49,20 @@
 		SELECT COUNT(1) AS tot_cnt
 		FROM
 		(
-		SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
+        SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
         order_date.order_mod_date, order_date.order_expdate, order_names.pro_name
 		FROM  
 		(SELECT	order_no, sum(order_qty) as order_total_qty
 		FROM tb_order
+        WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
 		GROUP BY order_no
 		) order_qty LEFT JOIN
 		(
 		SELECT tb_order.order_no, sum(tb_product.pro_price * tb_order.order_qty) as amount_payment
 		FROM tb_order tb_order LEFT JOIN tb_product tb_product
 		ON tb_order.pro_no = tb_product.pro_no
+        
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
 		GROUP BY tb_order.order_no
 		) order_price ON order_qty.order_no = order_price.order_no
         
@@ -63,6 +71,7 @@
 		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
 		tb_order.order_expdate, tb_order.order_cd
 		FROM tb_order tb_order
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
 		GROUP BY tb_order.order_no
 		) order_date ON order_qty.order_no = order_date.order_no
         LEFT JOIN
@@ -70,6 +79,7 @@
         SELECT orders.order_no, GROUP_CONCAT(product.pro_name) as pro_name
         FROM tb_order orders, tb_product product
         WHERE orders.pro_no = product.pro_no
+        AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
         GROUP BY orders.order_no
         ) order_names ON order_qty.order_no = order_names.order_no
 		
@@ -91,5 +101,34 @@
 		AND orders.order_no = #{order_no}
 	</select>
 
-
+	<insert id="insertOneRefundDirection" useGeneratedKeys="true" keyProperty="refund_no"
+	parameterType="kr.happyjob.chainmaker.epc.model.RefundInfoDTO">
+		INSERT INTO tb_refund(refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no)
+		VALUES (#{refund_qty}, now(), 0, 0, '사유부분', #{order_no}, #{pro_no})
+	</insert>
+	
+	<insert id="insertRefundDirectionList" parameterType="java.util.Map">
+		INSERT INTO tb_refund(refund_no, refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no)
+		VALUES 
+		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
+			 (#{refundInfo.refund_no}, #{refundInfo.refund_qty}, now(), 0, 0, '사유부분', #{refundInfo.order_no}, #{refundInfo.pro_no})
+		</foreach>
+	</insert>
+	
+	<update id="updateOneOrderCDtoRefundByOrderNoAndProNo" parameterType="kr.happyjob.chainmaker.epc.model.RefundInfoDTO">
+		UPDATE tb_order
+		SET order_cd = 'refund', order_mod_date = now()
+		WHERE order_no = #{order_no}
+		AND pro_no = #{pro_no}
+	</update>
+	
+	<update id="updateListOrderCDtoRefundByOrderNoAndProNo" parameterType="java.util.Map">
+		UPDATE tb_order
+		SET order_cd = 'refund', order_mod_date = now()
+		WHERE order_no = #{order_no}
+		AND pro_no IN
+		<foreach collection="refundInfoDTOList" item="refundInfo"  open="(" separator="," close=")">
+			 #{refundInfo.pro_no}
+		</foreach>
+	</update>
 </mapper>
