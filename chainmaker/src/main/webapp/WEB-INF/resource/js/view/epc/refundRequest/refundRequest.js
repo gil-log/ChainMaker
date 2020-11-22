@@ -332,7 +332,7 @@ function fDateSearch(startDate, endDate){
 	
 	if ($("#refundCheck").is(":checked")) {
 		
-		let url = "/scm/dailyOrderHistory.do/orders/dateRefund";
+		let url = "/epc/refundrequest.do/list/order";
 
 		let currentPage = $("#currentPageDailyOrder").val();
 		
@@ -352,7 +352,7 @@ function fDateSearch(startDate, endDate){
 		
 
 	} else{
-		let url = "/scm/dailyOrderHistory.do/orders/dateOrder";
+		let url = "/epc/refundrequest.do/list/order";
 
 		let currentPage = $("#currentPageDailyOrder").val();
 		
