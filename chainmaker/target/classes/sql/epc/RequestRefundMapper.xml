@@ -104,14 +104,14 @@
 	<insert id="insertOneRefundDirection" useGeneratedKeys="true" keyProperty="refund_no"
 	parameterType="kr.happyjob.chainmaker.epc.model.RefundInfoDTO">
 		INSERT INTO tb_refund(refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no)
-		VALUES (#{refund_qty}, now(), 0, 0, '사유부분', #{order_no}, #{pro_no})
+		VALUES (#{refund_qty}, now(), 0, 0, #{refund_note}, #{order_no}, #{pro_no})
 	</insert>
 	
 	<insert id="insertRefundDirectionList" parameterType="java.util.Map">
 		INSERT INTO tb_refund(refund_no, refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no)
 		VALUES 
 		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
-			 (#{refundInfo.refund_no}, #{refundInfo.refund_qty}, now(), 0, 0, '사유부분', #{refundInfo.order_no}, #{refundInfo.pro_no})
+			 (#{refundInfo.refund_no}, #{refundInfo.refund_qty}, now(), 0, 0, #{refundInfo.refund_note}, #{refundInfo.order_no}, #{refundInfo.pro_no})
 		</foreach>
 	</insert>
 	

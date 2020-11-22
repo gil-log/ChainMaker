@@ -21,6 +21,25 @@ $(function() {
 	
 });
 
+function fRefundNote(selected){
+	
+	let refund_note = selected.value;
+	
+	var this_row_pro_no = $(selected).parent().parent().children().eq(1).text();
+	
+	let already_refund_note = $(".refund_list_"+this_row_pro_no).find('.fd_refund_note').val();
+	
+	if(already_refund_note != null || already_refund_note != undefined){
+		$(".refund_list_"+this_row_pro_no).find('.fd_refund_note').val(refund_note);
+		return
+	}
+	
+	alert(already_refund_note);
+	
+	$(".refund_list_"+this_row_pro_no).append("<input type='hidden' class='fd_refund_note' value='"+refund_note+"'>");
+	
+}
+
 function faddRefundBtn(){
 	
 	$("#refundDetails").children().remove();
@@ -56,11 +75,24 @@ function faddRefundBtn(){
 		
 		$("#refund_tbody").append("<tr>");
 		
-		$("#refund_tbody").append("<td>" + order_no + "</td>");
-		$("#refund_tbody").append("<td>" + pro_no + "</td>");
-		$("#refund_tbody").append("<td>" + pro_name + "</td>");
-		$("#refund_tbody").append("<td>" + refund_qty + "</td>");
-		$("#refund_tbody").append("<td>" + refund_price + "</td>");
+		$("#refund_tbody tr").eq(i).append("<td>" + order_no + "</td>");
+		$("#refund_tbody tr").eq(i).append("<td>" + pro_no + "</td>");
+		$("#refund_tbody tr").eq(i).append("<td>" + pro_name + "</td>");
+		$("#refund_tbody tr").eq(i).append("<td>" + refund_qty + "</td>");
+		
+		$("#refund_tbody tr").eq(i).append("<td>" + 
+				'<select onchange="fRefundNote(this)">'
+				+'<option value="">사유 선택</option>'
+				+'<option value="상품 불량">상품 불량</option>'
+				+'<option value="상품 파손">상품 파손</option>'
+				+'<option value="오 배송">오 배송</option>'
+				+'<option value="지연 배송">지연 배송</option>'
+				+'<option value="주문 착오">주문 착오</option>'
+				+'<option value="상품 불만족">상품 불만족</option>'
+				+'<option value="기타 사유">기타 사유</option>'
+				+ '</select>' + "</td>");
+		
+		$("#refund_tbody tr").eq(i).append("<td>" + refund_price + "</td>");
 		
 		$("#refund_tbody").append("</tr>");
 		
@@ -94,23 +126,35 @@ function fsendRefundInfo(){
 	var order_no = 1;
 	var pro_no = 1;
 	var refund_qty = 1;
+	var refund_note = 1;
 	
 	for(let i = 0; i < refundLength; i++){
 		order_no = $("#refundDetails").children().eq(i).children().eq(0).val();
 		pro_no = $("#refundDetails").children().eq(i).children().eq(1).val();
 		refund_qty = $("#refundDetails").children().eq(i).children().eq(2).val();
+		refund_note = $("#refundDetails").children().eq(i).children().eq(3).val();
+		
+		
+		if(refund_note == null || refund_note == undefined || refund_note ==''){
+			alert("반품 사유를 선택해 주세요.");
+			return
+		}
+		
+		
+		
 		
 		
 		var refundInfoDTO = {
 				order_no : order_no,
 				pro_no : pro_no,
-				refund_qty : refund_qty
+				refund_qty : refund_qty,
+				refund_note : refund_note
 		};
 		
 		refundInfoList[i] = refundInfoDTO;
 		
 		console.log(i+"번째 : "+" order_no : " + refundInfoList[i].order_no + " pro_no : " + refundInfoList[i].pro_no + 
-				" refund_qty : " + refundInfoList[i].refund_qty);
+				" refund_qty : " + refundInfoList[i].refund_qty + " refund_note : " + refundInfoList[i].refund_note);
 	}
 	
 

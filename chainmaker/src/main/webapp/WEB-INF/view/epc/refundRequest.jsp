@@ -173,6 +173,7 @@
 						<col width="12%">
 						<col width="12%">
 						<col width="8%">
+						<col width="16%">
 						<col width="10%">
 					</colgroup>
 
@@ -182,6 +183,7 @@
 							<th scope="col">반품 제품 번호</th>
 							<th scope="col">반품 제품명</th>
 							<th scope="col">반품 수량</th>
+							<th scope="col">반품 사유</th>
 							<th scope="col">환불 예정 금액</th>
 						</tr>
 					</thead>
