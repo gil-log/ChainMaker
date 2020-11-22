@@ -26,7 +26,7 @@ public class OrderConfirmServiceImpl implements OrderConfirmService{
 	private final String className = this.getClass().toString();
 	
 	@Autowired
-	public OrderConfirmDao orderConfirmDao;
+	private OrderConfirmDao orderConfirmDao;
 	
 	
 	@Override

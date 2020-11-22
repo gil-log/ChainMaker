@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.ShippingDirectionDao">
+
+	<select id="selectShippingOrderList" resultType="kr.happyjob.chainmaker.scm.model.ShippingOrderVO"
+	parameterType="kr.happyjob.chainmaker.scm.model.ShippingRequestDTO">
+		SELECT order_info.order_no, product.pro_name, order_info.order_date, userinfo.user_company, 
+		order_info.ship_total_qty, order_info.order_expdate, order_info.ship_cd
+		
+		FROM
+		(    
+		SELECT shipping.ship_no, shipping.pro_no, sum(shipping.ship_qty) as ship_total_qty, shipping.ware_no, shipping.order_no, 
+		orders.loginID, orders.order_date, orders.deposit_cd, shipping.ship_cd, orders.order_expdate
+		FROM tb_shipping shipping, tb_order orders
+
+		WHERE shipping.order_no = orders.order_no
+		AND shipping.pro_no = orders.pro_no
+
+		<if test='ship_cd != null'>
+		AND shipping.ship_cd IN ('waiting', 'loading')
+		</if>
+
+		GROUP BY orders.pro_no
+		) order_info
+
+		LEFT JOIN tb_product product
+		ON order_info.pro_no = product.pro_no
+
+		LEFT JOIN tb_userinfo userinfo
+		ON order_info.loginID = userinfo.loginID
+		
+		ORDER BY order_info.order_expdate
+
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	<select id="countShippingOrderList" resultType="int">
+		SELECT COUNT(1) AS tot_cnt
+		FROM
+		(
+		SELECT order_info.order_no, product.pro_name, order_info.order_date, userinfo.user_company, 
+		order_info.ship_total_qty, order_info.order_expdate, order_info.ship_cd
+		
+		FROM
+		(    
+		SELECT shipping.ship_no, shipping.pro_no, sum(shipping.ship_qty) as ship_total_qty, shipping.ware_no, shipping.order_no, 
+		orders.loginID, orders.order_date, orders.deposit_cd, shipping.ship_cd, orders.order_expdate
+		FROM tb_shipping shipping, tb_order orders
+
+		WHERE shipping.order_no = orders.order_no
+		AND shipping.pro_no = orders.pro_no
+
+		<if test='ship_cd != null'>
+		AND shipping.ship_cd IN ('waiting', 'loading')
+		</if>
+
+		GROUP BY orders.pro_no
+		) order_info
+
+		LEFT JOIN tb_product product
+		ON order_info.pro_no = product.pro_no
+
+		LEFT JOIN tb_userinfo userinfo
+		ON order_info.loginID = userinfo.loginID
+		
+		ORDER BY order_info.order_expdate
+		) order_list
+	</select>
+	
+	<select id="selectShippingOrderDetailListByOrderNo" resultType="kr.happyjob.chainmaker.scm.model.ShippingOrderDetailVO"
+	parameterType="kr.happyjob.chainmaker.scm.model.ShippingRequestDTO">
+		SELECT shipping_info.*, orders.deposit_cd, userinfo.name
+		FROM
+		(
+		SELECT orders.order_date, shipping.order_no, shipping.ship_qty, shipping.ware_no, 
+		product.pro_name, ware_name, shipping.pro_no, userinfo.user_company
+
+		FROM tb_shipping shipping, tb_product product, tb_warehouse warehouse, tb_order orders, tb_userinfo userinfo
+
+		WHERE shipping.order_no = #{order_no}
+		AND shipping.pro_no = product.pro_no
+		AND shipping.ware_no = warehouse.ware_no
+
+		AND orders.order_no = shipping.order_no
+		AND orders.pro_no = shipping.pro_no
+
+		AND userinfo.loginID = orders.loginID
+
+
+		)shipping_info
+
+		LEFT JOIN tb_order orders
+
+		ON shipping_info.order_no = orders.order_no
+		AND orders.pro_no = shipping_info.pro_no
+
+		LEFT JOIN (
+		SELECT warehouse.ware_no, userinfo.name
+		FROM tb_warehouse warehouse, tb_userinfo userinfo
+		WHERE warehouse.loginID = userinfo.loginID
+
+		)userinfo
+		ON userinfo.ware_no = shipping_info.ware_no
+	</select>
+</mapper>
