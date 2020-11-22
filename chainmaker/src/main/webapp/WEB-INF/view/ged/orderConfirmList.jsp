@@ -22,7 +22,7 @@
 										<td>${list.name}</td>
 										<td><fmt:formatDate value="${list.purchase_date}" pattern="yyyy-MM-dd" /></td>
 										
-										<td>승인 버튼</td>
+										<td><a class="btnType blue" onclick="fConfirmPurchase('${list.purchase_no}')"><span>승인</span></a></td>
 									</tr>
 									<c:set var="nRow" value="${nRow + 1}" />
 								</c:forEach>

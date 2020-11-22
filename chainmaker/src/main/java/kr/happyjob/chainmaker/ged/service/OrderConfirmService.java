@@ -12,4 +12,7 @@ public interface OrderConfirmService {
 	
 	// 승인전 발주 목록 개수 세기
 	public int countBeforeApprovePurchaseList(PurchaseRequestDTO purchaseRequestDTO);
+	
+	// 발주 승인 해주기
+	public void confirmPurchaseByPurchaseNo(PurchaseRequestDTO purchaseRequestDTO);
 }

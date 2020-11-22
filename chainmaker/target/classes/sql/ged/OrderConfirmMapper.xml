@@ -16,6 +16,8 @@
 
 		WHERE product.pro_no = purchase.pro_no
 		
+		AND purchase.purchase_cd = 0
+		
 		<if test='pro_name != null'>
 		AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
 		</if>
@@ -58,6 +60,8 @@
 
 		WHERE product.pro_no = purchase.pro_no
 		
+		AND purchase.purchase_cd = 0
+		
 		<if test='pro_name != null'>
 		AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
 		</if>
@@ -81,4 +85,10 @@
 		LIMIT #{pageIndex}, #{pageSize}
 		) total_count
 	</select>
+	
+	<update id="updatePurchaseInfoToConfirmByPurchaseNo" parameterType="kr.happyjob.chainmaker.ged.model.PurchaseInfoDTO">
+		UPDATE tb_purchase
+		SET purchase_cd = 1, purchase_date = now()
+		WHERE purchase_no = #{purchase_no}
+	</update>
 </mapper>

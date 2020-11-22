@@ -56,4 +56,10 @@ public class OrderConfirmServiceImpl implements OrderConfirmService{
 		return totalCount;
 	}
 
+
+	@Override
+	public void confirmPurchaseByPurchaseNo(PurchaseRequestDTO purchaseRequestDTO) {
+		orderConfirmDao.updatePurchaseInfoToConfirmByPurchaseNo(purchaseRequestDTO);
+	}
+
 }

@@ -15,10 +15,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateDTO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
+import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
+import kr.happyjob.chainmaker.ged.model.ResponseDTO;
 import kr.happyjob.chainmaker.ged.model.PurchaseInfoDTO;
 import kr.happyjob.chainmaker.ged.model.PurchaseRequestDTO;
 import kr.happyjob.chainmaker.ged.service.OrderConfirmService;
@@ -103,5 +108,23 @@ public class OrderConfirmController {
 		return resultMap;
 	}
 	
-	
+	@RequestMapping(value = "/purchase/{purchaseNo}", method = RequestMethod.PUT)
+	@ResponseBody
+	public ResponseDTO postDirection(@PathVariable(value="purchaseNo") int purchaseNo) {
+		
+		ResponseDTO responseDTO = new ResponseDTO();
+		
+		logger.info("purchaseNo : "+purchaseNo);
+		
+		PurchaseRequestDTO purchaseRequestDTO = new PurchaseRequestDTO();
+		purchaseRequestDTO.setPurchase_no(purchaseNo);
+		
+		orderConfirmServiceImpl.confirmPurchaseByPurchaseNo(purchaseRequestDTO);
+		
+		responseDTO.setResult("SUCCESS");
+		responseDTO.setMsg("발주를 승인 하셨습니다.");
+		
+		
+		return responseDTO;
+	}
 }

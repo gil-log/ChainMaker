@@ -18,6 +18,24 @@ $(function() {
 	
 });
 
+function fConfirmPurchase(purchase_no){
+	
+
+	let url = "/ged/orderConfirm.do/purchase/"+purchase_no;
+	
+	var resultCallback = function(data) {
+		
+		alert(data.msg);
+			
+		fListDailyOrderHistroy();
+			
+	};
+	
+	callAjax(url, "put", "json", true, null, resultCallback);
+	
+	
+}
+
 function fModelNameSearch(){
 	
 
