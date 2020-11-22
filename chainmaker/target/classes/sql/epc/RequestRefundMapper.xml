@@ -24,8 +24,18 @@
 		(
 		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
 		tb_order.order_expdate, tb_order.order_cd
-		FROM tb_order tb_order
+		FROM tb_order tb_order, tb_product product
         WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
+        
+        <if test='pro_name != null'>
+        
+        
+        AND tb_order.pro_no = product.pro_no
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        
+        </if>
+        
+        
 		GROUP BY tb_order.order_no
 		) order_date ON order_qty.order_no = order_date.order_no
         LEFT JOIN
@@ -70,8 +80,17 @@
 		(
 		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
 		tb_order.order_expdate, tb_order.order_cd
-		FROM tb_order tb_order
+		FROM tb_order tb_order, tb_product product
         WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
+        
+        <if test='pro_name != null'>
+        
+        
+        AND tb_order.pro_no = product.pro_no
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        
+        </if>
+        
 		GROUP BY tb_order.order_no
 		) order_date ON order_qty.order_no = order_date.order_no
         LEFT JOIN
@@ -90,6 +109,15 @@
 		</if>
 		) order_date_count
 	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 	<select id="selectOrderDetailProductInfoByOrderNo" resultType="kr.happyjob.chainmaker.epc.model.OrderDetailVO">

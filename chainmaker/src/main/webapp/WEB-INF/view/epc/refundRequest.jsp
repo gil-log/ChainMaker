@@ -66,16 +66,16 @@
 							<span>주문 내역</span> <span class="fr"> 
 							</span>
 							
-								<label style="margin-left: 5%">모델명      </label> 
-								<input type="text" style="text-align: center; height:35%;  width:30%; margin-left: 1%"
-								onchange="fModelNameSearch()" id='model_name_searchbar'>
+								<label style="margin-left: 3%">모델명      </label> 
+								<input type="text" style="text-align: center; height:35%;  width:30%; margin-left: 1%" id='model_name_searchbar'>
 								
 								
-								<label style="margin-left: 15%">구매일자      </label> 
+								<label style="margin-left: 5%">구매일자      </label> 
 								<input class="datetype" style="margin-left: 1%" type="text" name = "date" id="startDate">
 							
 								<input class="datetype" type="text" name = "date" id="endDate">
-							
+								
+								<a href="" class="btnType blue" id="searchBtn" name="btn" style="margin-left: 2%"><span>검색</span></a>
 						</p>
 						<div class="divComGrpCodList">
 							<table class="col">

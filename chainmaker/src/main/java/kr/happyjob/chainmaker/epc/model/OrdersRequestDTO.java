@@ -22,4 +22,6 @@ public class OrdersRequestDTO {
 	private Date startDate;
 	private Date endDate;
 	
+	
+	private String pro_name;
 }

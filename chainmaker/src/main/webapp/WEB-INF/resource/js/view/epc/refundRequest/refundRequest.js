@@ -23,17 +23,52 @@ $(function() {
 
 function fModelNameSearch(){
 	
+
+	let startDate = $("#startDate").val();
+    let endDate = $("#endDate").val();
+	
+	let url = "/epc/refundrequest.do/list/order";
+
+	let currentPage = $("#currentPageDailyOrder").val();
+	
+	
 	let model_name_searchbar_val = $("#model_name_searchbar").val();
 	
 	if(model_name_searchbar_val.replace(/\s|　/gi, "").length == 0){
-		alert('검색하실 모델명을 입력해주세요.');
 		$("#model_name_searchbar").val('');
+		
+		let date = {
+				startDate : startDate,
+				endDate : endDate,
+			    currentPage: currentPage, 
+			    pageSize: pageSizeDailyOrder
+			};
+		
+		var resultCallback = function(data) {
+			flistDailyOrderHistroyResult(data, currentPage);
+		};
+		callAjax(url, "get", "text", true, date, resultCallback);
+		
+		
 		return
 	}
 	
-	 
+
+	let date = {
+		startDate : startDate,
+		endDate : endDate,
+	    currentPage: currentPage, 
+	    pageSize: pageSizeDailyOrder,
+	    pro_name : model_name_searchbar_val
+	};
 	
-	alert(model_name_searchbar_val);
+	
+	var resultCallback = function(data) {
+		flistDailyOrderHistroyResult(data, currentPage);
+	};
+	callAjax(url, "get", "text", true, date, resultCallback);
+	
+	
 }
 
 
@@ -50,7 +85,6 @@ function fRefundNote(selected){
 		return
 	}
 	
-	alert(already_refund_note);
 	
 	$(".refund_list_"+this_row_pro_no).append("<input type='hidden' class='fd_refund_note' value='"+refund_note+"'>");
 	
@@ -172,10 +206,6 @@ function fsendRefundInfo(){
 			return
 		}
 		
-		
-		
-		
-		
 		var refundInfoDTO = {
 				order_no : order_no,
 				pro_no : pro_no,
@@ -207,9 +237,6 @@ function fsendRefundInfo(){
         }
         
 	});
-	
-	
-		
 	
 }
 
@@ -362,17 +389,47 @@ function fDatePicker(){
 
 function fDateSearch(startDate, endDate){
 	
-	if ($("#refundCheck").is(":checked")) {
-		
+	
+	
+	
+	
+	
 		let url = "/epc/refundrequest.do/list/order";
 
 		let currentPage = $("#currentPageDailyOrder").val();
+		
+		
+
+		let model_name_searchbar_val = $("#model_name_searchbar").val();
+		
+		
+		if(model_name_searchbar_val.replace(/\s|　/gi, "").length == 0){
+			$("#model_name_searchbar").val('');
+			
+			let date = {
+					startDate : startDate,
+					endDate : endDate,
+				    currentPage: currentPage, 
+				    pageSize: pageSizeDailyOrder
+				};
+			
+			var resultCallback = function(data) {
+				flistDailyOrderHistroyResult(data, currentPage);
+			};
+			callAjax(url, "get", "text", true, date, resultCallback);
+			
+			
+			return
+		}
+		
+		
 		
 		let date = {
 			startDate : startDate,
 			endDate : endDate,
 		    currentPage: currentPage, 
-		    pageSize: pageSizeDailyOrder
+		    pageSize: pageSizeDailyOrder,
+		    pro_name : model_name_searchbar_val
 		};
 		
 		
@@ -382,30 +439,6 @@ function fDateSearch(startDate, endDate){
 		callAjax(url, "get", "text", true, date, resultCallback);
 		
 		
-
-	} else{
-		let url = "/epc/refundrequest.do/list/order";
-
-		let currentPage = $("#currentPageDailyOrder").val();
-		
-		let date = {
-			startDate : startDate,
-			endDate : endDate,
-		    currentPage: currentPage, 
-		    pageSize: pageSizeDailyOrder
-		};
-		
-		
-		var resultCallback = function(data) {
-			flistDailyOrderHistroyResult(data, currentPage);
-		};
-		callAjax(url, "get", "text", true, date, resultCallback);
-		
-		
-	}
-	
-	
-
 	
 }
 
@@ -422,6 +455,9 @@ function fRegisterButtonClickEvent() {
 				break;
 			case 'btnPurDirDone' :
 				fPurchaseDone();
+				break;
+			case 'searchBtn' :
+				fModelNameSearch()
 				break;
 			case 'btnClosePurDir' :
 			case 'btnClose' :
