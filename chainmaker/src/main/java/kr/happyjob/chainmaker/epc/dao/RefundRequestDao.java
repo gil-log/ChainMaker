@@ -7,6 +7,8 @@ import kr.happyjob.chainmaker.epc.model.OrderDetailVO;
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
 import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
+import kr.happyjob.chainmaker.epc.model.RefundUserInfoDTO;
+import kr.happyjob.chainmaker.epc.model.RefundUserInfoVO;
 
 public interface RefundRequestDao {
 	
@@ -30,4 +32,7 @@ public interface RefundRequestDao {
 
 	// 반품 정보 List 삽입
 	public void insertRefundDirectionList(Map<String, Object> map) throws Exception;
+	
+	// 반품 사용자 정보 검색
+	public RefundUserInfoVO selectRefundUserInfo(RefundUserInfoDTO refundUserInfoDTO);
 }

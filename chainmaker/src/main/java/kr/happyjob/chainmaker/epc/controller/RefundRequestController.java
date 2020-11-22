@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -26,6 +27,7 @@ import kr.happyjob.chainmaker.epc.service.RefundRequestService;
 import kr.happyjob.chainmaker.epc.model.ResponseDTO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
 import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
+import kr.happyjob.chainmaker.epc.model.RefundUserInfoDTO;
 
 @Controller
 @RequestMapping(value="/epc/refundrequest.do")
@@ -168,6 +170,32 @@ public class RefundRequestController {
 		}
 		
 		return responseDTO;
+	}
+	
+	@RequestMapping(value= "/user/{type}", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> getUserInfo(@PathVariable(value="type") String type, HttpSession session){
+
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		switch(type) {
+			case "refund" : {
+			
+				RefundUserInfoDTO refundUserInfoDTO = new RefundUserInfoDTO();
+				
+				String loginID = (String) session.getAttribute("loginId");
+				
+				refundUserInfoDTO.setLoginID(loginID);
+				
+				RefundUserInfoDTO resultRefundUserInfo = refundRequestServiceImpl.getRefundUserInfo(refundUserInfoDTO);
+				
+				resultMap.put("refundUserInfo", resultRefundUserInfo);
+				
+				break;
+			}
+		}
+		
+		return resultMap;
 	}
 	
 	

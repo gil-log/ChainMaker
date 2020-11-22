@@ -21,6 +21,22 @@ $(function() {
 	
 });
 
+function fModelNameSearch(){
+	
+	let model_name_searchbar_val = $("#model_name_searchbar").val();
+	
+	if(model_name_searchbar_val.replace(/\s|　/gi, "").length == 0){
+		alert('검색하실 모델명을 입력해주세요.');
+		$("#model_name_searchbar").val('');
+		return
+	}
+	
+	 
+	
+	alert(model_name_searchbar_val);
+}
+
+
 function fRefundNote(selected){
 	
 	let refund_note = selected.value;
@@ -40,11 +56,27 @@ function fRefundNote(selected){
 	
 }
 
+function fRequestRefundUserInfo(){
+	
+	  var resultCallback = function(data) {
+		  $("#refundBankInfo").text(data.refundUserInfo.bank_name + ", " + data.refundUserInfo.user_account + ", " + data.refundUserInfo.name + " 님");
+		  $("#refundAddressInfo").text(data.refundUserInfo.user_address);
+	  };
+	  
+	  callAjax("/epc/refundrequest.do/user/refund", "get", "json", true, null, resultCallback);
+}
+
 function faddRefundBtn(){
 	
 	$("#refundDetails").children().remove();
 	
 	$("#refund_tbody").children().remove();
+	
+	
+	// 환불 사용자 정보 조회
+	fRequestRefundUserInfo();
+	
+	
 	
 	let checkLength = $('input[name=refundCheck]:checked').length;
 	

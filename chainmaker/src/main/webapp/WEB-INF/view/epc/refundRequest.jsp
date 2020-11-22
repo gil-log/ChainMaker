@@ -67,7 +67,8 @@
 							</span>
 							
 								<label style="margin-left: 5%">모델명      </label> 
-								<input type="text" style="text-align: center; width:30%; margin-left: 1%">
+								<input type="text" style="text-align: center; height:35%;  width:30%; margin-left: 1%"
+								onchange="fModelNameSearch()" id='model_name_searchbar'>
 								
 								
 								<label style="margin-left: 15%">구매일자      </label> 
@@ -191,10 +192,22 @@
 
 					</tbody>
 				</table>
-
 				<div class="btn_areaC mt30">
-					<a ><span style = " font-size:1.5em; ">환불 예정 금액 : </span></a>
-					<a id="refundDirectionTotalPrice" style = " font-size:1.5em;"><span  ></span></a>
+				
+					<a ><span style = " font-size:1.3em; ">환불 계좌 정보 : </span></a>
+					<a id="refundBankInfo" style = " font-size:1.5em;"></a>
+				</div>
+				
+				<div class="btn_areaC mt30">
+				
+					<a ><span style = " font-size:1.3em; ">수거 예정 지역 : </span></a>
+					<a id="refundAddressInfo" style = " font-size:1.5em;"></a>
+				</div>
+				
+				<div class="btn_areaC mt30">
+				
+					<a ><span style = " font-size:2em; ">환불 예정 금액 : </span></a>
+					<a id="refundDirectionTotalPrice" style = " font-size:1.5em;"></a>
 				</div>
 
 

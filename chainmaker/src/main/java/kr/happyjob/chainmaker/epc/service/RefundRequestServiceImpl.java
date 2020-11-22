@@ -19,6 +19,8 @@ import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateDTO;
 import kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO;
 import kr.happyjob.chainmaker.epc.model.OrdersRequestDTO;
 import kr.happyjob.chainmaker.epc.model.RefundInfoDTO;
+import kr.happyjob.chainmaker.epc.model.RefundUserInfoDTO;
+import kr.happyjob.chainmaker.epc.model.RefundUserInfoVO;
 import kr.happyjob.chainmaker.scm.dao.DailyOrderHistoryDao;
 
 @Transactional
@@ -131,6 +133,16 @@ public class RefundRequestServiceImpl implements RefundRequestService {
 		}
 		
 		return refundNo;
+	}
+
+	@Override
+	public RefundUserInfoDTO getRefundUserInfo(RefundUserInfoDTO refundUserInfoDTO) {
+		
+		RefundUserInfoVO vo = refundRequestDao.selectRefundUserInfo(refundUserInfoDTO);
+		
+		RefundUserInfoDTO dto = new RefundUserInfoDTO(vo);
+		
+		return dto;
 	}
 
 }

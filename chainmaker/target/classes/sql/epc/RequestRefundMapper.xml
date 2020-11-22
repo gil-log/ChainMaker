@@ -131,4 +131,11 @@
 			 #{refundInfo.pro_no}
 		</foreach>
 	</update>
+	
+	<select id="selectRefundUserInfo" resultType="kr.happyjob.chainmaker.epc.model.RefundUserInfoVO">
+		SELECT userinfo.user_address, userinfo.name, detail_code.detail_name as bank_name, userinfo.user_account
+		FROM tb_userinfo userinfo, tb_detail_code detail_code
+		WHERE userinfo.loginID = #{loginID}
+		AND userinfo.bank_cd = detail_code.detail_code
+	</select>
 </mapper>
