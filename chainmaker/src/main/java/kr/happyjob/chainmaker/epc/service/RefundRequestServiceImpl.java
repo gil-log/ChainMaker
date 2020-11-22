@@ -89,18 +89,24 @@ public class RefundRequestServiceImpl implements RefundRequestService {
 			// 반품 정보가 하나인 상황
 			if(refundInfoDTOList.isEmpty()) {
 
-				refundRequestDao.insertOneRefundDirection(firstRefundInfoDTO);
+				refundRequestDao.insertOneRefundInfo(firstRefundInfoDTO);
 				refundNo = firstRefundInfoDTO.getRefund_no();
 				
 				logger.info("refund_no : " + refundNo);
 				refundRequestDao.updateOneOrderCDtoRefundByOrderNoAndProNo(firstRefundInfoDTO);
 				
+				
+				// 반품 지시서 작성
+				List<RefundInfoDTO> justOneList = new LinkedList<>();
+				justOneList.add(firstRefundInfoDTO);
+				map.put("refundInfoDTOList", justOneList);
+				refundRequestDao.insertRefundDirection(map);
 			} 
 			// 반품 정보가 둘 이상인 상황
 			else {
 
 				// refund_no 가져오기위해
-				refundRequestDao.insertOneRefundDirection(firstRefundInfoDTO);
+				refundRequestDao.insertOneRefundInfo(firstRefundInfoDTO);
 				refundNo = firstRefundInfoDTO.getRefund_no();
 
 				logger.info("refund_no : " + refundNo);
@@ -112,7 +118,7 @@ public class RefundRequestServiceImpl implements RefundRequestService {
 				
 				// 삽입된 refund_no로 refund Direction List 삽입
 				map.put("refundInfoDTOList", refundInfoDTOList);
-				refundRequestDao.insertRefundDirectionList(map);
+				refundRequestDao.insertRefundInfoList(map);
 				
 				// 전체 정보 update 하기
 				map.clear();
@@ -124,6 +130,9 @@ public class RefundRequestServiceImpl implements RefundRequestService {
 				map.put("order_no", orderNo);
 				map.put("refundInfoDTOList", refundInfoDTOList);
 				refundRequestDao.updateListOrderCDtoRefundByOrderNoAndProNo(map);
+				
+				// 반품 지시서 작성
+				refundRequestDao.insertRefundDirection(map);
 				
 			}
 		}

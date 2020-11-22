@@ -129,13 +129,13 @@
 		AND orders.order_no = #{order_no}
 	</select>
 
-	<insert id="insertOneRefundDirection" useGeneratedKeys="true" keyProperty="refund_no"
+	<insert id="insertOneRefundInfo" useGeneratedKeys="true" keyProperty="refund_no"
 	parameterType="kr.happyjob.chainmaker.epc.model.RefundInfoDTO">
 		INSERT INTO tb_refund(refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no)
 		VALUES (#{refund_qty}, now(), 0, 0, #{refund_note}, #{order_no}, #{pro_no})
 	</insert>
 	
-	<insert id="insertRefundDirectionList" parameterType="java.util.Map">
+	<insert id="insertRefundInfoList" parameterType="java.util.Map">
 		INSERT INTO tb_refund(refund_no, refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no)
 		VALUES 
 		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
@@ -166,4 +166,14 @@
 		WHERE userinfo.loginID = #{loginID}
 		AND userinfo.bank_cd = detail_code.detail_code
 	</select>
+	
+	
+	<insert id="insertRefundDirection" parameterType="java.util.Map">
+		INSERT INTO tb_direction(pro_no, refund_no, direction_date, direction_in_qty, direction_note, direction_cd)
+		VALUES
+		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
+			 (#{refundInfo.pro_no}, #{refundInfo.refund_no}, now(), #{refundInfo.refund_qty}, '반품 신청으로 인한 입고 예정', 'refund')
+		</foreach>
+	</insert>
+	
 </mapper>

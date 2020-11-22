@@ -22,7 +22,7 @@ public interface RefundRequestDao {
 	public List<OrderDetailVO> selectOrderDetailProductInfoByOrderNo(OrdersRequestDTO ordersRequestDTO);
 	
 	// 반품 정보 하나 삽입
-	public void insertOneRefundDirection(RefundInfoDTO refundInfoDTO) throws Exception;
+	public void insertOneRefundInfo(RefundInfoDTO refundInfoDTO) throws Exception;
 
 	// 주문 테이블 반품 상태로 order_no, pro_no로 단일 변경
 	public void updateOneOrderCDtoRefundByOrderNoAndProNo(RefundInfoDTO refundInfoDTO) throws Exception;
@@ -31,8 +31,11 @@ public interface RefundRequestDao {
 	public void updateListOrderCDtoRefundByOrderNoAndProNo(Map<String, Object> map) throws Exception;
 
 	// 반품 정보 List 삽입
-	public void insertRefundDirectionList(Map<String, Object> map) throws Exception;
+	public void insertRefundInfoList(Map<String, Object> map) throws Exception;
 	
 	// 반품 사용자 정보 검색
 	public RefundUserInfoVO selectRefundUserInfo(RefundUserInfoDTO refundUserInfoDTO);
+	
+	// 반품 지시서 작성
+	public void insertRefundDirection(Map<String, Object> map) throws Exception;
 }
