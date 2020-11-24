@@ -15,11 +15,40 @@ $(function() {
 	    
 	// datePicker
 	fDatePicker();
+
+	// 반품 체크 검색 이벤트 등록
+	fCheckShippingUnDoneClickEvent();
 	
 });
 
 
+function fCheckShippingUnDoneClickEvent(currentPage){
 
+	currentPage = currentPage || 1;
+	
+	$("#shippingDoneCheck").change(
+			function() {
+				if ($("#shippingDoneCheck").is(":checked")) {
+					
+					let url ="/scm/shippingDirection.do/list/unshipping";
+					var param = {
+						currentPage : currentPage,
+						pageSize : pageSizeDailyOrder
+					}
+					var resultCallback = function(data) {
+						flistDailyOrderHistroyResult(data, currentPage);
+					};
+					callAjax(url, "get", "text", true, param, resultCallback);
+					
+
+				} else {
+					
+					fListDailyOrderHistroy();
+					
+				}
+				
+			});
+}
 
 
 
@@ -354,12 +383,52 @@ function fSelectTR(order_no){
 	/** 일별 수주 내역 조회 콜백 함수 */
 function fOrderDetailList(data) {
 
-	
-	
-	
-	
-	
 
+	$("#shipping_tbody").children().remove();
+	
+	let shippingOrderDetailListLength = data.shippingOrderDetailList.length;
+	
+	var order_no;
+	var order_date;
+	var user_company;
+	var ship_qty;
+	var ware_name;
+	var name;
+	var deposit_cd;
+	var pro_name;
+	
+	for(var i=0; i<shippingOrderDetailListLength; i++){
+		
+		order_no = data.shippingOrderDetailList[i].order_no;
+		order_date = data.shippingOrderDetailList[i].order_date;
+		user_company = data.shippingOrderDetailList[i].user_company;
+		ship_qty = data.shippingOrderDetailList[i].ship_qty;
+		ware_name = data.shippingOrderDetailList[i].ware_name;
+		name = data.shippingOrderDetailList[i].name;
+		deposit_cd = data.shippingOrderDetailList[i].deposit_cd * 1;
+		
+		if(deposit_cd == 0){
+			deposit_cd = '입금 미확인'
+		}else if(deposit_cd == 1){
+			deposit_cd = '입금 확인'
+		}
+		
+		pro_name = data.shippingOrderDetailList[i].pro_name;
+		
+		$("#shipping_tbody").append("<tr>");
+		
+		$("#shipping_tbody").append('<td>'+order_date+'</td>');
+		$("#shipping_tbody").append('<td>'+order_no+'</td>');
+		$("#shipping_tbody").append('<td>'+user_company+'</td>');
+		$("#shipping_tbody").append('<td>'+ware_name+'</td>');
+		$("#shipping_tbody").append('<td>'+ship_qty+'</td>');
+		$("#shipping_tbody").append('<td>'+ware_name+'</td>');
+		$("#shipping_tbody").append('<td>'+name+'</td>');
+		$("#shipping_tbody").append('<td>'+deposit_cd+'</td>');
+
+		$("#shipping_tbody").append("</tr>");
+		
+	}
 	
 	
 

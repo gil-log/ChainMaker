@@ -1,0 +1,132 @@
+package kr.happyjob.chainmaker.pcm.controller;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/pcm/")
+public class OrderDepositProcessingController {
+
+	//Set logger
+	private final Logger logger = LogManager.getLogger(this.getClass());
+
+	//Get class name for logger
+	private final String className = this.getClass().toString();
+
+//	@Autowired
+//	private PurchaseOrderService purchaseOrderService;
+	
+	@RequestMapping("orderDepositProcessing.do")
+	public String orderDepositProcessing(){
+		logger.info("구매담당자_기업고객_주문내역관리");
+		
+		return "/pcm/orderDepositProcessing";
+	}
+
+//	//구매담당자_발주 지시서 목록 조회
+//	@RequestMapping("purchaseOrderList.do")
+//	public String purchaseOrderList(Model model, @RequestParam Map<String, Object> paramMap){		
+//		logger.info("구매담당자 - 제품 발주/반품 목록 => 데이터 전송");
+//		logger.info("paramMap : "+paramMap);
+//		
+//		int currentPage=Integer.parseInt((String) paramMap.get("currentPage"));
+//		int pageSize=Integer.parseInt((String) paramMap.get("pageSize"));
+//		int pageIndex=(currentPage-1)*pageSize;
+//		
+//		paramMap.put("pageIndex", pageIndex);
+//		paramMap.put("pageSize", pageSize);
+//		
+//		
+//		//DB의 목록 list에 담아 purchaseOrderList.jsp로 전달
+//		List<PurchaseOrderModel> listPurchaseOrder=purchaseOrderService.purchaseOrderList(paramMap);
+//				
+//		model.addAttribute("listPurchaseOrder", listPurchaseOrder);
+//		
+//		//DB목록의 total row를 담아 purchaseOrderList.jsp로 전달
+//		int purchaseOrderTotal=purchaseOrderService.countPurchaseOrderList(paramMap);
+//		logger.info("purchaseOrderList.do ==> listPurchaseOrder");
+//		logger.info(listPurchaseOrder);
+//		
+//		
+//		//페이지 네비게이션 정보
+//		model.addAttribute("purchaseOrderTotal", purchaseOrderTotal);		
+//		model.addAttribute("pageSize", pageSize);
+//		model.addAttribute("currentPagePurchaseOrderList", currentPage);
+//		
+//		return "/pcm/purchaseOrderList";
+//	}
+//	
+//	//구매담당자_발주 지시서 목록 단건 조회
+//	@RequestMapping("purchaseOrderSelect.do")
+//	@ResponseBody
+//	public Map<String,Object> purchaseOrderSelect(Model model, @RequestParam Map<String, Object> paramMap){
+//		logger.info("구매담당자 - 제품 발주/반품 단품 목록 => 데이터 전송");		
+//
+//		Map<String, Object> resultMap = new HashMap<>();
+//				
+//		PurchaseOrderModel purchaseOrderModel = purchaseOrderService.purchaseOrderSelect(paramMap);
+//		
+//		resultMap.put("purchaseOrderModel", purchaseOrderModel);		
+//		
+//		logger.info("purchaseOrderSelect.do ==> resultMap.purchaseOrderModel");
+//		logger.info(resultMap.get(purchaseOrderModel));
+//		
+//		return resultMap;
+//	}
+//
+//	//구매담당자_발주 지시서 목록 단건 상세 조회
+//	@RequestMapping("modalPurchasedtl.do")
+//	public String modalPurchasedtl(Model model, @RequestParam Map<String, Object> paramMap){
+//		logger.info("구매담당자 - 제품 발주/반품 단품 목록 => 데이터 전송");		
+//		
+//		int currentPage=Integer.parseInt((String) paramMap.get("currentPage"));
+//		int pageSize=Integer.parseInt((String) paramMap.get("pageSize"));
+//		int pageIndex=(currentPage-1)*pageSize;
+//		
+//		paramMap.put("pageIndex", pageIndex);
+//		paramMap.put("pageSize", pageSize);
+//		
+//		//DB의 목록 list에 담아 modalPurchaseDtlList.jsp로 전달
+//		List<PurchaseOrderModel> modalPurchaseDtlList = purchaseOrderService.purchaseDtlList(paramMap);	
+//		model.addAttribute("modalPurchaseDtlList", modalPurchaseDtlList);		
+//		
+//		//DB목록의 total row를 담아 purchaseOrderList.jsp로 전달
+//		int modalPurchaseDtlTotal=purchaseOrderService.countPurchaseDtlList(paramMap);
+//		logger.info("modalPurchasedtl.do ==> modalPurchaseDtlList");
+//		logger.info(modalPurchaseDtlList);
+//		
+//		
+//		//페이지 네비게이션 정보
+//		model.addAttribute("modalPurchaseDtlTotal", modalPurchaseDtlTotal);		
+//		model.addAttribute("pageSize", pageSize);
+//		model.addAttribute("currentPageModalPurchaseDtl", currentPage);
+//				
+//		return "/pcm/modalPurchaseDtlList";
+//	}
+//	
+//	//발주서 전송(email)
+//	@RequestMapping("sendPurchase.do")
+//	@ResponseBody
+//	public String sendPurchase(Model model, @RequestParam Map<String, Object> paramMap){
+//		logger.info("발주지시서 메일 전송");
+//		
+//		int currentPage=Integer.parseInt((String) paramMap.get("currentPage"));
+//		int pageSize=Integer.parseInt((String) paramMap.get("pageSize"));
+//		int pageIndex=(currentPage-1)*pageSize;
+//		
+//		paramMap.put("pageIndex", 0);
+//		paramMap.put("pageSize", 100);
+//		
+//		List<PurchaseOrderModel> modalPurchaseDtlList = purchaseOrderService.purchaseDtlList(paramMap);	
+//		logger.info("modalPurchaseDtlList : "+modalPurchaseDtlList);
+//		PurchaseOrderModel purchase=modalPurchaseDtlList.get(0);	
+//		logger.info("purchase : "+purchase);
+//		
+//		String result=RegisterFindIdEmailSend(modalPurchaseDtlList);
+//		purchaseOrderService.updatePurchaseCD(paramMap);
+//		return result;
+//	}
+}
+

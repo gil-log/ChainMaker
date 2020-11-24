@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.happyjob.chainmaker.sti.dao.InquiryDao;
+import kr.happyjob.chainmaker.sti.model.InquiryByInqNoModel;
 import kr.happyjob.chainmaker.sti.model.InquiryModel;
 
 @Service
@@ -37,6 +38,26 @@ public class inquiryServiceImpl implements  InquiryService {
 		int totalCount = inquiryDao.countListInquiry(paramMap);
 		
 		return totalCount;
+	}
+
+	@Override
+	public InquiryByInqNoModel selectInquiryByInqNo(int inq_no) throws Exception {
+		return inquiryDao.selectInquiryByInqNo(inq_no);
+	}
+
+	@Override
+	public int insertInquiryAns(Map<String, Object> paramMap) throws Exception {
+		return inquiryDao.insertInquiryAns(paramMap) ;
+	}
+
+	@Override
+	public int answerONX(Map<String, Object> paramMap) throws Exception {
+		return inquiryDao.answerONX(paramMap);
+	}
+
+	@Override
+	public int inqAnsDel(Map<String, Object> paramMap) throws Exception {
+		return inquiryDao.inqAnsDel(paramMap);
 	}
 	
 }

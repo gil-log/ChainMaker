@@ -21,7 +21,7 @@ public class WHInfoServiceImpl implements WHInfoService {
   
   @Override
   // 전체 창고 정보
-  public List<WHInfoDTO> whInfoList(WhPgAndScKeyWordDTO whPgAndScKeyWordDTO) {
+  public List<WHInfoDTO> whInfoList(WhPgAndScKeyWordDTO whPgAndScKeyWordDTO) throws Exception {
     // VO에서 DTO변환 과정
     List<WHInfoVO> whInfoList = whInfoDAO.whInfoList(whPgAndScKeyWordDTO);
     Iterator<WHInfoVO> whIterator = whInfoList.iterator();
@@ -38,13 +38,13 @@ public class WHInfoServiceImpl implements WHInfoService {
   
   @Override
   // 조회 목록 수
-  public int totalCnt(WhPgAndScKeyWordDTO whPgAndScKeyWordDTO) {
+  public int totalCnt(WhPgAndScKeyWordDTO whPgAndScKeyWordDTO) throws Exception {
     return whInfoDAO.totalCnt(whPgAndScKeyWordDTO);
   }
   
   @Override
   // 배송담당자 정보
-  public List<WhMngInfoDTO> whMngInfoList(WhMngInfoDTO whMngInfoDTO) {
+  public List<WhMngInfoDTO> whMngInfoList(WhMngInfoDTO whMngInfoDTO) throws Exception {
     // VO에서 DTO변환 과정
     List<WHInfoVO> whMngInfoList = whInfoDAO.whMngInfoList(whMngInfoDTO);
     Iterator<WHInfoVO> whIterator = whMngInfoList.iterator();
@@ -61,7 +61,7 @@ public class WHInfoServiceImpl implements WHInfoService {
   
   @Override
   // 담당자별 창고 정보
-  public List<WHInfoDTO> whMngWareInfoList(WHInfoDTO whInfoDTO) {
+  public List<WHInfoDTO> whMngWareInfoList(WHInfoDTO whInfoDTO) throws Exception {
     // VO에서 DTO변환 과정
     List<WHInfoVO> whMngWareInfoList = whInfoDAO.whMngWareInfoList(whInfoDTO);
     Iterator<WHInfoVO> iter = whMngWareInfoList.iterator();
@@ -78,19 +78,19 @@ public class WHInfoServiceImpl implements WHInfoService {
   
   @Override
   // 창고 정보 등록 - 성공하면 1 이상, 실패하면 0 미만 // 숫자는 insert,update,delete가 성공한 수
-  public int insertWhInfo(WHInfoDTO whInfoDTO) {
+  public int insertWhInfo(WHInfoDTO whInfoDTO) throws Exception {
     return whInfoDAO.insertWhInfo(whInfoDTO);
   }
 
   @Override
   // 창고 정보 수정 - 수정한 컬럼 개수를 리턴
-  public int updateWhInfo(WHInfoDTO whInfoDTO) {
+  public int updateWhInfo(WHInfoDTO whInfoDTO) throws Exception {
     return whInfoDAO.updateWhInfo(whInfoDTO);
   }
 
   @Override
   // 창고 정보 삭제 처리 - 수정한 컬럼 개수를 리턴
-  public int deleteWhInfo(WHInfoDTO whinfoDTO) {
+  public int deleteWhInfo(WHInfoDTO whinfoDTO) throws Exception {
     return whInfoDAO.deleteWhInfo(whinfoDTO);
   }
  

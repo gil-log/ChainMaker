@@ -36,7 +36,7 @@ public class WHInfoController {
   
   // 창고 정보 관리 페이지 연결
   @RequestMapping("whinfo.do")
-  public String WhInfo() {
+  public String WhInfo() throws Exception {
     
     logger.info("창고 정보 관리 페이지");
     logger.info(" + Start - " + className + ".initWhInfo");
@@ -44,8 +44,9 @@ public class WHInfoController {
     return "scm/whInfo";
   }
   
+  // 창고 정보 리스트 
   @RequestMapping(value = "/wh", method = RequestMethod.GET)
-  public String listWHInfo(@ModelAttribute WhPgAndScKeyWordDTO whPgAndScKeyWordDTO, Model model) {
+  public String listWHInfo(@ModelAttribute WhPgAndScKeyWordDTO whPgAndScKeyWordDTO, Model model) throws Exception {
     
     String viewLocation = "scm/whInfoList";
     
@@ -64,9 +65,10 @@ public class WHInfoController {
     return viewLocation;
   }
   
+  // 창고 정보 모달
   @RequestMapping(value = "/whmng", method = RequestMethod.GET)
   @ResponseBody
-  public Map<String, Object> listMngInfo(WhMngInfoDTO whMngInfoDTO, @ModelAttribute WHInfoDTO whInfoDTO, String modalCD) {
+  public Map<String, Object> listMngInfo(WhMngInfoDTO whMngInfoDTO, @ModelAttribute WHInfoDTO whInfoDTO, String modalCD) throws Exception {
     Map<String, Object> resultMap = new HashMap<String, Object>();
     
     List<WhMngInfoDTO> listMngInfo = whInfoService.whMngInfoList(whMngInfoDTO);
@@ -83,9 +85,10 @@ public class WHInfoController {
     return resultMap;
   }
   
+  // 창고 정보 등록 & 수정 & 삭제
   @RequestMapping(value = "/whinfo", method = RequestMethod.POST)
   @ResponseBody
-  public Map<String, Object> whInfoControl(String action, @ModelAttribute WHInfoDTO whInfoDTO) {
+  public Map<String, Object> whInfoControl(String action, @ModelAttribute WHInfoDTO whInfoDTO) throws Exception {
     
     Map<String, Object> resultMap = new HashMap<String, Object>();
     

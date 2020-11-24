@@ -15,14 +15,11 @@
 								<c:set var="nRow" value="${pageSize*(currentPageInquiry-1)}" />
 								<c:forEach items="${listInquiry}" var="list">
 									<tr>
-										<td><a href="javascript:fListinquiry">${list.inq_no}</a></td>
-										<td>${list.inq_title}</td>
-										<td>${list.category_cd}</td>
+										<td>${list.inq_no}</td>
+										<td><a href="javascript:fPopModalInquiry('${list.inq_no}')">${list.inq_title}</a></td>
+										<td>${list.inq_regdate}</td>
 										<td>${list.loginID}</td>
-										<%-- <td>${list.answer_cd}</td> --%>
-									<%-- 	<td>
-											<a class="btnType3 color1" href="javascript:fPopModalComnGrpCod('${list.grp_cod}');"><span>수정</span></a> 
-										</td> --%>
+										 <td>${list.answer_cd}</td>
 									</tr>									
 									<c:set var="nRow" value="${nRow + 1}" />
 								</c:forEach>

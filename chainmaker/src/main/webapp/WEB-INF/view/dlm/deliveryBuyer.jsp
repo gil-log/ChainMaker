@@ -3,198 +3,294 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>DeliveryBuyer</title>
 
 <!-- common Include -->
 <jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
 
 <script>
-	//상단테이블 페이징 설정
-	var pageSizeDeliveryBuyerList = 5;
-	var pageBlockSizeDeliveryBuyerList = 10;
-	
-	//하단테이블 페이징 설정
-	var pageSizeDeliveryBuyerDtlList = 5;
-	var pageBlockSizeDeliveryBuyerDtlList = 10;
-	
-	//Vue.js 사용 변수 설정
-	var searchvm;
-	var deliveryBuyerListvm;
-	var deliveryBuyerDtlListvm;
-	
-	//페이지로드 작동 메서드
-	$(document).ready(function(){
-		
-		init();
-		
-		//창고별 제품 목록 조회		
-		whInventoryList();
-		
-		//데이트피커 활성화        
-        $("#startDate").datepicker({
-        })
-        $("#endDate").datepicker({        	
-        	minDate:-1
-        })
-	});
-	
-	function init(){
-		
-		searchvm = new Vue({
-			el:"#searchArea",
-			data:{
-				searchKey:'all',
-				searchWord:'',
-				startDate:'',
-				endDate:''
-			}
-		})
-		
-		deliveryBuyerListvm = new Vue({
-			el:"#divDeliveryBuyerList",
-			components:{	
-				"bootstrap-table":BootstrapTable
-			},
-			data:{
-				items:[],
-				ware_name:'',
-				pro_name:'',
-				ware_no:'',
-				pro_no:'',
-			},
-			methods:{
-				rowClick:function(row){
-					
-					//알람 삭제 예정
-					//alert("sub 그리드 연결~!");
-					
-					var tdArr = new Array();
-					
-					//클릭된 row (#divWHInventoryList > <tr>)
-					var tr=$(row);
-					var td=tr.children();
-					
-					td.each(function(i){
-						tdArr.push(td.eq(i).text());
-					});
-					console.log("tdArr[0] : " + tdArr[0]);					
-					console.log("tdArr[1] : " + tdArr[1]);					
-					console.log("tdArr[2] : " + tdArr[2]);					
-					console.log("tdArr[3] : " + tdArr[3]);					
-					console.log("tdArr[4] : " + tdArr[4]);					
-					console.log("tdArr[5] : " + tdArr[5]);					
-					console.log("tdArr[6] : " + tdArr[6]);					
-					
-					//this.ware_no = tdArr[0];
-					
-					whProductList();
-				}
-			}
-		});
-		
-		deliveryBuyerDtlListvm = new Vue({
-			el:"#divDeliveryBuyerDtlList",
-			components:{	
-				"bootstrap-table":BootstrapTable
-			},
-			data:{
-				items:[]				
-			}
-		});
-	}
-	
-	//창고별 재고 조회
-	function deliveryBuyerList(currentPage){
-		currentPage=currentPage || 1;
-		
-		/* console.log("currentPage : " + currentPage + "\npageSizeWHInventory : " + pageSizeWHInventory 
-				+ "\nsearchvm.searchKey : " + searchvm.searchKey + "\nsearchvm.searchWord : " + searchvm.searchWord); */
-		
-		var param={
-				currentPage : currentPage,
-				pageSize : pageSizeWHInventory,
-				searchKey : searchvm.searchKey,
-				searchWord : searchvm.searchWord,
-				startDate : searchvm.startDate,
-				endDate : searchvm.endDate
-		}
-		
-		var resultCallback = function(data){
-			deliveryBuyerListResult(data, currentPage);			
-		}
-		
-		callAjax("/dlm/deliveryBuyerList.do", "post", "json", true, param, resultCallback);
-	}
-	//창고별 재고 조회 콜백
-	function deliveryBuyerListResult(data, currentPage){
-		//console.log(data);
-		
-		deliveryBuyerListvm.items=[];
-		deliveryBuyerListvm.items=data.listdeliveryBuyer;
-		
-		//총 개수 추출
-		var deliveryBuyerListTotal=data.deliveryBuyerListTotal;
-		
-		//페이지 네비게이션 생성
-		var paginationHtml = getPaginationHtml(currentPage, deliveryBuyerListTotal, pageSizeDeliveryBuyerList, pageBlockSizeDeliveryBuyerList, "deliveryBuyerList");
-		
-		$("#listDeliveryBuyerPagination").empty().append( paginationHtml );
-		
-		$("#currentPageDeliveryBuyerList").val(currentPage);		
-	}
-	
-	
-	
-	//제품별 입출고 내역 (특정 창고의 특정 제품 입출고 내역)
-	function deliveryBuyerDtlList(currentPage){
-		currentPage=currentPage || 1;
-		
-		//알람 삭제 예정
-		//alert("ware_name : " + whInventoryvm.ware_name + "\npro_name : " + whInventoryvm.pro_name + "\n서브그리드 작동 확인");
-		
-		var param={
-				currentPage : currentPage,
-				pageSize : pageSizeDeliveryBuyerDtlList,	
-				ware_name : whInventoryvm.ware_name,
-				pro_name : whInventoryvm.pro_name,
-				ware_no :  whInventoryvm.ware_no,
-				pro_no : whInventoryvm.pro_no
-		}
-		//alert("param : " + param + "\nparam 진행 확인");
-		
-		var resultCallback = function(data){
-			deliveryBuyerDtlListResult(data, currentPage);
-		}
-		
-		callAjax("/dlm/deliveryBuyerDtlList.do", "post", "json", true, param, resultCallback);
-	}
-	//제품별 입출고 내역 (특정 창고의 특정 제품 입출고 내역) 콜백
-	function deliveryBuyerDtlListResult(data, currentPage){
-		
-		whproductvm.items=[];
-		whproductvm.items=data.deliveryBuyerDtlList;
-		
-		//총 개수 추출
-		var deliveryBuyerDtlListTotal=data.deliveryBuyerDtlListTotal;
-		//페이지 네비게이션 생성
-		var paginationHtml = getPaginationHtml(currentPage, deliveryBuyerDtlListTotal, pageSizeDeliveryBuyerDtlList, pageBlockSizeDeliveryBuyerDtlList, "deliveryBuyerDtlList");
-		
-		$("#listDeliveryBuyerDtlListPagination").empty().append( paginationHtml );
-		
-		$("#currentPageDeliveryBuyerDtlList").val(currentPage);
-	} 
-</script>
+//페이징 설정
+var pageSizeDeliveryBuyer=10;
+var pageBlockSizeDeliveryBuyer=10;
 
+var pageSizeModalDeliveryBuyerDtl=5;
+var pageBlockSizeModalDeliveryBuyerDtl=5;
+
+var currentShippingNum;
+
+//페이지 로드시 실행 (Onload Event)
+$(document).ready(function(){
+	//구매담당자_발주 지시서 목록 조회
+	deliveryBuyerList();
+	
+	//데이트피커 활성화       
+	setDatePicker();
+});
+
+function setDatePicker(){
+	$.datepicker.setDefaults($.datepicker.regional['ko']); 
+    $( "#startdate" ).datepicker({
+         changeMonth: true, 
+         changeYear: true,
+         nextText: '다음 달',
+         prevText: '이전 달', 
+         dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+         dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'], 
+         monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+         monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+         showAnim: "slide", //애니메이션을 적용한다.
+         dateFormat: "yy-mm-dd",
+         maxDate: 0,                       // 선택할수있는 최소날짜, ( 0 : 오늘 이후 날짜 선택 불가)
+         onClose: function( selectedDate ) {    
+              //시작일(startDate) datepicker가 닫힐때
+              //종료일(endDate)의 선택할수있는 최소 날짜(minDate)를 선택한 시작일로 지정
+             $("#enddate").datepicker( "option", "minDate", selectedDate );
+             
+             var endDate = $("#enddate").val();
+         }    
+    });
+    $( "#enddate" ).datepicker({
+         changeMonth: true, 
+         changeYear: true,
+         nextText: '다음 달',
+         prevText: '이전 달', 
+         dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+         dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'], 
+         monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+         monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+         showAnim: "slide", //애니메이션을 적용한다.
+         dateFormat: "yy-mm-dd",                    // 선택할수있는 최대날짜, ( 0 : 오늘 이후 날짜 선택 불가)
+         onClose: function( selectedDate ) {    
+             // 종료일(endDate) datepicker가 닫힐때
+             // 시작일(startDate)의 선택할수있는 최대 날짜(maxDate)를 선택한 시작일로 지정
+             $("#startdate").datepicker( "option", "maxDate", selectedDate );
+             
+             var startDate = $("#startdate").val();
+         } 	    
+    }); 
+    
+    $("#startdate").datepicker('setDate', 'today');
+    $("#enddate").datepicker('setDate', 'today');
+}
+
+//구매담당자_발주 지시서 목록 조회 & 검색
+function searchDeliveryBuyerList(currentPage){		
+	currentPage=currentPage || 1;
+	
+	var searchKey=document.getElementById("searchKey").value;
+	var searchWord=document.getElementById("searchWord").value;
+	
+	var startDate=$("#startdate").val();
+	var endDate=$("#enddate").val();
+       //alert(typeof startDate+" => "+startDate+"\n"+typeof endDate+" => "+endDate);
+	
+	var param={
+			currentPage:currentPage,
+			pageSize:pageSizeDeliveryBuyer,
+			searchKey:searchKey,
+			searchWord:searchWord,	
+			startDate:startDate,
+			endDate:endDate
+	}
+	
+	console.log("startDate : "+startDate+", endDate : "+endDate);
+	
+ 	if(searchKey === 'all'){
+		alert("검색조건을 선택하세요.");	
+		if(startDate === ''){
+			alert("시작일을 선택하세요.");			
+		}
+		if(endDate === ''){
+			alert("종료일을 선택하세요.");	
+		}
+	}else{
+		if(startDate ==='' && endDate === ''){
+			
+		}			
+		else{		
+			if(startDate > endDate){
+				alert("종료일을 다시 선택해주세요.");
+				endDate.val("");					
+			}
+		}
+	}
+	
+	var resultCallbackSearch=function(data){
+		deliveryBuyerListResult(data, currentPage);
+	}
+	callAjax("/dlm/deliveryBuyerList.do", "post", "text", true, param, resultCallbackSearch);
+}
+//구매담당자_발주 지시서 목록 조회
+function deliveryBuyerList(currentPage){
+	currentPage=currentPage || 1;
+	
+	var searchKey=document.getElementById("searchKey").value;
+	var searchWord=document.getElementById("searchWord").value;
+	
+	//console.log("searchKey : "+searchKey+", searchWord : "+searchWord)
+	
+	var param={
+			currentPage:currentPage,
+			pageSize:pageSizeDeliveryBuyer,
+			searchKey:searchKey,
+			searchWord:searchWord		
+	}
+	
+	var resultCallback=function(data){
+		deliveryBuyerListResult(data, currentPage);
+	}
+	callAjax("/dlm/deliveryBuyerList.do", "post", "text", true, param, resultCallback);
+}
+//구매담당자_발주 지시서 목록 조회 콜백
+function deliveryBuyerListResult(data, currentPage){
+	console.log(data);
+	
+	//기존 목록 삭제 및 가져온 정보 넣기
+	$("#listDeliveryBuyer").empty();
+	$("#listDeliveryBuyer").append(data);
+	
+	//구매담당자_발주 지시서 목록 조회 카운트
+	var deliveryBuyerTotal=$("#deliveryBuyerTotal").val();	
+	// 페이지 네비게이션 생성
+	var paginationHtml = getPaginationHtml(currentPage, deliveryBuyerTotal, pageSizeDeliveryBuyer, pageBlockSizeDeliveryBuyer, "deliveryBuyerList");
+	$("#deliveryBuyerPagination").empty().append(paginationHtml);
+	
+	$("#currentPageDeliveryBuyer").val(currentPage);
+}
+
+
+//구매담당자_발주 지시서 단건 조회
+function deliveryBuyerSelect(ship_no){
+	
+	var param={
+			ship_no:ship_no
+	}
+	
+	var resultCallback=function(data){
+		deliveryBuyerSelectResult(data);
+	}
+	callAjax("/dlm/deliveryBuyerSelect.do", "post", "json", true, param, resultCallback);
+}
+//구매담당자_발주 지시서 단건 조회 콜백
+function deliveryBuyerSelectResult(data){
+	console.log("data.deliveryBuyerModel : "+data.deliveryBuyerModel);
+	
+	//모달 팝업
+	gfModalPop("#layer1");
+	//모달 초기화 및 정보 넣기 함수 호출
+	setDeliveryBuyerModal(data.deliveryBuyerModel);		
+}
+//구매담당자_발주 지시서 단건 조회_상세 리스트 
+function deliveryBuyerDtlList(ship_no, currentPage){
+	currentPage=currentPage || 1;
+	
+	var param={
+			purchase_no:purchase_no,
+			currentPage:currentPage,
+			pageSize:pageSizeModalDeliveryBuyerDtl
+	}
+	
+	var resultCallback=function(data){
+		deliveryBuyerDtlListResult(data, currentPage);
+	}
+	callAjax("/dlm/modalDeliveryBuyerDtl.do", "post", "text", true, param, resultCallback);
+}
+//구매담당자_발주 지시서 단건 조회_상세 리스트 콜백
+function deliveryBuyerDtlListResult(data, currentPage){
+	//console.log(data);
+	
+	//기존 목록 삭제 및 가져온 정보 넣기
+	$("#listModalDeliveryBuyerDtl").empty();
+	$("#listModalDeliveryBuyerDtl").append(data);
+	
+	//구매담당자_발주 지시서 목록 조회 카운트
+	var modalDeliveryBuyerDtlTotal=$("#modalDeliveryBuyerDtlTotal").val();
+	
+	// 페이지 네비게이션 생성
+	/* var paginationHtml = getPaginationHtml(currentPage, modalPurchaseDtlTotal, pageSizeModalPurchaseDtl, pageBlockSizeModalPurchaseDtl, "purchaseDtlList");
+	$("#ModalPurchaseDtlPagination").empty().append(paginationHtml);
+	
+	$("#currentPageModalPurchaseDtl").val(currentPage); */		
+}
+
+//확인버튼 클릭 이벤트
+function rowClickEvent(ship_no){
+	console.log(ship_no);
+	//구매담당자_발주 지시서 단건 조회 함수 호출
+	deliveryBuyerSelect(ship_no);	
+	//purchaseDtlList(ship_no);
+}
+//모달 초기화 및 정보 넣기
+function setDeliveryBuyerModal(object) {
+	if( object == "" || object == null || object == undefined) {			
+		$("#ship_no").val("");
+		$("#user_company").val("");
+		$("#pro_no").val("");
+		$("#pro_name").val("");		
+		$("#ship_qty").val("");		
+		$("#ship_manager").val("");		
+		$("#ship_date").val("");		
+		$("#ware_name").val("");		
+		$("#ware_address").val("");		
+		
+	} else {					
+		$("#ship_no").val(object.ship_no);
+		$("#user_company").val(object.user_company);
+		$("#pro_no").val(object.pro_no);
+		$("#pro_name").val(object.pro_name);		
+		$("#ship_qty").val(object.ship_qty);		
+		$("#ship_manager").val(object.ship_manager);		
+		$("#ship_date").val(object.ship_date);		
+		$("#ware_name").val(object.ware_name);		
+		$("#ware_address").val(object.ware_address+" "+object.ware_dt_address);	
+		currentShippingNum=object.ship_no;
+		
+		console.log(object.ship_cd);
+		
+		if(object.ship_cd === "waiting"){
+			$("#btnSendWord").text("배송상태 변경");			
+		}else if(object.ship_cd === "loading"){
+			$("#btnSendWord").text("배송지시서 전송");			
+		}		
+	}	
+}
+
+//여기부터
+function sendDeliveryBuyerDirection(currentPage){	
+	currentPage=currentPage || 1;
+	
+	var param={
+			ship_no:currentShippingNum,
+			//currentPage:currentPage,
+			//pageSize:pageSizeModalDeliveryBuyerDtl
+	}
+	
+	var resultCallback=function(data){
+		sendDeliveryBuyerDirectionResult(data, currentPage);
+	}
+	
+	callAjax("/dlm/sendDelivery.do", "post", "text", true, param, resultCallback);
+}
+
+function sendDeliveryBuyerDirectionResult(data){
+	alert("배송상태 변경 : "+data);
+	//모달 팝업
+	gfCloseModal();		
+	deliveryBuyerList();
+}
+
+</script>
 </head>
-<body>	
+<body>
 	<form id="myForm" action=""  method="">
-		<input type="hidden" name="currentPageDeliveryBuyerList" id="currentPageDeliveryBuyerList" value="">
-		<input type="hidden" name="currentPageDeliveryBuyerDtlList" id="currentPageDeliveryBuyerDtlList" value="">
+		<input type="hidden" name="currentPageDeliveryBuyer" id="currentPageDeliveryBuyer" value="">
+		<input type="hidden" name="currentPageModalDeliveryBuyerDtl" id="currentPageModalDeliveryBuyerDtl" value="">
+		<input type="hidden" id="userEmail" name="userEmail" value=""/>
+		<input type="hidden" id="currentShippingNum" name="currentShippingNum" value=""/>
 		
 		<div id="wrap_area">
-		
+			
 			<!-- header Include -->
 			<jsp:include page="/WEB-INF/view/common/header.jsp"></jsp:include>
 			
@@ -202,135 +298,188 @@
 				<ul>
 					<li class="lnb">
 					
-						<!-- lnb Include --> 
+						<!-- lnb Include -->
 						<jsp:include page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include>
 						
 					</li>
-					<li class="contents">						
+					<li class="contents">
 						<div class="content">
-							
 							<!-- 메뉴 경로 영역 -->
 							<p class="Location">
 								<a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a> <a href="#"
-									class="btn_nav">기업 고객</a> <span class="btn_nav bold">배송 지시서 목록</span> <a href="/dlm/deliveryBuyer.do" class="btn_set refresh">새로고침</a>
+									class="btn_nav">기업고객</a> <span class="btn_nav bold">배송 지시서 목록</span> <a href="/dlm/deliveryBuyer.do" class="btn_set refresh">새로고침</a>
 							</p>
 							
 							<!-- 검색 영역 -->
 							<p class="search">
-	
-							</p>
+							
+							</p>							
 							<p class="conTitle" id="searchArea">
-								 <span>기업고객_배송 지시서 목록_배송담당자</span>
+							<span>배송 지시서 목록_배송담당자</span>
 								 <span class="fr"> 
-									<select id="searchKey" name="searchKey" style="width: 80px;" v-model="searchKey">
-									    <option value="all" id="option1" selected="selected" >검색 조건</option>
-										<option value="user_company" id="option2">업체 명</option>
+									<select id="searchKey" name="searchKey" style="width: 80px;">
+									    <option value="all" id="option1" selected="selected">검색 조건</option>
+										<option value="user_company" id="option2">구매회사</option>										
+										<option value="ware_name" id="option3">출발 창고지</option>
 									</select> 
-									<input type="text" id="searchWord" name="searchWord" v-model="searchWord" placeholder="검색어를 입력해주세요." style="height: 28px;"> 
-									<input type="text" id="startDate" placeholder="시작일 선택" style="height: 28px;width: 80px" readonly="readonly"></input>
-									<input type="text" id="endDate" placeholder="종료일 선택" style="height: 28px;width: 80px" readonly="readonly"></input>
-									<a class="btnType blue" href="javascript:whInventoryList()"onkeydown="enterKey()" name="search">
-									<span id="searchEnter">검색</span>
-									</a>			
+									<input type="text" id="searchWord" name="searchWord" placeholder="검색어를 입력하세요." style="height: 28px;"> 
+										<input type="text" id="startdate" name="startdate" placeholder="시작일 선택" style="height: 28px;width: 80px"></input>
+										<input type="text" id="enddate" name="enddate" placeholder="종료일 선택" style="height: 28px;width: 80px"></input>
+										<a class="btnType blue" href="javascript:searchDeliveryBuyerList()" onkeydown="enterKey()" name="search">
+										<span id="searchEnter">검색</span></a>			
 								</span>
 							</p>
 							
-							<!-- 상단 테이블 영역 -->
-							<div class="divDeliveryBuyerList" id="divDeliveryBuyerList">
+							<!-- 테이블 영역 -->
+							<div class="divDeliveryBuyer" id="divDeliveryBuyer">
 								<table class="col">
 									<colgroup>
-									    <col width="8%">
-										<col width="15%">
-										<col width="10%">
-										<col width="10%">
-										<col width="10%">
-									</colgroup>
-					
-									<thead>
-										<tr>
-										    <th scope="col">번호</th>
-											<th scope="col">업체 명</th>
-											<th scope="col">주문금액</th>
-											<th scope="col">주문희망일</th>
-											<th scope="col">배송희망일</th>
-										</tr>
-									</thead>
-									
-									<!-- 상단테이블 DB데이터 출력 영역 -->
-									<tbody id="listDeliveryBuyer">
-									<!-- whInventoryvm에 담긴 items의 정보를 가져와 테이블에 뿌리는 코드 (Vue.js) -->
-										<template v-for="(row, index) in items" v-if="items.length">
-											<tr onclick="whInventoryvm.rowClick(this)">
-											    <td>{{ row.no }}</td>
-												<td>{{ row.user_company }}</td>
-												<td>{{ row.refund_amount }}</td>
-												<td>{{ row.refund_date }}</td>	
-											</tr>
-										</template>
-									</tbody>
-								</table>
-							</div>	<!-- .divWhInventoryList 종료 -->
-							
-							<!-- 상단테이블 페이지 네비게이션 영역 -->
-							<div class="pagingArea"  id="listDeliveryBuyerPagination"> </div>
-							
-							<p class="conTitle mt50">
-								<span>배송 지시서_상세 내역</span> 
-								<span class="fr"></span>
-							</p>
-							
-							<!-- 하단 테이블 영역 -->
-							<div class="divDeliveryBuyerDtlList" id="divDeliveryBuyerDtlList">
-								<table class="col">
-									<colgroup>
+										<col width="5%">
 										<col width="8%">
-										<col width="10%">
-										<col width="10%">
-										<col width="10%">
-										<col width="15%">
-										<col width="15%">
-										<col width="10%">
+										<col width="8%">
+										<col width="5%">
+										<col width="6%">
+										<col width="6%">
 									</colgroup>
-		
 									<thead>
 										<tr>
-										    <th scope="col">번호</th>
-										    <th scope="col">장비 번호</th>
-										    <th scope="col">장비 구분</th>
-											<th scope="col">모델 번호</th>											
-											<th scope="col">모델 명</th>
-											<th scope="col">제조사</th>
-											<th scope="col">판매 가격</th>
+											<th scope="col">배송번호</th>
+											<th scope="col">구매회사</th>
+											<th scope="col">주문날짜</th>
+											<th scope="col">배송 담당자</th>
+											<th scope="col">출발 창고지</th>
+											<th scope="col">배송결과</th>
 										</tr>
 									</thead>
 									
-									<!-- 하단테이블 DB 데이터 출력 영역 -->
-									<tbody id="listDeliveryBuyerDtlList">
-										<template v-for="(row, index) in items" v-if="items.length">
-											<tr>
-												<td>{{ row.no }}</td>
-												<td>{{ row.pro_no }}</td>
-												<td>{{ row.pro_name }}</td>
-												<td>{{ row.pro_detail }}</td>
-												<td>{{ row.pro_model_name }}</td>					
-												<td>{{ row.pro_manu_name }}</td>																	
-												<td>{{ row.pro_price }}</td>																	
-											</tr>
-										</template>
-									</tbody>
+									<!--  -->
+									<tbody id="listDeliveryBuyer">
+									</tbody>									
 								</table>
-							</div>
-						<!-- 하단테이블 Pagenation 영역 -->
-						<div class="pagingArea"  id="listDeliveryBuyerDtlListPagination"> </div>
-						</div>	<!-- .content 종료 -->
-					</li>	<!-- .content 종료 -->
-				</ul>				
-			</div>	<!-- #container 종료 -->
+							</div>	<!-- .divDeliveryBuyerList 종료 -->
+							
+							<!-- 테이블 페이지 네비게이션 영역 -->
+							<div class="pagingArea" id="deliveryBuyerPagination"></div>							
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>	
+		
+		<!-- Modal 시작 -->
+		<div id="layer1" class="layerPop layerType2" style="width: 900px;">
+		<dl>
+			<dt>
+				<strong>배송 지시서</strong>
+			</dt>
+			<dd class="content">
+				<!-- s : 여기에 내용입력 -->
+				<table class="row mt20">
+					<caption>caption</caption>
+					<colgroup>
+						<col width="80px">
+						<col width="*">
+						<col width="80px">
+						<col width="*">
+					</colgroup>
+
+					<tbody>
+						<tr>
+							<th scope="row">배송번호</th>
+							<td><input type="text" class="inputTxt p100" name="ship_no" id="ship_no" readonly="readonly"/></td>
+							<th scope="row">구매회사</th>
+							<td><input type="text" class="inputTxt p100" name="user_company" id="user_company" readonly="readonly"/></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="row mt20">
+					<caption>caption</caption>
+					<colgroup>
+						<col width="80px">
+						<col width="*">
+						<col width="80px">
+						<col width="*">
+						<col width="80px">
+						<col width="*">
+					</colgroup>
+
+					<tbody>
+						<tr>
+							<th scope="row">제품번호</th>
+							<td><input type="text" class="inputTxt p100" name="pro_no" id="pro_no" readonly="readonly"/></td>
+							<th scope="row">제품명</th>
+							<td><input type="text" class="inputTxt p100" name="pro_name" id="pro_name" readonly="readonly"/></td>
+							<th scope="row">제품수량</th>
+							<td><input type="text" class="inputTxt p100" name="ship_qty" id="ship_qty" readonly="readonly"/></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="row mt20">
+					<caption>caption</caption>
+					<colgroup>
+						<col width="80px">
+						<col width="*">
+						<col width="80px">
+						<col width="*">
+						<col width="80px">
+						<col width="*">
+						<col width="80px">
+						<col width="*">
+					</colgroup>
+
+					<tbody>
+						<tr>
+							<th scope="row">배송 담당자</th>
+							<td><input type="text" class="inputTxt p100" name="ship_manager" id="ship_manager" readonly="readonly"/></td>
+							<th scope="row">배송날짜</th>
+							<td><input type="text" class="inputTxt p100" name="ship_date" id="ship_date" readonly="readonly"/></td>
+							<th scope="row">출발 창고지</th>
+							<td><input type="text" class="inputTxt p100" name="ware_name" id="ware_name" readonly="readonly"/></td>
+							<th scope="row">창고주소</th> 
+							<td><input type="text" class="inputTxt p100" name="ware_address" id="ware_address" readonly="readonly"/></td>
+						</tr>
+					</tbody>
+				</table>
+				<!-- <table class="row mt20" id="modalDeliveryBuyerDtlList">
+					<colgroup>
+						<col width="8%">
+						<col width="5%">
+						<col width="6%">
+						<col width="8%">
+						<col width="5%">
+						<col width="10%">
+						<col width="20%">
+					</colgroup>
+					<thead>
+						<tr style="background-color: silver;">
+							<th scope="row" style="font-weight: bold;">제품</th>
+							<th scope="row" style="font-weight: bold;">수량</th>
+							<th scope="row" style="font-weight: bold;">납품금액</th>
+							<th scope="row" style="font-weight: bold;">금액</th>
+							<th scope="row" style="font-weight: bold;">창고번호</th>
+							<th scope="row" style="font-weight: bold;">창고이름</th>
+							<th scope="row" style="font-weight: bold;">창고주소</th>
+						</tr>
+					</thead>
+					<tbody id="listModalDeliveryBuyerDtl">					
+					</tbody>	
+				</table> -->
+				<!-- 테이블 페이지 네비게이션 영역 -->
+				<div class="pagingArea" id="modalDeliveryBuyerDtlPagination"></div>	
+
+				<!-- e : 여기에 내용입력 -->
+
+				<div class="btn_areaC mt30">
+					<a href="javascript:sendDeliveryBuyerDirection()" class="btnType blue" id="btnSendConfirm" name="btn"><span id="btnSendWord"></span></a>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href=""	class="btnType gray" name="btn"><span>취소</span></a>
+				</div>
+			</dd>
+		</dl>
+		<a href="" class="closePop"><span class="hidden">닫기</span></a>
+	</div>	
+	<!-- Modal 종료 -->		
 			
-			<!-- footer Include -->
-			<jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
-			
-		</div>	<!-- #wrap_area 종료 -->
 	</form>	
 </body>
 </html>

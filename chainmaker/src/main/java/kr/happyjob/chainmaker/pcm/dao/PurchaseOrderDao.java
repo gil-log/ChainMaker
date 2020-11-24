@@ -18,4 +18,6 @@ public interface PurchaseOrderDao {
 	public List<PurchaseOrderModel> purchaseDtlList(Map<String, Object> paramMap);
 	//구매담당자_발주 지시서 목록 조회 카운트
 	public int countPurchaseDtlList(Map<String, Object> paramMap);
+	//구매담당자_반품 지시서 전송 및 입금확인에 대한 purchase_cd 변경
+	public int updatePurchaseCD(Map<String, Object> paramMap);
 }

@@ -198,4 +198,9 @@
 		  WHERE tb_direction.direction_cd='purchase' 
 		    AND tb_purchase.purchase_no=#{purchase_no}
 	</select>
+	
+	<!-- 구매담당자_발주 지시서 전송 및 입금확인에 대한 purchase_cd 변경 -->
+	<update id="updateRefundCD">
+		UPDATE tb_purchase SET purchase_cd='2' WHERE purchase_no=#{rpurchase_no}
+	</update>
 </mapper>

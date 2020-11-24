@@ -10,10 +10,13 @@
 			          ,	inq_no
                       , inq_title
                       , inq_content
-                      , inq_regdate
+                      ,DATE_FORMAT( inq_regdate, "%y년 %c월 %e일 %H시 %i분" ) as inq_regdate
                       , inq_moddate
                       , category_cd
-                      , answer_cd
+                      , case answer_cd 
+                          when '1' then '답변완료'
+                          when '0' then ''
+                        end as  answer_cd
                       , loginID
 		FROM	tb_inquiry
 		WHERE (@rownum:=0)=0
@@ -27,6 +30,47 @@
 		/*kr.happyjob.chainmaker.sti.dao.InquiryDao.countListInquiry*/
 		SELECT COUNT(1) AS tot_cnt FROM tb_inquiry
 	</select>
+<!-- 	1:1문의 모달창 -->
+	<select id="selectInquiryByInqNo" resultType="kr.happyjob.chainmaker.sti.model.InquiryByInqNoModel">
+		SELECT userinfo. name,
+		DATE_FORMAT( inquiry. inq_regdate, "%y년 %c월 %e일 %H시 %i분" ) as inq_regdate,
+        inquiry. inq_title,
+        inquiry. inq_content,
+        answer.ans_title,
+        answer.ans_content
+       
+		FROM tb_inquiry inquiry LEFT JOIN tb_userinfo userinfo
+		ON inquiry. loginID = userinfo. loginID
+		LEFT JOIN tb_answer answer
+	    ON inquiry.inq_no = answer.inq_no
+		
+		
+		WHERE inquiry. inq_no = #{inq_no}
+		
+	</select>
 	
+		<!-- 1:1문의 저장 -->
+	<insert id="insertInquiryAns">
+		INSERT INTO tb_answer 
+		(inq_no, ans_content, ans_writer, ans_regdate, ans_title, ans_moddate)
+		VALUES 
+		(#{inq_no}, #{ans_content}, #{ans_writer}, now(), #{ans_title}, now())
+	</insert>
+	
+	<!-- 1:1문의 여부 -->
+   <update id="answerONX">
+		UPDATE tb_inquiry 
+		       SET answer_cd = #{answer_cd}
+		WHERE inq_no = #{inq_no}
+ 	</update>
+ 	
+ 	
+ 	
+	<!-- 1:1문의 답변 삭제 -->
+	<delete id="inqAnsDel">
+		delete from tb_answer 
+		where inq_no = #{inq_no}
+		
+	</delete>
 	
 </mapper>

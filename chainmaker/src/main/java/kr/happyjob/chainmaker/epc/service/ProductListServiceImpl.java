@@ -74,4 +74,11 @@ public class ProductListServiceImpl implements ProductListService {
 		return selectProduct;
 	}
 	
+	/** 동적 셀렉트 상품목록 */
+	public List<ProductListModel> selectDetail(Map<String, Object> paramMap) throws Exception {
+		
+		List<ProductListModel> selectDetail = productListDao.selectDetail(paramMap);
+		
+		return selectDetail;
+	}
 }

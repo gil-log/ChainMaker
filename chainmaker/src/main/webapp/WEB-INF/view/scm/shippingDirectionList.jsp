@@ -6,7 +6,7 @@
 	
 							<c:if test="${totalCntDailyOrder eq 0 }">
 								<tr>
-									<td colspan="13">승인 신청 내역이 존재하지 않습니다.</td>
+									<td colspan="13">배송 지시서가  존재하지 않습니다.</td>
 								</tr>
 							</c:if>
 							

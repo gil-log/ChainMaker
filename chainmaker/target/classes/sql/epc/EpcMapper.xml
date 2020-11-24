@@ -5,27 +5,29 @@
 
 	<!-- 그룹코드 목록 조회 -->
 	<select id="listProductList" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">
-		SELECT	pro_no as pro_num	
-			,	pro_cd as pro_cod
-			,	pro_model_name as pro_cod_nam
-			,	pro_manu_name as pro_manu_nm
-			,	pro_price as pro_prc
-		FROM	tb_product
+		SELECT	TA.pro_no as pro_num	
+			,	TB.detail_name as pro_cod
+			,	TA.pro_model_name as pro_cod_nam
+			,	TA.pro_manu_name as pro_manu_nm
+			,	TA.pro_price as pro_prc
+		FROM	tb_product TA 
+		LEFT JOIN tb_detail_code TB
+   		ON TA.pro_cd = TB.detail_code
 		<where>
 				<choose>
 					<when
 						test="(v != null) and (!v.equals(''))">
-							and pro_cd = #{p}
-							and pro_manu_name = #{v}
-							and (pro_no Like CONCAT('%', #{sname}, '%')
-							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+							and TB.detail_name = #{p}
+							and TA.pro_manu_name = #{v}
+							and (TA.pro_no Like CONCAT('%', #{sname}, '%')
+							or TA.pro_model_name Like CONCAT('%', #{sname} , '%'))
 					</when>
 					
 					<when
-						test="(oname eq 'all'.toString())">
+						test="(oname eq ''.toString()) and (sname != null)">
 							
-							and (pro_no Like CONCAT('%', #{sname}, '%')
-							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+							and (TA.pro_no Like CONCAT('%', #{sname}, '%')
+							or TA.pro_model_name Like CONCAT('%', #{sname} , '%'))
 					</when>
 					
 				</choose>
@@ -41,32 +43,35 @@
 	<!-- 그룹코드 목록 총 갯수 조회 -->
 	<select id="countListProductList" resultType="int">
 		/*kr.kosmo.jobkorea.epc.dao.ProductListDAO.countListProductList*/
-		SELECT COUNT(1) AS tot_cnt FROM tb_product
+		SELECT COUNT(1) AS tot_cnt  FROM	tb_product TA 
+									LEFT JOIN tb_detail_code TB
+   									ON TA.pro_cd = TB.detail_code
 		
 		<where>
 				<choose>
 					<when
 						test="(v != null) and (!v.equals(''))">
-							and pro_cd = #{p}
-							and pro_manu_name = #{v}
-							and (pro_no Like CONCAT('%', #{sname}, '%')
-							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+							and TB.detail_name = #{p}
+							and TA.pro_manu_name = #{v}
+							and (TA.pro_no Like CONCAT('%', #{sname}, '%')
+							or TA.pro_model_name Like CONCAT('%', #{sname} , '%'))
 					</when>
+					
 					<when
-						test="(oname eq 'all'.toString())">
+						test="(oname eq ''.toString()) and (sname != null)">
 							
-							and (pro_no Like CONCAT('%', #{sname}, '%')
-							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+							and (TA.pro_no Like CONCAT('%', #{sname}, '%')
+							or TA.pro_model_name Like CONCAT('%', #{sname} , '%'))
 					</when>
 					
 				</choose>
-				
+			
 		</where>
 	</select>
 	
 		<!-- 동적 셀렉트 조회 -->
 	<select id = "selectProduct" resultType = "kr.happyjob.chainmaker.epc.model.ProductDetailModel">
-		select pro_manu_name as pro_manu_nm 
+		<!--select pro_manu_name as pro_manu_nm 
 			 , pro_cd 
 			from tb_product
 			
@@ -76,10 +81,37 @@
 					</where>
 						
 				
-			group by pro_manu_name	
+			group by pro_manu_name	 -->
+			
+     	 select     TA.pro_manu_name as pro_manu_nm 
+			      , TA.pro_cd
+           		  , TB.detail_name
+       		 
+       		 from tb_product	TA
+          	 LEFT JOIN tb_detail_code TB
+             ON TA.pro_cd = TB.detail_code
+            
+             <where>
+			  TB.detail_name = #{p}
+			 </where>
+			 			
+	   		 group by pro_manu_name	
+	
+	</select>
+	
+	
+		<!-- 동적 셀렉트  상품목록 -->
+	<select id = "selectDetail" resultType = "kr.happyjob.chainmaker.epc.model.ProductDetailModel">
+		select TA.pro_cd as pro_cod
+			 , TB.detail_name as detail_name
+			from tb_product TA
+			LEFT JOIN tb_detail_code TB
+			ON TA.pro_cd = TB.detail_code
+			group by TB.detail_name	
      
 	
 	</select>
+	
 	
 	<!-- 제품 1건 상세정보 -->
 	<select id="selectProductDetail" parameterType="Map" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">

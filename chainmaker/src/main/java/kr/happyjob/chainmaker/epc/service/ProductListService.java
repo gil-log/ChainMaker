@@ -27,4 +27,6 @@ public interface ProductListService {
 	/** 동적 셀렉트 조회 */
 	public List<ProductListModel> selectProduct(Map<String, Object> paramMap) throws Exception;
 	
+	/** 동적 셀렉트 상품목록*/
+	public List<ProductListModel> selectDetail(Map<String, Object> paramMap) throws Exception;
 }

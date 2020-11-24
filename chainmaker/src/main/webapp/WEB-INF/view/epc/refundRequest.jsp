@@ -24,6 +24,9 @@
 	
 </head>
 <body>
+	
+	<input type="hidden" id="datePickerClieckedFlag" value="0">
+
 	<input type="hidden" id="currentPageDailyOrder" value="1">
 	<input type="hidden" id="currentPageComnDtlCod" value="1">
 	<input type="hidden" id="tmpGrpCod" value="">

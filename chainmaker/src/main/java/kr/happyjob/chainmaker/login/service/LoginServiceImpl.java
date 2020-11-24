@@ -8,14 +8,14 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kr.happyjob.chainmaker.common.comnUtils.AESCryptoHelper;
-import kr.happyjob.chainmaker.common.comnUtils.ComnUtil;
+/*import kr.happyjob.chainmaker.common.comnUtils.AESCryptoHelper;
+import kr.happyjob.chainmaker.common.comnUtils.ComnUtil;*/
 import kr.happyjob.chainmaker.login.dao.LoginDao;
 import kr.happyjob.chainmaker.login.model.LgnInfoModel;
 import kr.happyjob.chainmaker.login.model.UsrMnuAtrtModel;
 import kr.happyjob.chainmaker.login.model.UsrMnuChildAtrtModel;
 
-@Service
+@Service("loginService")
 public class LoginServiceImpl implements LoginService {
 
 	// Set logger
@@ -54,20 +54,50 @@ public class LoginServiceImpl implements LoginService {
 		return loginDao.listUsrChildMnuAtrt(paramMap);
 
 	}
+	
+	/**사용자 회원가입*/
+	@Override
+	public int registerUser(Map<String, Object> paramMap) throws Exception {
+		int ret = loginDao.registerUser(paramMap);
+		return ret;
+	}
+	
+	/**loginID 중복체크*/
+	@Override
+	public int check_loginID(LgnInfoModel model) throws Exception {
+		int result = loginDao.check_loginID(model);
+		return result;
+	}
 
 	/** 사용자 ID 찾기 */
 	public LgnInfoModel selectFindId(Map<String, Object> paramMap) throws Exception{
+		System.out.println(loginDao.selectFindId(paramMap));
 		return loginDao.selectFindId(paramMap);
 	}
 
 	/** 사용자 PW 찾기 */
 	public LgnInfoModel selectFindPw(Map<String, Object> paramMap) throws Exception{
-		String password = paramMap.get("pwd").toString();
+/*		String password = paramMap.get("pwd").toString();
 		//AES 방식 암호화
 		password = AESCryptoHelper.encode( ComnUtil.AES_KEY, password);
-		paramMap.put("pwd", password);
+		paramMap.put("pwd", password);*/
 		return loginDao.selectFindPw(paramMap);
 	}
+	/** 사용자 PW 찾기 ID 체크*/
+	@Override
+	public LgnInfoModel registerIdCheck(Map<String, Object> paramMap) throws Exception {
+	
+		return loginDao.registerIdCheck(paramMap);
+	}
+
+	/** select박스 은행 목록*/
+	@Override
+	public List<LgnInfoModel> selectBankList() {
+		List<LgnInfoModel> list = loginDao.selectBankList();
+		return list;
+	}
+
+	
 
 
 }

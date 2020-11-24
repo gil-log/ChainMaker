@@ -40,7 +40,7 @@ public class PurchaseOrderController {
 	private final String className = this.getClass().toString();
 
 	@Autowired
-	PurchaseOrderService purchaseOrderService;
+	private PurchaseOrderService purchaseOrderService;
 	
 	@RequestMapping("purchaseOrder.do")
 	public String purchaseOrder(){
@@ -149,6 +149,7 @@ public class PurchaseOrderController {
 		logger.info("purchase : "+purchase);
 		
 		String result=RegisterFindIdEmailSend(modalPurchaseDtlList);
+		purchaseOrderService.updatePurchaseCD(paramMap);
 		return result;
 	}
 	

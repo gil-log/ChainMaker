@@ -189,6 +189,10 @@ public class ProductListController {
 			return resultMap;
 		}	
 		
+		/**
+		 * 동적 셀렉트 조회
+		 */
+		
 		@RequestMapping("selectProduct.do")
 		@ResponseBody
 		public Map<String, Object> selectProduct(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
@@ -209,5 +213,31 @@ public class ProductListController {
 			
 			return resultMap;
 		}
+		
+		/**
+		 * 동적 셀렉트 상품목록
+		 */
+		
+		@RequestMapping("selectDetail.do")
+		@ResponseBody
+		public Map<String, Object> selectDetail(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+				HttpServletResponse response, HttpSession session)  throws Exception{
+		
+			logger.info("+ Start " + className + ".selectDetail" );
+			
+			List<ProductListModel> dList =  productListService.selectDetail(paramMap);
+			model.addAttribute("dListobj", dList);
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			
+			
+			resultMap.put("dListobj", dList);
+			
+			
+			
+			logger.info("+ End " + className + ".selectDetail");
+			
+			return resultMap;
+		}
+		
 		
 }

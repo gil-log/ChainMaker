@@ -9,8 +9,6 @@ import lombok.ToString;
 @EqualsAndHashCode(of = {"ware_no", "loginID"})
 public class WHInfoVO {
   
-  private int totalcnt;
-  
   private int ware_no;
   private String ware_cd;
   private String ware_name;

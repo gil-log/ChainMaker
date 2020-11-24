@@ -114,7 +114,7 @@
               ,   currentPage : currentPage
               ,   pageSize : pageSizeComnGrpCod
         }
-        
+        //alert(JSON.stringify(param));
         var resultCallback = function(data) {
         	flistGrpCodResult(data, currentPage); 
         };
@@ -224,7 +224,7 @@
 		
 		// 신규 저장
 		if (grp_cod == null || grp_cod=="") {
-			alert("여기도 찍어봅세  ");
+			//alert("여기도 찍어봅세  ");
 			// Tranjection type 설정
 			$("#action").val("I");
 			
@@ -250,10 +250,17 @@
 		
 		currentPage = currentPage || 1;
 		
+		var sname = $('#sname');
+        var searchKey = document.getElementById("searchKey");
+		var oname = searchKey.options[searchKey.selectedIndex].value;
+		
+		
 		console.log("currentPage : " + currentPage);
 		
-		var param = {
-					currentPage : currentPage
+		var param = {	
+					sname : sname.val()
+				,	oname : oname
+				,	currentPage : currentPage
 				,	pageSize : pageSizeComnGrpCod
 		}
 		
@@ -283,7 +290,7 @@
 		var totalCntComnGrpCod = $("#totalCntComnGrpCod").val();
 		
 		
-		
+		//alert(totalCntComnGrpCod);
 		
 		// 페이지 네비게이션 생성
 		

@@ -32,8 +32,6 @@ public class WHInfoDTO {
   
   public WHInfoDTO(WHInfoVO whInfoVO) {
     
-    this.totalcnt = whInfoVO.getTotalcnt();
-    
     this.ware_no = whInfoVO.getWare_no();
     this.ware_cd = whInfoVO.getWare_cd();
     this.ware_name = whInfoVO.getWare_name();

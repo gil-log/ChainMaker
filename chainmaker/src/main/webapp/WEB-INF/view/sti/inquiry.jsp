@@ -13,7 +13,7 @@
 <script type="text/javascript">
 
 	// 1:1문의 페이징 설정
-	var pageSizeinquiry = 5;
+	var pageSizeinquiry = 10;
 	var pageBlockSizeinquiry = 5;
 	
 	
@@ -21,7 +21,7 @@
 	$(function() {
 	
 		// 1:1문의 조회
-		fListinquiry();
+		fListInquiry();
 		
 		// 버튼 이벤트 등록
 		fRegisterButtonClickEvent();
@@ -36,11 +36,11 @@
 			var btnId = $(this).attr('id');
            
 			switch (btnId) {
-				case 'btnSaveGrpCod' :
-					fSaveGrpCod();
+				case 'btnSaveInquiry' :
+					fSaveInquiryAns();
 					break;
-				case 'btnDeleteGrpCod' :
-					fDeleteGrpCod();
+				case 'btnDeleteInqAns' :
+					fDeleteInqAns();
 					break;
 				case 'btnSaveDtlCod' :
 					fSaveDtlCod();
@@ -56,8 +56,9 @@
 		});
 	}
 	
+	
 	/** 1:1문의 조회 */
-	function fListinquiry(currentPage) {
+	function fListInquiry(currentPage) {
 		
 		currentPage = currentPage || 1;
 		
@@ -69,7 +70,7 @@
 		}
 		
 		var resultCallback = function(data) {
-			flistInquiryResult(data, currentPage);
+			fListInquiryResult(data, currentPage);
 		};
 		
 		//Ajax실행 방식
@@ -80,7 +81,7 @@
 	
 	
 	/** 1:1문의 조회 콜백 함수 */
-	function flistInquiryResult(data, currentPage) {
+	function fListInquiryResult(data, currentPage) {
 				//alert(data);
 		console.log(data);		
 		
@@ -92,10 +93,8 @@
 		var totalCntlistInquiry = $("#totalCntlistInquiry").val();
 			
 	
-		
-		
 		// 페이지 네비게이션 생성
-		var paginationHtml = getPaginationHtml(currentPage, totalCntlistInquiry, pageSizeinquiry, pageBlockSizeinquiry, 'fListinquiry');
+		var paginationHtml = getPaginationHtml(currentPage, totalCntlistInquiry, pageSizeinquiry, pageBlockSizeinquiry, 'fListInquiry');
 		console.log("paginationHtml : " + paginationHtml);
 
 		$("#listInquiryPagination").empty().append( paginationHtml );
@@ -103,9 +102,34 @@
 	}
 	
 	
+	/** 1:1문의 모달 실행 */
+	function fPopModalInquiry(inq_no) {
+
+		 $("#selectedInqNo").val(inq_no);
+		 
+		console.log(typeof(inq_no));
+		var url = "/sti/inquiryByInqNo.do";
+		var param = {
+				inq_no : inq_no
+		};
+		
+		var callback = function(data){
+			console.log(data);
+			$("#inq_cod_nm").val(data.inqNoData.name);
+			$("#inq_cod_day").val(data.inqNoData.inq_regdate);
+			$("#inq_title").val(data.inqNoData.inq_title);
+			$("#inq_content").val(data.inqNoData.inq_content);
+			$("#ans_title").val(data.inqNoData.ans_title);
+			$("#ans_content").val(data.inqNoData.ans_content);
+			
+		}
+		
+		callAjax(url, "get", "json", true, param, callback);
+		
+		gfModalPop("#inquiryModal");		
+		
+	}
 	
-	
-	/** 1:1문의 폼 초기화 */
 	function fInitFormGrpCod(object) {
 		$("#grp_cod").focus();
 		if( object == "" || object == null || object == undefined) {
@@ -120,7 +144,7 @@
 			$("#grp_cod").attr("readonly", false);
 			$("#grp_cod").css("background", "#FFFFFF");
 			$("#grp_cod").focus();
-			$("#btnDeleteGrpCod").hide();
+			$("#btnDeleteGrpCod").hide(); 
 			
 		} else {
 			
@@ -158,55 +182,7 @@
 		return true;
 	}
 	
-	
-	/** 상세코드 저장 validation */
-/* 	function fValidateDtlCod() {
 
-		var chk = checkNotEmpty(
-				[
-						[ "dtl_grp_cod", "그룹 코드를 선택해 주세요." ]
-					,	[ "dtl_cod", "상세 코드를 입력해 주세요." ]
-					,	[ "dtl_cod_nm", "상세 코드 명을 입력해 주세요" ]
-					,	[ "dtl_cod_eplti", "상세 제목을 입력해 주세요." ]
-					,	[ "dtl_odr", "상세 제목을 입력해 주세요." ]
-				]
-		);
-
-		if (!chk) {
-			return;
-		}
-
-		return true;
-	} */
-	
-	
-	/** 1:1문의 모달 실행 */
-	function fPopModalComnGrpCod(grp_cod) {
-		
-		// 신규 저장
-		if (grp_cod == null || grp_cod=="") {
-		
-			// Tranjection type 설정
-			$("#action").val("I");
-			
-			// 1:1문의 폼 초기화
-			fInitFormGrpCod();
-			
-			// 모달 팝업
-			gfModalPop("#layer1");
-
-		// 수정 저장
-		} else {
-			
-			// Tranjection type 설정
-			$("#action").val("U");
-			
-			// 1:1문의 단건 조회
-			fSelectGrpCod(grp_cod);
-		}
-	}
-	
-	
 	
 	/** 1:1문의 단건 조회 */
 	function fSelectGrpCod(grp_cod) {
@@ -217,7 +193,7 @@
 			fSelectGrpCodResult(data);
 		};
 		
-		callAjax("/system/selectComnGrpCod.do", "post", "json", true, param, resultCallback);
+		callAjax("/sti/selectComnGrpCod.do", "post", "json", true, param, resultCallback);
 	}
 	
 	
@@ -254,8 +230,29 @@
 	}
 	
 	
+	//1:1답변 저장
+	function fSaveInquiryAns(){
+		
+		var select_inq_no = $("#selectedInqNo").val();
+		var ans_title = $("#ans_title").val();
+		var ans_content = $("#ans_content").val();
+		
+		var param = {
+				ans_title : ans_title,
+				ans_content : ans_content,
+				inq_no : select_inq_no
+		};
+		
+		var resultCallback = function(data) {
+			fSaveAnsByInquiry(data);
+		};
+		
+		callAjax("/sti/inquiryInAns.do", "post", "json", true, param, resultCallback)
+		
+	}
+	
 	/** 1:1문의 저장 콜백 함수 */
-	function fSaveGrpCodResult(data) {
+	function fSaveAnsByInquiry(data) {
 		
 		// 목록 조회 페이지 번호
 		var currentPage = "1";
@@ -272,7 +269,7 @@
 			gfCloseModal();
 			
 			// 목록 조회
-			fListComnGrpCod(currentPage);
+			fListInquiry(currentPage);
 			
 		} else {
 			// 오류 응답 메시지 출력
@@ -280,23 +277,29 @@
 		}
 		
 		// 입력폼 초기화
-		fInitFormGrpCod();
+		$("#ans_title").val("");
+		$("#ans_content").val("");
 	}
 
 	
 	/** 1:1문의 삭제 */
-	function fDeleteGrpCod() {
+	function fDeleteInqAns() {
 		
+		var inq_no = $("#selectedInqNo").val();
+		
+		console.log(inq_no);
+		
+		var param = {inq_no : inq_no};
 		var resultCallback = function(data) {
-			fDeleteGrpCodResult(data);
+			fDeleteInqAnsResult(data);
 		};
 		
-		callAjax("/system/deleteComnGrpCod.do", "post", "json", true, $("#myForm").serialize(), resultCallback);
+		callAjax("/sti/deleteInqAns.do", "post", "json", true, param, resultCallback);
 	}
 	
 	
 	/** 1:1문의 삭제 콜백 함수 */
-	function fDeleteGrpCodResult(data) {
+	function fDeleteInqAnsResult(data) {
 		
 		var currentPage = $("#currentPageComnGrpCod").val();
 		
@@ -308,211 +311,16 @@
 			// 모달 닫기
 			gfCloseModal();
 			
-			// 1:1문의 목록 조회
-			fListComnGrpCod(currentPage);
-			
-		} else {
-			alert(data.resultMsg);
-		}	
-	}
-	
-	
- 	 //상세코드 모달 실행 
-	/*function fPopModalComnDtlCod(grp_cod, dtl_cod) {
-		
-		// 신규 저장
-		if (dtl_cod == null || dtl_cod=="") {
-		
-			if ($("#tmpGrpCod").val() == "") {
-				alert("그룹 코드를 선택해 주세요.");
-				return;
-			}
-			
-			// Tranjection type 설정
-			$("#action").val("I");
-			
-			// 상세코드 폼 초기화
-			fInitFormDtlCod();
-			
-			// 모달 팝업
-			gfModalPop("#layer2");
-
-		// 수정 저장
-		} else {
-			
-			// Tranjection type 설정
-			$("#action").val("U");
-			
-			// 상세코드 단건 조회
-			fSelectDtlCod(grp_cod, dtl_cod);
-		}
-	} 
-	
-	/* 
-	 상세코드 목록 조회 
-	function fListComnDtlCod(currentPage, grp_cod, grp_cod_nm) {
-		
-		currentPage = currentPage || 1;
-		
-		// 1:1문의 정보 설정
-		$("#tmpGrpCod").val(grp_cod);
-		$("#tmpGrpCodNm").val(grp_cod_nm);
-		
-		var param = {
-					grp_cod : grp_cod
-				,	currentPage : currentPage
-				,	pageSize : pageSizeComnDtlCod
-		}
-		
-		var resultCallback = function(data) {
-			flistDtlCodResult(data, currentPage);
-		};
-		
-		callAjax("/system/listComnDtlCod.do", "post", "text", true, param, resultCallback);
-	}
-	 */
-	
-	/** 상세코드 조회 콜백 함수 */
-	/* function flistDtlCodResult(data, currentPage) {
-		
-		// 기존 목록 삭제
-		$('#listComnDtlCod').empty(); 
-		
-		var $data = $( $(data).html() );
-
-		// 신규 목록 생성
-		var $listComnDtlCod = $data.find("#listComnDtlCod");		
-		$("#listComnDtlCod").append($listComnDtlCod.children());
-		
-		// 총 개수 추출
-		var $totalCntComnDtlCod = $data.find("#totalCntComnDtlCod");
-		var totalCntComnDtlCod = $totalCntComnDtlCod.text(); 
-		
-		// 페이지 네비게이션 생성
-		var grp_cod = $("#tmpGrpCod").val();
-		var grp_cod_nm = $("#tmpGrpCodNm").val();
-		var paginationHtml = getPaginationHtml(currentPage, totalCntComnDtlCod, pageSizeComnDtlCod, pageBlockSizeComnDtlCod, 'fListComnDtlCod', [grp_cod]);
-		$("#comnDtlCodPagination").empty().append( paginationHtml );
-		
-		// 현재 페이지 설정
-		$("#currentPageComnDtlCod").val(currentPage);
-	}
-	
-	
-	* 상세코드 단건 조회 */
-	/* function fSelectDtlCod(grp_cod, dtl_cod) {
-
-		var param = {
-					grp_cod : grp_cod
-				,	dtl_cod : dtl_cod
-		};
-		
-		var resultCallback = function(data) {
-			fSelectDtlCodResult(data);
-		};
-		
-		callAjax("/system/selectComnDtlCod.do", "post", "json", true, param, resultCallback);
-	}
-	
-	
-	* 상세코드 단건 조회 콜백 함수*/
-	/* function fSelectDtlCodResult(data) {
-
-		if (data.result == "SUCCESS") {
-
-			// 모달 팝업
-			gfModalPop("#layer2");
-			
-			// 1:1문의 폼 데이터 설정
-			fInitFormDtlCod(data.comnDtlCodModel);
-			
-		} else {
-			alert(data.resultMsg);
-		}	
-	} */
-	
-	
-	/** 상세코드 저장 */
-	/* function fSaveDtlCod() {
-
-		// vaildation 체크
-		if ( ! fValidateDtlCod() ) {
-			return;
-		}
-		
-		var resultCallback = function(data) {
-			fSaveDtlCodResult(data);
-		};
-		
-		callAjax("/system/saveComnDtlCod.do", "post", "json", true, $("#myForm").serialize(), resultCallback);
-	}
-	 */
-	
-	/** 상세코드 저장 콜백 함수 */
-	/* function fSaveDtlCodResult(data) {
-		
-		// 목록 조회 페이지 번호
-		var currentPage = "1";
-		if ($("#action").val() != "I") {
-			currentPage = $("#currentPageComnDtlCod").val();
-		}
-		
-		if (data.result == "SUCCESS") {
-			
-			// 응답 메시지 출력
-			alert(data.resultMsg);
-			
-			// 모달 닫기
-			gfCloseModal();
-			
 			// 목록 조회
-			var grp_cod = $("#tmpGrpCod").val();
-			var grp_cod_nm = $("#tmpGrpCodNm").val();
-			fListComnDtlCod(currentPage, grp_cod, grp_cod_nm);
+			fListInquiry(currentPage);
 			
-		} else {
-			// 오류 응답 메시지 출력
-			alert(data.resultMsg);
-		}
-		
-		// 입력폼 초기화
-		fInitFormDtlCod();
-	} */
-	
-	
-	/** 상세코드 삭제 */
-	/* function fDeleteDtlCod() {
-		
-		var resultCallback = function(data) {
-			fDeleteDtlCodResult(data);
-		};
-		
-		callAjax("/system/deleteComnDtlCod.do", "post", "json", true, $("#myForm").serialize(), resultCallback);
-	}
-	 */
-	
-	//* 상세코드 삭제 콜백 함수 */
-	/* function fDeleteDtlCodResult(data) {
-		
-		var currentPage = $("#currentPageComnDtlCod").val();
-		
-		if (data.result == "SUCCESS") {
-			
-			// 응답 메시지 출력
-			alert(data.resultMsg);
-			
-			// 모달 닫기
-			gfCloseModal();
-			
-			// 1:1문의 목록 조회
-			var grp_cod = $("#tmpGrpCod").val();
-			var grp_cod_nm = $("#tmpGrpCodNm").val();
-			fListComnDtlCod(currentPage, grp_cod, grp_cod_nm);
 			
 		} else {
 			alert(data.resultMsg);
 		}	
-	}   */
+	}
+	
+	
 	
 </script>
 
@@ -524,6 +332,8 @@
 	<input type="hidden" id="tmpGrpCod" value="">
 	<input type="hidden" id="tmpGrpCodNm" value="">
 	<input type="hidden" name="action" id="action" value="">
+	<input type="hidden" id="selectedInqNo" value="">
+	
 	
 	<!-- 모달 배경 -->
 	<div id="mask"></div>
@@ -551,24 +361,28 @@
 								</span> <a href="#" class="btn_set refresh">새로고침</a>
 						</p>
 
-						
+						<p class="search"></p>
 						<p class="conTitle">
-							<span>1:1문의</span> <span class="fr"> 
+							<span>1:1문의 답변</span> 
+							<!-- <span class="fr">
+			                  <select id="searchKey" name="searchKey" style="width: 80px;" v-model="searchKey">
+			                    <option value="all" id="option1" selected>전체</option>
+			                    <option value="ware_name" id="option1">제목</option>
+			                    <option value="ware_address" id="option2">내용</option>
+			                  </select> <input type="text" id="searchWord" name="searchWord" v-model="searchWord" placeholder="" style="height: 28px;  width: 600px;"> <a class="btnType blue" href="javascript:whInfoFormList()" onkeydown="enterKey()" name="search"><span id="searchEnter">검 색</span></a>
+			                </span> -->
 
-							</span>
+						
 						</p>
-						<div style="display: flex; justify-content:flex-end; padding: 10px;">
-							<a class="btnType blue"  href="javascript:fPopModalComnGrpCod();" name="modal">
-							<span>글쓰기</span>
-							</a>
-						</div>
+						
 						<div class="divComGrpCodList">
 							<table class="col">
 								<caption>caption</caption>
 								<colgroup>
-									<col width="20%">
+									<col width="5%">
 									<col width="45%">
 									<col width="20%">
+									<col width="15%">
 									<col width="15%">
 								</colgroup>
 	
@@ -578,9 +392,11 @@
 										<th scope="col">제목</th>
 										<th scope="col">작성일</th>
 										<th scope="col">작성자</th>
+										<th scope="col">답변</th>
 									</tr>
 								</thead>
-								<tbody id="listInquiry"></tbody>
+								<tbody id="listInquiry">
+								</tbody>
 							</table>
 						</div>
 	
@@ -594,7 +410,7 @@
 	</div>
 
 	<!-- 모달팝업 -->
-	<div id="layer1" class="layerPop layerType2" style="width: 600px;">
+	<div id="inquiryModal" class="layerPop layerType2" style="width: 900px;">
 		<dl>
 			<dt>
 				<strong>1:1문의</strong>
@@ -612,121 +428,51 @@
 
 					<tbody>
 						<tr>
-							<th scope="row">작성자 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" name="grp_cod" id="grp_cod" /></td>
-							<th scope="row">작성일 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" name="grp_cod_nm" id="grp_cod_nm" /></td>
+							<th scope="row">작성자 </th>
+							<td><input type="text" class="inputTxt p100" name="grp_cod" id="inq_cod_nm" readonly/></td>
+							<th scope="row">작성일 </th>
+							<td><input type="text" class="inputTxt p100" name="grp_cod_nm" id="inq_cod_day" readonly /></td>
 						</tr>
 						<tr>
-							<th scope="row">제목 <span class="font_red">*</span></th>
+							<th scope="row">제목 </th>
 							<td colspan="3"><input type="text" class="inputTxt p100"
-								name="grp_cod_eplti" id="grp_cod_eplti" maxlength="100" /></td>
+								name="grp_cod_eplti" id="inq_title" maxlength="100"readonly/></td>
 						</tr>
 						
 						<tr>
-							<th scope="row">내용 <span class="font_red">*</span></th>
+							<th scope="row"></th>
 							<td colspan="3" ><textarea class="inputTxt p100"
 							style="height: 200px; word-break : break-all;"
-								name="grp_cod_eplti" id="grp_cod_eplti"></textarea></td>
+								name="grp_cod_eplti" id="inq_content"readonly></textarea></td>
+						</tr>
+
+						<tr>
+							<th scope="row">답변제목 <span class="font_red">*</span></th>
+							<td colspan="3"><input type="text" class="inputTxt p100"
+								name="ans_title" id="ans_title" maxlength="100"/></td>
 						</tr>
 						
+						<tr>
+							<th scope="row">답변내용 <span class="font_red">*</span></th>
+							<td colspan="3" ><textarea class="inputTxt p100"
+							style="height: 200px; word-break : break-all;"
+								name="ans_content" id="ans_content"></textarea></td>
+						</tr>
 						</tbody>
 				</table>
 
 				<!-- e : 여기에 내용입력 -->
 
 				<div class="btn_areaC mt30">
-				    <a href="" class="btnType blue" id="btnSaveGrpCod" name="btn"><span>저장</span></a> 
-					<a href="" class="btnType blue" id="btnDeleteGrpCod" name="btn"><span>삭제</span></a> 
-					<a href=""	class="btnType gray"  id="btnCloseGrpCod" name="btn"><span>취소</span></a>
+				    <a href="" class="btnType blue" id="btnSaveInquiry" name="btn"><span>저장</span></a> 
+					<a href="" class="btnType blue" id="btnDeleteInqAns" name="btn"><span>삭제</span></a> 
+					<a href="" class="btnType gray" id="btnCloseGrpCod" name="btn"><span>취소</span></a>
 				</div>
 			</dd>
 		</dl>
 		<a href="" class="closePop"><span class="hidden">닫기</span></a>
 	</div>
 
-	<div id="layer2" class="layerPop layerType2" style="width: 600px;">
-		<dl>
-			<dt>
-				<strong>상세코드 관리</strong>
-			</dt>
-			<dd class="content">
-
-				<!-- s : 여기에 내용입력 -->
-<%-- 
-				<table class="row">
-					<caption>caption</caption>
-					<colgroup>
-						<col width="120px">
-						<col width="*">
-						<col width="120px">
-						<col width="*">
-					</colgroup>
-
-					<tbody>
-						<tr>
-							<th scope="row">그룹 코드 ID <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" id="dtl_grp_cod" name="dtl_grp_cod" /></td>
-							<th scope="row">그룹 코드 명 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" id="dtl_grp_cod_nm" name="dtl_grp_cod_nm" /></td>
-						</tr>
-						<tr>
-							<th scope="row">상세 코드 ID <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" id="dtl_cod" name="dtl_cod" /></td>
-							<th scope="row">상세 코드 명 <span class="font_red">*</span></th>
-							<td><input type="text" class="inputTxt p100" id="dtl_cod_nm" name="dtl_cod_nm" /></td>
-						</tr>
-						<tr>
-							<th scope="row">순서</th>
-							<td colspan="3"><input type="text" class="inputTxt" id="dtl_odr" name="dtl_odr" /></td>
-						</tr>
-						<tr>
-							<th scope="row">제목</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_cod_eplti" name="dtl_cod_eplti" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 01</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_01" name="dtl_tmp_fld_01" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 02</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_02" name="dtl_tmp_fld_02" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 03</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_03" name="dtl_tmp_fld_03" /></td>
-						</tr>
-						<tr>
-							<th scope="row">임시 필드 04</th>
-							<td colspan="3"><input type="text" class="inputTxt p100"
-								id="dtl_tmp_fld_04" name="dtl_tmp_fld_04" /></td>
-						</tr>
-						<tr>
-							<th scope="row">사용 유무 <span class="font_red">*</span></th>
-							<td colspan="3"><input type="radio" id="dtl_use_poa_1"
-								name="dtl_use_poa" value="Y" /> <label for="radio1-1">사용</label>
-								&nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" id="dtl_use_poa_2"
-								name="dtl_use_poa" value="N" /> <label for="radio1-2">미사용</label></td>
-						</tr>
-					</tbody>
-				</table>
- --%>
-				<!-- e : 여기에 내용입력 -->
-
-				<div class="btn_areaC mt30">
-					<a href="" class="btnType blue" id="btnSaveDtlCod" name="btn"><span>저장</span></a>
-					<a href="" class="btnType blue" id="btnDeleteDtlCod" name="btn"><span>삭제</span></a>  
-					<a href="" class="btnType gray" id="btnCloseDtlCod" name="btn"><span>취소</span></a>
-				</div>
-			</dd>
-		</dl>
-		<a href="" class="closePop"><span class="hidden">닫기</span></a>
-	</div>
-	<!--// 모달팝업 -->
 </form>
 </body>
 </html>

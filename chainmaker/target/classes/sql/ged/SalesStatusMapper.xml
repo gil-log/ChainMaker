@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.ged.dao.SalesStatusDao">
+
+	<select id="selectCompanySales" resultType="kr.happyjob.chainmaker.ged.model.CompanySalesVO"
+	parameterType="kr.happyjob.chainmaker.ged.model.SalesRequestDTO">
+		SELECT detail_company_order.user_company, sum(detail_company_order.sales_price) as sales_price, sum(detail_company_order.profit_price) as profit_price
+		FROM
+		(
+		SELECT company_order.*,  (product.pro_price * company_order.order_qty) as sales_price, ((product.pro_price - product.pro_deli_price) * company_order.order_qty) as profit_price
+		FROM
+		(
+		SELECT userinfo.user_company, orders.order_no, orders.pro_no, order_qty, order_date
+
+		FROM tb_order orders, tb_userinfo userinfo
+
+		WHERE orders.loginID = userinfo.loginID
+		AND orders.order_cd = 'complete'
+		
+		<if test='startDate != null and endDate != null'>
+		AND DATE(orders.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		<if test='user_company != null'>
+		AND userinfo.user_company LIKE CONCAT('%', #{user_company}, '%')
+		</if>
+
+		) company_order
+		LEFT JOIN tb_product product
+		ON company_order.pro_no = product.pro_no
+		) detail_company_order
+		GROUP BY detail_company_order.user_company
+		ORDER BY detail_company_order.sales_price desc
+		
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+
+	<select id="countCompanySales" resultType="int" parameterType="kr.happyjob.chainmaker.ged.model.SalesRequestDTO">
+		SELECT COUNT(1) as tot_cnt
+		FROM
+		(		SELECT detail_company_order.user_company, sum(detail_company_order.sales_price) as sales_price, sum(detail_company_order.profit_price) as profit_price
+		FROM
+		(
+		SELECT company_order.*,  (product.pro_price * company_order.order_qty) as sales_price, ((product.pro_price - product.pro_deli_price) * company_order.order_qty) as profit_price
+		FROM
+		(
+		SELECT userinfo.user_company, orders.order_no, orders.pro_no, order_qty, order_date
+
+		FROM tb_order orders, tb_userinfo userinfo
+
+		WHERE orders.loginID = userinfo.loginID
+		AND orders.order_cd = 'complete'
+		
+		<if test='startDate != null and endDate != null'>
+		AND DATE(orders.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		<if test='user_company != null'>
+		AND userinfo.user_company LIKE CONCAT('%', #{user_company}, '%')
+		</if>
+
+		) company_order
+		LEFT JOIN tb_product product
+		ON company_order.pro_no = product.pro_no
+		) detail_company_order
+		GROUP BY detail_company_order.user_company
+		ORDER BY detail_company_order.sales_price desc
+		) total_count
+	</select>
+	
+	<select id="selectCompanySalesDetail" resultType="kr.happyjob.chainmaker.ged.model.CompanySalesDetailVO"
+	parameterType="kr.happyjob.chainmaker.ged.model.SalesRequestDTO">
+		SELECT company_order.*,  product.pro_name,  (product.pro_price * company_order.order_qty) as sales_price, ((product.pro_price - product.pro_deli_price) * company_order.order_qty) as profit_price
+		FROM
+		(
+		SELECT userinfo.user_company, orders.order_no, orders.pro_no, order_qty, order_date
+
+		FROM tb_order orders, tb_userinfo userinfo
+
+		WHERE orders.loginID = userinfo.loginID
+		AND orders.order_cd = 'complete'
+
+		AND userinfo.user_company  LIKE CONCAT('%', #{user_company}, '%')
+
+		<if test='startDate != null and endDate != null'>
+		AND DATE(orders.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+
+		) company_order
+		LEFT JOIN tb_product product
+		ON company_order.pro_no = product.pro_no
+	</select>
+	
+	<select id="countCompanySalesDetail" resultType="int" parameterType="kr.happyjob.chainmaker.ged.model.SalesRequestDTO">
+		SELECT COUNT(1) as tot_cnt
+		FROM
+		(
+		SELECT company_order.*,  product.pro_name,  (product.pro_price * company_order.order_qty) as sales_price, ((product.pro_price - product.pro_deli_price) * company_order.order_qty) as profit_price
+		FROM
+		(
+		SELECT userinfo.user_company, orders.order_no, orders.pro_no, order_qty, order_date
+
+		FROM tb_order orders, tb_userinfo userinfo
+
+		WHERE orders.loginID = userinfo.loginID
+		AND orders.order_cd = 'complete'
+
+		AND userinfo.user_company  LIKE CONCAT('%', #{user_company}, '%')
+
+		<if test='startDate != null and endDate != null'>
+		AND DATE(orders.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+
+		) company_order
+		LEFT JOIN tb_product product
+		ON company_order.pro_no = product.pro_no
+		) total_count
+	</select>
+	
+</mapper>

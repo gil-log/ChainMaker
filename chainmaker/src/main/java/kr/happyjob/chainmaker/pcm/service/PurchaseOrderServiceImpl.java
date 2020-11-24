@@ -13,7 +13,7 @@ import kr.happyjob.chainmaker.pcm.model.PurchaseOrderModel;
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 	@Autowired
-	PurchaseOrderDao purchaseOrderDao; 
+	private PurchaseOrderDao purchaseOrderDao; 
 	
 	@Override
 	public List<PurchaseOrderModel> purchaseOrderList(Map<String, Object> paramMap) {
@@ -43,6 +43,12 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	public int countPurchaseDtlList(Map<String, Object> paramMap) {
 
 		return purchaseOrderDao.countPurchaseDtlList(paramMap);
+	}
+
+	@Override
+	public int updatePurchaseCD(Map<String, Object> paramMap) {
+		
+		return purchaseOrderDao.updatePurchaseCD(paramMap);
 	}
 
 }

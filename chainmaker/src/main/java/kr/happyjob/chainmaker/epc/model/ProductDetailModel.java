@@ -12,7 +12,7 @@ import lombok.ToString;
 public class ProductDetailModel {
 	
 		
-	// 모델번호
+			// 모델번호
 			private String pro_cod_num;
 			// 장비구분
 			private String pro_cod;
@@ -23,6 +23,8 @@ public class ProductDetailModel {
 			//상세 코드
 			private String detail_code;
 			
+			//상세 이름
+			private String detail_name;
 			
 	
 }

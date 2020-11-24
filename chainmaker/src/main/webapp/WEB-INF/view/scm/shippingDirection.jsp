@@ -58,25 +58,13 @@
 						</p>
 
 						<p class="conTitle">
-							<span>구매 승인</span> <span class="fr"> 
+							<span>배송 지시서</span> <span class="fr"> 
 							</span>
+							
+							<label style="margin-left: 70%"><input type="checkbox" id="shippingDoneCheck" value="refund"> 배송 미완료 목록 조회</label>
+							
 						</p>
 						
-						<p class="conTitle">
-							<span>제품 검색</span> <span class="fr"> 
-							</span>
-							
-								<label style="margin-left: 3%">제품명      </label> 
-								<input type="text" style="text-align: center; height:35%;  width:30%; margin-left: 1%" id='model_name_searchbar'>
-								
-								
-								<label style="margin-left: 5%">신청일자      </label> 
-								<input class="datetype" style="margin-left: 1%" type="text" name = "date" id="startDate">
-							
-								<input class="datetype" type="text" name = "date" id="endDate">
-								
-								<a href="" class="btnType blue" id="searchBtn" name="btn" style="margin-left: 2%"><span>검색</span></a>
-						</p>
 						<div class="divComGrpCodList">
 							<table class="col">
 								<caption>caption</caption>

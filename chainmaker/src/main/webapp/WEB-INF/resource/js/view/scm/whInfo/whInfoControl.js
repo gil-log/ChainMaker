@@ -18,7 +18,6 @@
     case "produce":
       param = {
       action : action,
-      ware_no : 15,
       ware_cd : $("#address").val().substr(0,2),
       ware_name : $("#ware_name").val(),
       ware_address : $("#address").val(),

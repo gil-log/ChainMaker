@@ -30,7 +30,7 @@ public class WHInventoryFormController {
 	private final String className = this.getClass().toString();
 		
 	@Autowired
-	WHInventoryFormService whInventoryFormService;
+	private WHInventoryFormService whInventoryFormService;
 	
 	//창고별 재고 현황 페이지 연결
 	@RequestMapping("whInventoryForm.do")

@@ -75,8 +75,69 @@
          ORDER BY ta.odr
      </select>
      
+     <!-- 회원가입 -->
+     <insert id="registerUser" parameterType="java.util.Map">
+     /*kr.kosmo.jobkorea.login.dao.LoginDao.registerUser*/
+     INSERT INTO tb_userinfo (
+     							loginID
+     						,	user_type
+     						,	name
+     						,	password
+     						,	gender_cd
+     						,	user_tel1
+     						,	user_tel2
+     						,	user_tel3
+     						,	user_zipcode
+     						,	user_address
+     						,	user_dt_address
+     						,	user_account
+     						,	bank_cd
+     						,	del_cd
+     						,	div_cd
+     						,	user_email
+     						,	user_company
+     						)
+     						VALUES (
+     								#{loginID}
+								,	#{user_type}
+								,	#{name}  
+								,	#{password}  
+								,	#{gender_cd}  
+								,	#{user_tel1}  
+								,	#{user_tel2}  
+								,	#{user_tel3}  
+								,	#{user_zipcode}  
+								,	#{user_address}  
+								,	#{user_dt_address}
+								,	#{user_account}
+								,	#{bank_cd}
+								,	#{del_cd}
+								,	#{div_cd}    	
+								,	#{user_email}  
+								,	#{user_company}					
+     						)
+     
+     
+     </insert>
+     
+     
+     <!-- loginID 중복검사 -->
+	<select id="check_loginID" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM tb_userinfo
+		WHERE loginID = #{loginID}
+	</select>
+	
      <!-- 사용자 ID 찾기 -->
-   <select id="selectFindId" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      <select id="selectFindId" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.happyjob.chainmaker.login.dao.LoginDao.selectFindId*/
+      SELECT  u.loginID as loginID
+      	  ,	  u.user_email as user_email
+      FROM    tb_userinfo as u
+      WHERE   u.del_cd =0
+      AND	  u.user_email = #{user_email}
+     </select>
+<!--    <select id="selectFindId" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
       /*kr.kosmo.jobkorea.login.dao.LoginDao.selectFindId*/
       SELECT  ta.lgn_id
       , tb.cpn_ctr
@@ -105,10 +166,28 @@
             AND 1=2
          </otherwise>
       </choose>
+     </select> -->
+     <!-- select박스 은행 목록 -->
+     <select id="selectBankList" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+     /*kr.happyjob.chainmaker.login.dao.LoginDao.selectBankList*/
+     SELECT detail_name 
+     	,	detail_code
+     FROM   tb_detail_code
+	 WHERE  group_code = 'bankCD'
      </select>
       
      <!-- 사용자 PW 찾기 -->
-   <select id="selectFindPw" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+     <select id="selectFindPw" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.happyjob.chainmaker.login.dao.LoginDao.selectFindPw*/
+      SELECT  u.loginID as loginID
+      	  ,   u.password as password
+      	  ,	  u.user_email as user_email
+      FROM    tb_userinfo as u
+      WHERE   u.del_cd =0
+      AND	  u.user_email = #{user_email}
+      AND 	  u.loginID = #{loginID}
+     </select>
+   <!-- <select id="selectFindPw" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
       /*kr.kosmo.jobkorea.login.dao.LoginDao.selectFindPw*/
       SELECT  ta.lgn_id
       , ta.pwd
@@ -140,6 +219,14 @@
             AND 1=2
          </otherwise>
       </choose>
+     </select> -->
+     
+     <!-- 사용자 PW 찾기 ID 체크-->
+     <select id="registerIdCheck" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+     SELECT     u.loginID as loginID
+     FROM    	tb_userinfo as u
+     WHERE   	u.del_cd =0
+     AND 	  	u.loginID = #{loginID}
      </select>
      
 

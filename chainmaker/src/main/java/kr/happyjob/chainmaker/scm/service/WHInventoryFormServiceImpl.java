@@ -14,7 +14,7 @@ import kr.happyjob.chainmaker.scm.model.WHInventoryFormModel;
 public class WHInventoryFormServiceImpl implements WHInventoryFormService {
 
 	@Autowired
-	WHInventoryFormDao whInventoryFormDao;
+	private WHInventoryFormDao whInventoryFormDao;
 	
 	@Override
 	public List<WHInventoryFormModel> whInventoryList(Map<String, Object> paramMap) {

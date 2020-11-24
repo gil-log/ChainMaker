@@ -4,15 +4,15 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>purchaseOrderList</title>
+<title>purchaseOrderist</title>
 
 <!-- common Include -->
 <jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
 
 <script>
 //페이징 설정
-var pageSizePurchaseOrder=5;
-var pageBlockSizePurchaseOrder=5;
+var pageSizePurchaseOrder=10;
+var pageBlockSizePurchaseOrder=10;
 
 var pageSizeModalPurchaseDtl=5;
 var pageBlockSizeModalPurchaseDtl=5;
@@ -284,7 +284,7 @@ function sendPurchaseDirectionResult(data){
 						<jsp:include page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include>
 						
 					</li>
-					<li class="content">
+					<li class="contents">
 						<div class="content">
 							<!-- 메뉴 경로 영역 -->
 							<p class="Location">

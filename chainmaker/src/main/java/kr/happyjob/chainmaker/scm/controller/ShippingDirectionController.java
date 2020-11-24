@@ -89,9 +89,44 @@ public class ShippingDirectionController {
 				
 				break;
 			}
+			
+			case "unshipping" : {
+				//resultMap에 담아서 결과 리스트 가져온다.
+				resultMap = getUnShippingOrderList(shippingRequestDTO);
+				
+				// resultMap의 key들을 set에 가져온다.
+				Set<String> keySet = resultMap.keySet();
+				Iterator<String> keyIterator = keySet.iterator();
+				
+				// model에 key와 value에 해당하는 값을 담아준다.
+				while(keyIterator.hasNext()) {
+					String key = keyIterator.next();
+					Object value = resultMap.get(key);
+					model.addAttribute(key, value);
+				}
+				
+				viewLocation = "/scm/shippingDirectionList";
+				
+				break;
+			}
 		}
 		
 		return viewLocation;
+	}
+	
+	public Map<String, Object> getUnShippingOrderList(ShippingRequestDTO shippingRequestDTO){
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		shippingRequestDTO.setShip_cd("unshippng");
+		
+		List<ShippingOrderDTO> shippingDirectionList = shippingDirectionServiceImpl.getShippingOrderList(shippingRequestDTO);
+		
+		int totalCntDailyOrder = shippingDirectionServiceImpl.countShippingOrderList(shippingRequestDTO);
+		
+		resultMap.put("shippingDirectionList", shippingDirectionList);
+		resultMap.put("totalCntDailyOrder", totalCntDailyOrder);
+		
+		return resultMap;
 	}
 	
 	public Map<String, Object> getShippingOrderList(ShippingRequestDTO shippingRequestDTO){

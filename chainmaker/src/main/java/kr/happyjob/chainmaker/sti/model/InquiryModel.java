@@ -4,13 +4,15 @@ public class InquiryModel {
 	
 	private int row_num;
 	private String inq_no;
-	private String  inq_title;
+	private String inq_title;
 	private String inq_content;
-	private String  inq_regdate;
+	private String inq_regdate;
 	private String inq_moddate;
 	private String category_cd;
 	private String answer_cd;
-	private String loginID;		
+	private String loginID;
+	private String inq_antitle;
+	
 	
 	public int getRow_num() {
 		return row_num;
@@ -65,6 +67,12 @@ public class InquiryModel {
 	}
 	public void setLoginID(String loginID) {
 		this.loginID = loginID;
+	}
+	public String getInq_antitle() {
+		return inq_antitle;
+	}
+	public void setInq_antitle(String inq_antitle) {
+		this.inq_antitle = inq_antitle;
 	}
 
 	

@@ -5,44 +5,50 @@
 
 	<!-- 공지사항 작성 -->
 	<insert id="insertNotice">
-		insert into tb_notice
-		(notice_no, notice_title,
-		notice_content, notice_regdate, notice_moddate, loginID, notice_hit)
-		values(
-		notice_no,
+		INSERT INTO tb_notice
+		(notice_no, notice_title, notice_content, notice_regdate, notice_moddate, loginID, notice_hit)
+		VALUES(
+		#{notice_no},
 		#{notice_title},
 		#{notice_content},
 		curdate(),
 		curdate(),
 		#{loginID},
-		0
+		0 
 		)
 	</insert>
+	
+	<!--  notice_no +1  -->
+	<select id="numPlus" resultType="int">
+		SELECT (IFNULL(MAX(notice_no),0) +1) as notice_no 
+		FROM tb_notice
+	</select>
+	
 	<!-- 파일 테이블에 제품 내용 등록 -->
-	<insert id="insertNoticeFile" parameterType="Map">
-
+	<insert id="insertNoticeFile">
 		INSERT INTO tb_file
-
-		(
-		file_server_path, file_local_path, file_new_name , file_ofname , file_size , pro_no
-		)
-		VALUES
-
-		(
-		#{file_server_path}
-		, #{file_local_path}
-		, #{file_new_name}
-		, #{file_ofname}
-		, #{file_size}
-		, #{pro_no}
+		(file_server_path, file_local_path, file_new_name , file_ofname , file_size , notice_no)
+		VALUES(
+		#{file_server_path},
+		#{file_local_path},
+		#{file_new_name},
+		#{file_ofname},
+		#{file_size},
+		#{notice_no}
 		)
 	</insert>
+	
+	<!-- 파일 조회 -->
+	<select id="selectFile" resultType="kr.happyjob.chainmaker.scm.model.FileModel">	
+		SELECT file_no, file_ofname, file_new_name, file_size, notice_no 		
+		FROM tb_file
+		WHERE notice_no = #{notice_no} 		
+	</select>
+		
 	<!-- 공지사항 리스트 -->
-	<!-- and notice_moddate >= #{from_date} and notice_moddate < #{to_date} -->
 	<select id="selectNoticeList" resultType="kr.happyjob.chainmaker.scm.model.NoticeModel">
 		SELECT
-		notice_no, notice_title, loginID, notice_regdate,
-		notice_moddate, notice_hit
+		notice_no, notice_title, loginID, notice_regdate, notice_moddate, notice_hit
 		FROM tb_notice
 		<where>
 			<choose>
@@ -62,30 +68,18 @@
 					or
 					notice_content LIKE CONCAT('%', #{sname}, '%'))
 				</when>
-			</choose>
-			<!-- <if test="(sname != null) and (!sname.equals('')) "> <choose> <when 
-				test="(oname eq 'title'.toString())"> and notice_title Like CONCAT('%', #{sname}, 
-				'%') </when> <when test="(oname eq 'content'.toString())"> and notice_content 
-				LIKE CONCAT('%', #{sname}, '%') </when> <when test="(oname eq 'all'.toString())"> 
-				and notice_content LIKE CONCAT('%', #{sname}, '%') or notice_title Like CONCAT('%', 
-				#{sname}, '%') </when> <otherwise> AND 1=2 </otherwise> </choose> </if> -->
+			</choose>			
 		</where>
-		ORDER BY notice_moddate DESC
+		ORDER BY notice_moddate DESC, notice_no DESC
 		LIMIT #{pageIndex}, #{pageSize}
 	</select>
-
-
-	<!-- <sql id="search"> <if test="searchType == 'notice_title'.toString()">AND 
-		notice_title LIKE 'notice_title%' || #{searchkeyword}</if> <if test="searchType 
-		== 'loginID'.toString()">AND loginID LIKE 'loginID%' || #{searchkeyword}</if> 
-		</sql> -->
-
+	
 	<!-- 공지 사항 수 구하기 -->
 	<select id="noticeTotalCnt" resultType="int">
-		select count(*) as total_cnt from
-		( SELECT notice_no
-		, notice_title
-		, loginID
+		SELECT COUNT(*) as total_cnt from
+		(SELECT notice_no,
+		         notice_title,
+		         loginID
 		FROM tb_notice
 		<where>
 			<choose>
@@ -107,12 +101,6 @@
 					LIKE CONCAT('%', #{sname}, '%'))
 				</when>
 			</choose>
-			<!-- <if test="(sname != null) and (!sname.equals('')) "> <choose> <when 
-				test="(oname eq 'title'.toString())"> and notice_title Like CONCAT('%', #{sname}, 
-				'%') </when> <when test="(oname eq 'content'.toString())"> and notice_content 
-				LIKE CONCAT('%', #{sname}, '%') </when> <when test="(oname eq 'all'.toString())"> 
-				and notice_content LIKE CONCAT('%', #{sname}, '%') or notice_title Like CONCAT('%', 
-				#{sname}, '%') </when> <otherwise> AND 1=2 </otherwise> </choose> </if> -->
 		</where>
 		)a
 	</select>
@@ -120,14 +108,14 @@
 	<!-- 공지사항 상세보기 -->
 	<select id="detailNotice" resultType="kr.happyjob.chainmaker.scm.model.NoticeModel">
 		<![CDATA[
-		select notice_no
-			 , loginID
-			 , notice_title
-			 , notice_regdate
-			 , notice_moddate
-			 , notice_content
-			from tb_notice
-			where notice_no = #{notice_no}
+		SELECT notice_no,
+			   loginID,
+			   notice_title,
+			   notice_regdate,
+			   notice_moddate,
+			   notice_content
+		FROM   tb_notice
+		WHERE  notice_no = #{notice_no}
 			]]>
 		<choose>
 			<when test="(oname eq 'title'.toString())">
@@ -144,32 +132,34 @@
 				or notice_content LIKE CONCAT('%', #{sname}, '%'))
 			</when>
 		</choose>
-		<!-- <if test="(sname != null) and (!sname.equals('')) "> <choose> <when 
-			test="(oname eq 'title'.toString())"> and notice_title Like CONCAT('%', #{sname}, 
-			'%') </when> <when test="(oname eq 'content'.toString())"> and notice_content 
-			LIKE CONCAT('%', #{sname}, '%') </when> <when test="(oname eq 'all'.toString())"> 
-			and notice_content LIKE CONCAT('%', #{sname}, '%') or notice_title Like CONCAT('%', 
-			#{sname}, '%') </when> <otherwise> AND 1=2 </otherwise> </choose> </if> -->
 	</select>
 
 	<!-- 공지사항 조회수 -->
 	<update id="updateHit">
-		update tb_notice
-		set notice_hit = notice_hit+1
-		where notice_no = #{notice_no}
+		UPDATE tb_notice
+		SET notice_hit = notice_hit+1
+		WHERE notice_no = #{notice_no}
 	</update>
 
 	<!-- 공지사항 수정 -->
-	<update id="updateNotice" parameterType="java.util.Map">
-		update tb_notice
-		set notice_title = #{notice_title},
+	<update id="updateNotice">
+		UPDATE tb_notice
+		SET notice_title = #{notice_title},
 		notice_content = #{notice_content},
-		notice_moddate = NOW()
-		where notice_no = #{notice_no}
+		notice_moddate = curdate()
+		WHERE notice_no = #{notice_no}
 	</update>
 
 	<!-- 공지사항 삭제 -->
 	<delete id="deleteNotice">
-		delete from tb_notice where notice_no = #{notice_no}
+		DELETE FROM tb_notice 
+		WHERE notice_no = #{notice_no}
 	</delete>
+	
+	<!-- 첨부파일 삭제  -->
+	<delete id="deleteFile">
+		DELETE FROM tb_file 
+		WHERE notice_no = #{notice_no}
+	</delete>
+	
 </mapper>

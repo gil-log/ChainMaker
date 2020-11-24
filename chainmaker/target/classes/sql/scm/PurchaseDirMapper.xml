@@ -63,7 +63,8 @@
 			</choose>
 		</if>
 		<if test="(fromDate != null) and (toDate != null)">
-			AND p.purchase_date BETWEEN #{fromDate} AND #{toDate}
+			AND p.purchase_date <![CDATA[ >= date(#{fromDate}) ]]> 
+			AND p.purchase_date <![CDATA[ <= date(#{toDate})+1 ]]>
 		</if>
 		
 		AND dt.group_code = 'purchaseCD'
@@ -105,6 +106,7 @@
 	<where>
 		<if test="(searchWord != null) and (!searchWord.equals('')) ">
 			<choose>
+			
 				<when test= "searchKey eq 'all'.toString()">
 					AND concat( pd.deli_company, pd.detail_name, pd.pro_name) REGEXP concat('.', #{searchWord}, '.')
 				</when>	
@@ -119,13 +121,14 @@
 				</when>	
 			</choose>
 		</if>
-		
 		<if test="(fromDate != null) and (toDate != null)">
-			AND p.purchase_date BETWEEN #{fromDate} AND #{toDate}
+			AND p.purchase_date <![CDATA[ >= date(#{fromDate}) ]]> 
+			AND p.purchase_date <![CDATA[ <= date(#{toDate})+1 ]]>
 		</if>
 		
 		AND dt.group_code = 'purchaseCD'
 	</where>
+		ORDER BY p.purchase_no ASC
 
 </select>
 
