@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.RefundInfoDao">
+
+<!-- 12페이지 반품 신청 목록 _ 혜원 -->
+	
+<!-- 1. 반품 목록 전체 조회  -->
+	<select id="selectRefundList" parameterType="Map" resultType="kr.happyjob.chainmaker.scm.model.RefundVO">
+	
+	select @rownum:=@rownum+1 as row_num     
+      ,ll.refund_no as refund_no
+      ,ll.company_name as company_name
+      ,ll.pro_no as pro_no           
+      ,ll.pro_name as pro_name
+      ,ll.refund_date as refund_date
+      ,ll.refund_qty as refund_qty
+      ,ll.pro_price * ll.refund_qty as total_price
+	  ,ll.purchase_no as purchase_no
+	  ,ll.order_no as order_no
+	  ,CASE ll.order_no 
+                  WHEN null  THEN '납품업체'
+                  ELSE '기업고객'
+        END as type_company
+	  ,ll.refund_note as refund_note
+  	from (
+				 Select
+						r.refund_no as refund_no
+						,a4.user_company as company_name   
+						,a4.pro_no as pro_no
+						,a4.pro_name as pro_name
+						,r.refund_date as refund_date
+						,r.refund_qty as refund_qty
+						,a4.pro_price as pro_price
+						,r.purchase_no
+						,r.order_no
+						,r.refund_note
+				from tb_refund r     
+				join 
+					(
+					      select u.user_company as user_company
+							     ,u.div_cd as div_cd
+							     ,u.user_type as user_type
+							     ,p.pro_no as pro_no
+							     ,p.pro_name as pro_name
+							     ,p.pro_price as pro_price
+							     ,p.pro_cd as pro_cd
+					       from tb_order o
+					       join tb_product p 
+					          on o.pro_no = p.pro_no
+					       join tb_userinfo u 
+					          on o.loginID = u.loginID and u.user_type = "C"
+					              where 
+						             o.order_cd = 'refund'
+						
+					) a4 on r.pro_no = a4.pro_no 
+					
+					
+			union
+			
+				Select
+						 r.refund_no as refund_no
+						,plu.deli_company as company_name 
+						,r.pro_no as pro_no
+						,plu.pro_name as pro_name
+						,r.refund_date as refund_date
+						,r.refund_qty as refund_qty
+						,plu.pro_deli_price as pro_price
+						,r.purchase_no
+						,r.order_no
+						,r.refund_note
+				from tb_refund r
+				join 
+					(
+					      select 							
+								 pu.purchase_no
+								,pu.purchase_cd
+								,pu.purchase_qty
+								,pu.pro_no
+								,pl.deli_company
+                                ,pl.pro_deli_price
+                                ,pl.pro_name
+							from tb_purchase pu
+							     join 
+					                  (
+									   select
+								             p.pro_no
+								            ,p.pro_name
+								            ,p.pro_deli_price
+								            ,p.deli_no
+                                            ,aa.deli_company											
+							            from tb_product p
+										     join
+					                             (
+												   select
+								                          d.deli_no
+								                         ,d.deli_company
+							                         from tb_delivery d
+												 ) aa on p.deli_no = aa.deli_no
+									  ) pl on pl.pro_no = pu.pro_no
+						   where pu.purchase_cd = '2'
+				    ) plu on r.purchase_no = plu.purchase_no 		
+							
+	  ) ll
+	  
+
+	 where (@rownum:=0)=0
+	 limit 0,10
+	</select>
+	
+	
+<!-- 2. 반품 목록 갯수 -->	
+	<select id="refundListCnt" parameterType="Map" resultType="int">
+		select count(1) from tb_refund
+	</select>
+	
+<!-- 3. 검색하면 나오는 반품목록    * if 조건 하나씩 추가해서 검색해보기. if 문에서 오류뜨는 상태! -->		
+	<select id="selectedRefundList" parameterType="Map" resultType="kr.happyjob.chainmaker.scm.model.RefundVO">
+	
+	select @rownum:=@rownum+1 as row_num     
+      ,ll.refund_no as refund_no
+      ,ll.company_name as company_name
+      ,ll.pro_no as pro_no           
+      ,ll.pro_name as pro_name
+      ,ll.refund_date as refund_date
+      ,ll.refund_qty as refund_qty
+      ,ll.pro_price * ll.refund_qty as total_price
+	  ,ll.purchase_no as purchase_no
+	  ,ll.order_no as order_no
+	  ,CASE ll.order_no 
+                  WHEN null  THEN '납품업체'
+                  ELSE '기업고객'
+        END as type_company
+	  ,ll.refund_note as refund_note
+  	from (
+				 Select
+						r.refund_no as refund_no
+						,a4.user_company as company_name   
+						,a4.pro_no as pro_no
+						,a4.pro_name as pro_name
+						,r.refund_date as refund_date
+						,r.refund_qty as refund_qty
+						,a4.pro_price as pro_price
+						,r.purchase_no
+						,r.order_no
+						,r.refund_note
+				from tb_refund r     
+				join 
+					(
+					      select u.user_company as user_company
+							     ,u.div_cd as div_cd
+							     ,u.user_type as user_type
+							     ,p.pro_no as pro_no
+							     ,p.pro_name as pro_name
+							     ,p.pro_price as pro_price
+							     ,p.pro_cd as pro_cd
+					       from tb_order o
+					       join tb_product p 
+					          on o.pro_no = p.pro_no
+					       join tb_userinfo u 
+					          on o.loginID = u.loginID and u.user_type = "C"
+					              where 
+						             o.order_cd = 'refund'
+						
+					) a4 on r.pro_no = a4.pro_no 
+							
+	  ) ll
+	  
+
+	 where (@rownum:=0)=0
+	 limit 0,10
+	</select>
+
+
+<!-- 4. 검색하면 나오는 반품목록 갯수  -->	
+	<select id="selectedRefundCnt"  parameterType="Map" resultType="int">
+		select count(1) from tb_refund
+	</select>
+	
+	
+	
+	
+
+<!-- 모달창띄우기 -->
+	<!-- <select id="refundPopup" resultType="kr.happyjob.chainmaker.scm.model.RefundVO">
+		Select
+		@rownum:=@rownum+1 as row_num	
+		,r.refund_qty as refund_qty
+		,r.refund_note as refund_note
+		,r.refund_no as refund_no
+		,r. refund_date as refund_date
+		,r.refund_confirm_cd as refund_confirm_cd
+		,r.refund_cd as refund_cd
+		,purchase_no
+		,p.pro_name as pro_name
+		,p.pro_model_no as pro_model_no
+		,r.order_no as order_no
+   		,p.pro_price * r.refund_qty as total_price		
+		 
+		from tb_refund r, tb_product p
+   		where r.pro_no = p.pro_no and refund_no = #{refund_no}
+         and (@rownum:=0)=0
+	</select> --> 
+
+	
+
+</mapper>

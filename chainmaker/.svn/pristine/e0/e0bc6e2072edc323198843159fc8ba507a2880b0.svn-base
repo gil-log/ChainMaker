@@ -1,0 +1,92 @@
+
+$(function() {
+	// 기업별 매출 상위 차트 보여주기
+	fCompanyTopChart();
+	
+	// 제품별 잘팔린 제품 차트 보여주기
+	fProductTopChart();
+	
+	// 회사 매출 라인 차트 보여주기
+	fSalesLineChart();
+});
+
+function fCompanyTopChart() {
+	
+	var labels = [ 'gr', 'Blue', 'Yellow', 'Green', 'Purple' ];
+	var data = [ 12, 19, 3, 5, 2, 3 ];
+	
+	var label = '상위 매출 기업';
+		
+	var backgroundColor =  [ 'rgba(233, 5, 61, 100)',
+		'rgba(247, 80, 22, 100)', 'rgba(247, 22, 184, 100)',
+		'rgba(150, 246, 238, 100)', 'rgba(172, 185, 178, 100)'];
+	
+	
+	var ctx = $('#companyTopChart');
+	var myChart = new Chart(ctx, {
+		type : 'bar',
+		data : {
+			labels : labels,
+			datasets : [ {
+				label : label,
+				data : data,
+				backgroundColor : backgroundColor
+			} ]
+		},
+		options : {
+			responsive: false,
+			scales : {
+				yAxes : [ {
+					ticks : {
+						beginAtZero : true
+					}
+				} ]
+			}
+		}
+	});
+
+}
+
+function fProductTopChart(){
+	
+	var ptc = $("#productTopChart");
+	
+	var data = { 
+			labels: ['red','yellow','blue'],
+			datasets: [{ 
+				backgroundColor: ['rgba(226, 34, 94, 100)',
+					'rgba(222, 246, 18, 100)',
+					'rgba(1, 191, 241, 100)'], 
+				data: [10, 20, 30] }]
+	}
+
+	
+	
+	var myDoughnutChart = new Chart(ptc, 
+			{ type: 'doughnut', 
+		data: data, 
+		options: {
+			responsive: false} 
+	});
+
+}
+
+function fSalesLineChart(){
+	
+	var slc = $("#salesLineChart");
+	
+	var chart = new Chart(slc, {  
+		type: 'line', 
+		data: { 
+			labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'], 
+			datasets: [
+				{ label: 'My First dataset', 
+					backgroundColor: 'transparent', 
+					borderColor: 'rgba(3, 235, 78, 100)', 
+					data: [0, 10, 5, 2, 20, 30, 45] }] 
+	},
+	options: {
+		responsive: false
+		} 
+	});
+}

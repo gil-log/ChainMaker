@@ -1,0 +1,66 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<!-- 부트스트랩 -->
+<!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+	integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	crossorigin="anonymous"></script> -->
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+	integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+	crossorigin="anonymous"></script>
+<!-- 차트 링크 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+<script src="${CTX_PATH}/js/view/dashboard/ged/dashboardGed.js"></script>
+
+<style>
+
+.canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 1000px;
+    
+}
+.first {
+float:left;
+margin-left: 1%;
+}
+.third{
+float:right;
+margin-right: 1%;
+margin-bottom: 3%
+}
+
+</style>
+
+</head>
+<body>
+
+				<p class="conTitle" style="margin-top: 3%">
+					<span>월간 수익</span> <span class="fr"> 
+					</span>
+				</p>
+
+		<canvas id=salesLineChart class="canvas" style="height:300px; width:90%"></canvas>
+		
+
+				<p class="conTitle" style="margin-top: 3%">
+					<span>매출 현황</span> <span class="fr"> 
+					</span>
+				</p>
+	
+		<canvas id=companyTopChart class="first" style="height:300px; width:50%"></canvas>
+
+		<canvas id=productTopChart class="third" style="height:300px; width:45%"></canvas>
+
+
+</body>
+</html>

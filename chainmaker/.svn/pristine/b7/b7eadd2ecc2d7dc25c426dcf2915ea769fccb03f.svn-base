@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.RefundRequestDao">
+
+	<select id ="selectOrderListQtyAndDate" resultType="kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO">
+		SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, order_date.order_mod_date, order_date.order_expdate
+		FROM  
+		(SELECT	order_no, sum(order_qty) as order_total_qty
+		FROM tb_order
+		GROUP BY order_no
+		) order_qty,
+		(
+		SELECT tb_order.order_no, sum(tb_product.pro_price * tb_order.order_qty) as amount_payment
+		FROM tb_order tb_order LEFT JOIN tb_product tb_product
+		ON tb_order.pro_no = tb_product.pro_no
+		GROUP BY tb_order.order_no
+		) order_price,
+		(
+		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
+		tb_order.order_expdate, tb_order.order_cd
+		FROM tb_order tb_order
+		GROUP BY tb_order.order_no
+		) order_date
+		WHERE order_qty.order_no = order_price.order_no
+		AND order_qty.order_no = order_date.order_no
+		
+		<if test='startDate != null and endDate != null'>
+		AND DATE(order_date.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	<select id="countOrderListByDate" resultType="int">
+	
+		SELECT COUNT(1) AS tot_cnt
+		FROM
+		(
+		SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, order_date.order_mod_date, order_date.order_expdate
+		FROM  
+		(SELECT	order_no, sum(order_qty) as order_total_qty
+		FROM tb_order
+		GROUP BY order_no
+		) order_qty,
+		(
+		SELECT tb_order.order_no, sum(tb_product.pro_price * tb_order.order_qty) as amount_payment
+		FROM tb_order tb_order LEFT JOIN tb_product tb_product
+		ON tb_order.pro_no = tb_product.pro_no
+		GROUP BY tb_order.order_no
+		) order_price,
+		(
+		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
+		tb_order.order_expdate, tb_order.order_cd
+		FROM tb_order tb_order
+		GROUP BY tb_order.order_no
+		) order_date
+		WHERE order_qty.order_no = order_price.order_no
+		AND order_qty.order_no = order_date.order_no
+		
+		<if test='startDate != null and endDate != null'>
+		AND DATE(order_date.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		) order_date_count
+	</select>
+
+
+	<select id="selectOrderDetailProductInfoByOrderNo" resultType="kr.happyjob.chainmaker.epc.model.OrderDetailVO">
+		SELECT orders.order_no, product.pro_no, product.pro_cd, product.pro_name, 
+		product.pro_manu_name, orders.order_qty, product.pro_price
+		
+		FROM tb_product product, tb_order orders
+		WHERE product.pro_no = orders.pro_no
+		AND orders.order_no = #{order_no}
+	</select>
+
+
+</mapper>

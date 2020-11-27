@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.ged.dao.SalesTopDao">
+
+<!--매춢 상위 조회 -->
+<select id="selectSalesList" parameterType="Map" resultType="kr.happyjob.chainmaker.ged.model.SalesTopModel">
+	
+	SELECT detail_company_order.user_company as top_sales_user_company
+		, sum(detail_company_order.sales_price) as top_sales_price
+	FROM (
+			SELECT company_order.*
+				,  (product.pro_price * company_order.order_qty) as sales_price
+			FROM
+			(
+				SELECT userinfo.user_company
+					, orders.order_no
+					, orders.pro_no
+					, order_qty
+					, order_date
+				FROM tb_order orders 
+				JOIN tb_userinfo userinfo
+				ON orders.loginID = userinfo.loginID
+			<where>
+				AND orders.order_cd = 'complete'
+				AND order_date
+			</where>
+			<if test="(fromDate != null) and (toDate != null)">
+				BETWEEN DATE(#{fromDate}) AND DATE(#{toDate})+1
+			</if>
+			) company_order
+		LEFT OUTER JOIN tb_product product
+		ON company_order.pro_no = product.pro_no
+		) detail_company_order
+	GROUP BY detail_company_order.user_company
+	ORDER BY top_sales_price desc
+	LIMIT 0, 10
+
+</select>
+
+</mapper>

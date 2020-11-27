@@ -18,7 +18,6 @@
           </when>
         </choose>
       </if>
-     AND del_cd = '0'
     </where>
   </select> 
 
@@ -56,8 +55,7 @@
           </when>
         </choose>
       </if>
-     AND wh.del_cd = '0'
-     AND ui.del_cd = '0'
+     AND ui.del_cd = 'n'
     </where>
     ORDER BY wh.ware_no
     LIMIT  #{pageIndex}, #{pageSize}
@@ -74,7 +72,7 @@
            user_email
       FROM tb_userinfo
      WHERE user_type = 'B'
-       AND del_cd = '0'
+       AND del_cd = 'n'
   </select>
   
 <!-- 창고 정보 구하기 -->
@@ -94,8 +92,8 @@
     JOIN     tb_userinfo  as ui
     ON       wh.loginID = ui.loginID
     WHERE    user_type = 'B' 
-      AND    wh.del_cd = '0'
-      AND    ui.del_cd = '0'
+      AND    ui.del_cd = 'n'
+      AND    ui.approval_cd = 'y'
 </select>
   
   <!-- 창고 정보 등록 -->
@@ -139,13 +137,13 @@
      WHERE ware_no = #{ware_no}
   </update> 
   
-  <!-- 창고 정보 삭제 처리 -->
+  <!-- 창고 정보 삭제 처리
   <update id="deleteWhInfo">
   /** kr.happyjob.chainmaker.scm.dao.WHInfoDao.deleteWhInfo */
    UPDATE tb_warehouse
       SET del_cd = '1'
     WHERE ware_no = #{ware_no}
-  </update>
+  </update> -->
   
   
 </mapper>

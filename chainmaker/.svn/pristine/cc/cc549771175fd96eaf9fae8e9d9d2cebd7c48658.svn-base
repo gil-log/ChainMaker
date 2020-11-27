@@ -1,0 +1,23 @@
+package kr.happyjob.chainmaker.dlm.dao;
+
+import java.util.List;
+
+import kr.happyjob.chainmaker.dlm.model.DlmPurchaseOrderDTO;
+import kr.happyjob.chainmaker.dlm.model.DlmPurchaseOrderVO;
+import kr.happyjob.chainmaker.dlm.model.PurchaseOrderPgAndScKeyWordDTO;
+
+public interface DlmPurchaseOrderDao {
+  
+  // 담당자별 발주 리스트 목록 조회
+  public List<DlmPurchaseOrderVO> purchaseOrderListByMng(PurchaseOrderPgAndScKeyWordDTO purchaseOrderPgAndKeyWordDTO);
+  
+  // 발주 리스트 조회 목록 수
+  public int purchaseOrderListTotal(PurchaseOrderPgAndScKeyWordDTO purchaseOrderPgAndKeyWordDTO);
+  
+  // 업체별 발주 상세 목록 조회
+  public List<DlmPurchaseOrderVO> purchaseOrderDtlListByCompany(PurchaseOrderPgAndScKeyWordDTO purchaseOrderPgAndKeyWordDTO);
+  
+  // 발주 리스트 상세 조회 목록 수
+  public int purchaseOrderDtlListTotal(PurchaseOrderPgAndScKeyWordDTO purchaseOrderPgAndKeyWordDTO);
+  
+}

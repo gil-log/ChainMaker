@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.EpcInquiryDao">
+
+<!-- 빌립담당 -->
+	 <!--토탈카운트 조회   -->
+	<select id="inquiryTotalCnt" resultType="int">
+		SELECT count(*)
+		FROM tb_inquiry i
+		JOIN (SELECT d.detail_name as detail_name
+					, d.detail_code as detail_code 
+				FROM tb_detail_code d 
+				WHERE d.group_code='categoryCD') d
+		ON d.detail_code = i.category_cd
+		JOIN (SELECT d.detail_name as detail_name
+					, d.detail_code as detail_code 
+				FROM tb_detail_code d 
+				WHERE d.group_code='answerCD') d2
+		ON d2.detail_code = i.answer_cd
+		WHERE i.loginID = #{loginID};
+      
+	</select> 
+
+	<!-- 1대1 문의 리스트 -->
+	<select id="listInquiry" resultType="kr.happyjob.chainmaker.epc.model.EpcInquiryModel">
+		/* 공통코드로 내부직원, 외부직원, 직책 가져오기 */
+		
+		SELECT @rownum:=@rownum+1 as row_num
+				, d.detail_name as category_name
+				, i.inq_title as inq_title
+				, i.loginID as loginID
+				, i.inq_no as inq_no
+				, DATE_FORMAT( i.inq_regdate, "%Y/%c/%d" ) as inq_regdate
+				, d2.detail_name as answer_name
+		FROM tb_inquiry i
+		JOIN (SELECT d.detail_name as detail_name
+					, d.detail_code as detail_code 
+				FROM tb_detail_code d 
+				WHERE d.group_code='categoryCD') d
+		ON d.detail_code = i.category_cd
+		JOIN (SELECT d.detail_name as detail_name
+					, d.detail_code as detail_code 
+				FROM tb_detail_code d 
+				WHERE d.group_code='answerCD') d2
+		ON d2.detail_code = i.answer_cd
+		WHERE (@rownum:=0)=0
+		AND i.loginID = #{loginID}
+		ORDER by row_num DESC
+		LIMIT #{pageIndex}, #{pageSize};
+
+	</select>
+	
+	
+	<!-- 1대1 문의 상세내용 및 답변내용 -->
+	<select id="detailInquiry" resultType="kr.happyjob.chainmaker.epc.model.EpcInquiryModel">
+		SELECT i.inq_title as inq_title
+		      , i.inq_content as inq_content
+		      , i.category_cd as category_cd
+		      , i.loginID as loginID
+		      , a.ans_content as ans_content
+		      , i.inq_no as inq_no
+		      , i.inq_regdate as inq_regdate
+		FROM tb_inquiry i
+		LEFT JOIN tb_answer a
+		ON i.inq_no = a.inq_no
+		WHERE i.inq_no = #{inq_no};
+	</select>
+	
+	
+	<select id="listCategory" resultType="kr.happyjob.chainmaker.epc.model.EpcInquiryModel">
+		SELECT d.detail_name as category_name
+      		, d.detail_code as detail_code
+		FROM tb_detail_code d
+		WHERE d.group_code = 'categoryCD';
+	</select>
+	
+	<insert id="insertInquiry" parameterType="java.util.Map">
+		INSERT INTO tb_inquiry(
+				inq_title
+				, inq_content
+				, inq_regdate
+				, inq_moddate
+				, category_cd
+				, answer_cd
+				, loginID )
+		VALUES ( #{title}
+				, #{inquiry_content}
+				, now()
+				, now()
+				, #{selectCategory}
+				, '0'
+				, #{writer} );
+	</insert>
+	
+	<update id="updateInquiry" parameterType="java.util.Map">
+		UPDATE tb_inquiry
+		SET inq_title = #{title}
+			, inq_content = #{inquiry_content}
+			, category_cd = #{selectCategory}
+			, inq_regdate = #{inq_regdate}
+			, inq_moddate = now()
+		WHERE inq_no = #{inq_no};
+	</update>
+	
+	<delete id="deleteInquiry" parameterType="java.util.Map">
+		DELETE
+		FROM tb_inquiry
+		WHERE inq_no = #{inq_no};
+	</delete>
+
+</mapper>

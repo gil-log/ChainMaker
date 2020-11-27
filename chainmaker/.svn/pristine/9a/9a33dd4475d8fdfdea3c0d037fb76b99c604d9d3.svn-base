@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.ged.dao.OrderConfirmDao">
+
+	<select id="selectBeforeApprovePurchaseList" resultType="kr.happyjob.chainmaker.ged.model.PurchaseInfoVO">
+		SELECT deli_info.deli_company, product_info.purchase_no, product_info.pro_name, product_info.purchase_qty,
+		product_info.purchase_price, product_info.purchase_date, userinfo.name
+		
+		FROM 
+		(SELECT product.deli_no, product.pro_name, 
+		sum(purchase.purchase_qty *product.pro_deli_price) as purchase_price,
+		purchase.purchase_no, purchase.pro_no, purchase.loginID, 
+		sum(purchase.purchase_qty) as purchase_qty, purchase.purchase_date
+		
+		FROM tb_product product, tb_purchase purchase
+
+		WHERE product.pro_no = purchase.pro_no
+		
+		AND purchase.purchase_cd = 0
+		
+		<if test='pro_name != null'>
+		AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+		</if>
+		
+		<if test='startDate != null and endDate != null'>
+		AND DATE(purchase.purchase_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		
+		GROUP BY purchase.purchase_no
+		) product_info
+
+		LEFT JOIN tb_userinfo userinfo
+		ON product_info.loginID = userinfo.loginID
+	
+		LEFT JOIN
+		(SELECT deli_no, deli_company
+		FROM tb_delivery
+		) deli_info
+		ON product_info.deli_no = deli_info.deli_no
+		
+		ORDER BY product_info.purchase_date
+		
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+
+	<select id="countBeforeApprovePurchaseList" resultType="int">
+		SELECT COUNT(1) as tot_cnt
+		FROM
+		(
+		SELECT deli_info.deli_company, product_info.purchase_no, product_info.pro_name, product_info.purchase_qty,
+		product_info.purchase_price, product_info.purchase_date, userinfo.name
+		
+		FROM 
+		(SELECT product.deli_no, product.pro_name, 
+		sum(purchase.purchase_qty *product.pro_deli_price) as purchase_price,
+		purchase.purchase_no, purchase.pro_no, purchase.loginID, 
+		sum(purchase.purchase_qty) as purchase_qty, purchase.purchase_date
+		
+		FROM tb_product product, tb_purchase purchase
+
+		WHERE product.pro_no = purchase.pro_no
+		
+		AND purchase.purchase_cd = 0
+		
+		<if test='pro_name != null'>
+		AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+		</if>
+		
+		<if test='startDate != null and endDate != null'>
+		AND DATE(purchase.purchase_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		
+		GROUP BY purchase.purchase_no
+		) product_info
+
+		LEFT JOIN tb_userinfo userinfo
+		ON product_info.loginID = userinfo.loginID
+	
+		LEFT JOIN
+		(SELECT deli_no, deli_company
+		FROM tb_delivery
+		) deli_info
+		ON product_info.deli_no = deli_info.deli_no
+		
+		LIMIT #{pageIndex}, #{pageSize}
+		) total_count
+	</select>
+	
+	<update id="updatePurchaseInfoToConfirmByPurchaseNo" parameterType="kr.happyjob.chainmaker.ged.model.PurchaseInfoDTO">
+		UPDATE tb_purchase
+		SET purchase_cd = 1, purchase_date = now()
+		WHERE purchase_no = #{purchase_no}
+	</update>
+</mapper>

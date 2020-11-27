@@ -161,14 +161,25 @@
 		/*kr.kosmo.jobkorea.epc.dao.ProductListDAO.insertBasket*/
 		INSERT INTO tb_basket 
 					(  	 pro_no
+					   , bas_date
                        , loginID
                        , bas_qty
-                       , bas_date)
+                       )
                        
-                       VALUES(  #{pro_num}
+                       SELECT  #{pro_num}
+                    		  ,	#{startDate}
                               , #{login_id}
                               , #{od_qty}
-                              ,	 NOW() )
+                             FROM DUAL 
+                             WHERE NOT EXISTS (SELECT pro_no
+					  								, bas_date
+                       								, loginID
+                       								, bas_qty
+                       								FROM tb_basket
+                       								WHERE pro_no = #{pro_num}
+					  								AND bas_date = #{startDate}
+                       								AND loginID = #{login_id}
+                       									)				
 	</insert>
 	
 </mapper>

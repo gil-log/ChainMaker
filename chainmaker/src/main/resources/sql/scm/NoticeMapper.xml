@@ -48,9 +48,10 @@
 	<!-- 공지사항 리스트 -->
 	<select id="selectNoticeList" resultType="kr.happyjob.chainmaker.scm.model.NoticeModel">
 		SELECT
-		notice_no, notice_title, loginID, notice_regdate, notice_moddate, notice_hit
+		notice_no, notice_title, loginID, notice_regdate, notice_moddate, notice_hit, del_cd
 		FROM tb_notice
-		<where>
+		WHERE del_cd = "n"
+		<where>		
 			<choose>
 				<when test="(oname eq 'title'.toString())">
 					and notice_moddate between #{from_date} and #{to_date}
@@ -61,12 +62,13 @@
 					#{to_date}
 					and notice_content LIKE CONCAT('%', #{sname}, '%')
 				</when>
-				<when test="(oname eq 'all'.toString())">
+				<when test="(oname eq 'all'.toString())">	
 					and notice_moddate between #{from_date} and
 					#{to_date}
 					and (notice_title Like CONCAT('%', #{sname}, '%')
 					or
 					notice_content LIKE CONCAT('%', #{sname}, '%'))
+					
 				</when>
 			</choose>			
 		</where>
@@ -81,8 +83,9 @@
 		         notice_title,
 		         loginID
 		FROM tb_notice
+		WHERE del_cd = "n"
 		<where>
-			<choose>
+			<choose>				
 				<when test="(oname eq 'title'.toString())">
 					and notice_moddate between #{from_date} and
 					#{to_date}
@@ -151,15 +154,16 @@
 	</update>
 
 	<!-- 공지사항 삭제 -->
-	<delete id="deleteNotice">
-		DELETE FROM tb_notice 
-		WHERE notice_no = #{notice_no}
-	</delete>
+	<update id="deleteNotice">
+		UPDATE tb_notice
+		SET del_cd = "y"
+		WHERE notice_no = #{notice_no};
+	</update>
 	
-	<!-- 첨부파일 삭제  -->
+	<!--  첨부파일 삭제 -->  
 	<delete id="deleteFile">
 		DELETE FROM tb_file 
 		WHERE notice_no = #{notice_no}
-	</delete>
+	</delete> 
 	
 </mapper>

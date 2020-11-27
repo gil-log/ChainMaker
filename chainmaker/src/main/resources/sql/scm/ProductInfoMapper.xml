@@ -39,6 +39,7 @@
 				</when>
 			</choose>
         </if>
+        	AND d.del_cd = 'n'
 			AND (@rownum:=0)=0
         </where>
         ORDER BY p.pro_cd DESC
@@ -64,18 +65,12 @@
 			 , ware_address as ware_address
 			 , ware_dt_address as ware_dt_address
 		FROM tb_warehouse
-		<where>
-			AND del_cd = '0'
-		</where> 
 	</select>
 	
 	<select id="selectDelivery" resultType="kr.happyjob.chainmaker.scm.model.DeliveryModel">
 		SELECT deli_no as deli_no
 			 , deli_company as deli_company
 		FROM tb_delivery
-		<where>
-			AND del_cd = '0'
-		</where> 
 	</select>
 
 	<!-- 제품 목록 수 조회 -->
@@ -215,7 +210,7 @@
 	</delete>
 	
 	<!-- 제품 창고 테이블에 제품 등록 -->
-	<insert id="insertProdWareHouse" parameterType="Map">
+	<insert id="insertProdWareHouse" parameterType="java.util.Map">
 		INSERT INTO tb_product_warehouse 
 		
 		(
@@ -223,10 +218,15 @@
 		)
 		VALUES
 		
+		<foreach collection="ware_list"  index='index' item="item"  separator=','>
 		(
-			#{ware_no} 
+			#{item}
+			 
 			, #{pro_no}
 		)
+		</foreach>		
+        
+		
 	</insert>
 	
 

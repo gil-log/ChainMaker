@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.dlm.dao.DlmPurchaseOrderDao">
+  <!-- 창고 담당자 별 발주 리스트 목록 -->
+  <select id="purchaseOrderListByMng" resultType="kr.happyjob.chainmaker.dlm.model.DlmPurchaseOrderVO">
+    SELECT deli.deli_no,
+           deli.deli_company, 
+           FORMAT(SUM(purc.purchase_qty * prod.pro_deli_price),'##,##0') 'total_price', 
+           purc.purchase_date 
+           
+      FROM tb_purchase as purc 
+      JOIN tb_product as prod 
+        ON purc.pro_no = prod.pro_no
+      JOIN tb_delivery as deli 
+        ON prod.deli_no = deli.deli_no 
+      JOIN tb_warehouse as ware 
+        ON purc.ware_no = ware.ware_no
+      JOIN tb_userinfo as ui
+        ON ware.loginID = ui.loginID
+        
+    <where>
+      <if test="(searchKey != null) and (!searchKey.equals(''))">
+        <choose>
+          <when test="(searchKey != null) and (searchKey eq 'company'.toString())"> 
+            deli.deli_company LIKE CONCAT('%', #{searchWord}, '%')
+          </when>
+          <when test="(searchKey != null) and (searchKey eq 'all'.toString())">
+            (deli.deli_company LIKE CONCAT('%', #{searchWord}, '%') OR deli.deli_no LIKE CONCAT('%',#{searchWord}, '%'))
+          </when>
+        </choose>
+      </if>
+      <if test="(startDate != null) and (!startDate.equals('')) and (endDate != null) and (!endDate.equals(''))">
+        AND DATE_FORMAT(purc.purchase_date, '%Y-%m-%d') BETWEEN #{startDate} AND #{endDate}
+      </if>
+      AND ware.del_cd = '0' 
+      AND ui.del_cd = '0'
+      AND deli.del_cd = '0'
+      AND purc.purchase_cd = '2'
+      AND ware.loginID = #{loginID}
+    </where>
+    GROUP BY deli.deli_company
+  </select>
+  <!-- 조회 목록 수 -->
+  <select id="totalCnt" resultType="int"> 
+  SELECT COUNT(DISTINCT deli_company) as totalcnt
+   
+    FROM tb_purchase as purc
+    JOIN tb_product as prod 
+      ON purc.pro_no = prod.pro_no 
+    JOIN tb_delivery as deli 
+      ON prod.deli_no = deli.deli_no 
+    JOIN tb_warehouse as ware 
+      ON purc.ware_no = ware.ware_no 
+    JOIN tb_userinfo as ui
+      ON ware.loginID = ui.loginID
+      
+   WHERE ware.del_cd = '0' 
+     AND ui.del_cd = '0' 
+     AND deli.del_cd = '0'
+     AND purc.purchase_cd = '2'
+     AND ware.loginID = #{loginID}
+  </select>
+</mapper>

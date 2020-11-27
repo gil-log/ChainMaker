@@ -11,7 +11,6 @@
  		 , d.deli_password as deli_password
  		 , d.deli_name as deli_name
  		 , d.deli_phone as deli_phone
-		 , d.del_cd as del_cd
  	FROM   tb_delivery as d
  	   	 , tb_product as p
 		<where>
@@ -26,7 +25,6 @@
 				</when> 
 			</choose>
 			</if>	
-	AND d.del_cd = #{del_cd}
 		</where>
 	ORDER BY deli_no DESC
 	LIMIT #{pageIndex}, #{pageSize}
@@ -49,7 +47,6 @@
 				</when> 
 			</choose>
 			</if>
-			AND d.del_cd = #{del_cd}
 		</where>
 
 </select>
@@ -87,7 +84,7 @@
 /*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.insertDelivery*/
 	INSERT INTO tb_delivery 
 	(
-	deli_no, deli_company, deli_id, deli_password, deli_name, deli_phone, del_cd
+	deli_no, deli_company, deli_id, deli_password, deli_name, deli_phone
 	)
 	VALUES
 	(
@@ -96,8 +93,7 @@
 	#{deli_id},
 	#{deli_password},
 	#{deli_name},
-	#{deli_phone},
-	"0"
+	#{deli_phone}
 	) 
 </insert>
 
@@ -114,18 +110,18 @@
 </update>
 
 <!-- 납품 업체 삭제 -->
-<update id="deleteDelivery" parameterType="java.util.Map">
+<!-- <update id="deleteDelivery" parameterType="java.util.Map">
 	UPDATE tb_delivery
 	SET    del_cd = "1"
 	WHERE  deli_no = #{deli_no}
-</update>
+</update> -->
 <!-- 납품 업체 복원 -->
-<update id="recoveryDelivery" parameterType="java.util.Map">
+<!-- <update id="recoveryDelivery" parameterType="java.util.Map">
 	UPDATE tb_delivery
 	SET    del_cd = "0"
 	WHERE  deli_no = #{deli_no}
 </update>
-
+ -->
 <!-- 납품 업체 단건 조회 -->
 <select id="selectDelivery" resultType="kr.happyjob.chainmaker.scm.model.SupplierInfoModel">
 /*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.selectDelivery*/
@@ -135,7 +131,6 @@
  		 , d.deli_password as deli_password
  		 , d.deli_name as deli_name
  		 , d.deli_phone as deli_phone
- 		 , d.del_cd as del_cd
  	FROM   tb_delivery as d
  	WHERE  d.deli_no = #{deli_no}
 

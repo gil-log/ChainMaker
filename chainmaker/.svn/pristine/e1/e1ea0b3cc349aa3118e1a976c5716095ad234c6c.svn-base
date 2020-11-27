@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.SupplierInfoDao"> <!--DAO파일이 위치한 디렉터리와 매핑 (내 담당 DAO는 누구이다.)  -->
+
+<!-- 납품 업체 조회 -->
+<select id="listDelivery" resultType="kr.happyjob.chainmaker.scm.model.SupplierInfoModel"> <!--id=DAO가 호출할 별명 작성 , resultType 반환 값을 담을 model의 디렉터리와 매핑 -->
+	/*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.listDelivery*/
+ 	SELECT DISTINCT d.deli_no as deli_no 
+ 		 , d.deli_company as deli_company
+ 		 , d.deli_id as deli_id
+ 		 , d.deli_password as deli_password
+ 		 , d.deli_name as deli_name
+ 		 , d.deli_phone as deli_phone
+		 , d.del_cd as del_cd
+ 	FROM   tb_delivery as d
+ 	   	 , tb_product as p
+		<where>
+			<if test="(sname != null) and (!sname.equals(''))">
+			<choose>
+				<when test= "(oname eq 'del_nm'.toString())">
+						AND d.deli_company LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "(oname eq 'pro_nm'.toString())">
+						AND d.deli_no = p.deli_no
+						AND p.pro_name LIKE concat('%', #{sname}, '%')
+				</when> 
+			</choose>
+			</if>	
+	AND d.del_cd = #{del_cd}
+		</where>
+	ORDER BY deli_no DESC
+	LIMIT #{pageIndex}, #{pageSize}
+	
+</select>
+
+<!-- 납품업체 카운트 -->
+<select id="totalCntDelivery" resultType="int">
+      /*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.totalCntDelivery*/
+      select count(DISTINCT d.deli_no) as total_cnt from tb_delivery as d, tb_product as p
+      <where>
+			<if test="(sname != null) and (!sname.equals('')) ">
+			<choose>
+				<when test= "(oname eq 'del_nm'.toString())">
+						AND d.deli_company LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "(oname eq 'pro_nm'.toString())">
+						d.deli_no = p.deli_no
+						AND p.pro_name LIKE concat('%', #{sname}, '%')
+				</when> 
+			</choose>
+			</if>
+			AND d.del_cd = #{del_cd}
+		</where>
+
+</select>
+
+
+<!-- 제품 목록 조회 -->
+<select id="listProduct" resultType="kr.happyjob.chainmaker.scm.model.SupplierInfoModel">
+	/*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.listProduct*/
+	
+	SELECT DISTINCT p.pro_no as pro_no
+				  , p.pro_name as pro_name
+				  , p.pro_deli_price as pro_deli_price
+	FROM tb_delivery as d JOIN tb_product as p ON d.deli_no=p.deli_no
+    WHERE d.deli_company = #{deli_company}
+      AND d.deli_no = #{deli_no}
+      
+    <if test="(pageIndex != null) and (!pageIndex.equals('')) and (pageSize != null) and (!pageSize.equals(''))">
+		LIMIT #{pageIndex}, #{pageSize}
+	</if>
+</select>
+
+<!-- 제품 목록 카운트 -->
+<select id="totalCntProduct" resultType="int">
+      /*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.totalCntProduct*/
+      SELECT count(DISTINCT pro_no) as total_cnt 
+      FROM tb_delivery as d 
+      JOIN tb_product as p 
+      ON d.deli_no=p.deli_no 
+      WHERE p.deli_no = #{deli_no} 
+
+</select>
+
+<!-- 납품 업체 등록 -->
+<insert id="insertDelivery" parameterType="java.util.Map">
+/*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.insertDelivery*/
+	INSERT INTO tb_delivery 
+	(
+	deli_no, deli_company, deli_id, deli_password, deli_name, deli_phone, del_cd
+	)
+	VALUES
+	(
+	deli_no,
+	#{deli_company},
+	#{deli_id},
+	#{deli_password},
+	#{deli_name},
+	#{deli_phone},
+	"0"
+	) 
+</insert>
+
+<!-- 납품 업체 수정 -->
+<update id="updateDelivery" parameterType="java.util.Map">
+/*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.updateDelivery*/
+	UPDATE tb_delivery 
+	SET    deli_company = #{deli_company}
+		 , deli_id = #{deli_id}
+		 , deli_password = #{deli_password}
+		 , deli_name = #{deli_name}
+		 , deli_phone = #{deli_phone}
+	WHERE deli_no = #{deli_no}
+</update>
+
+<!-- 납품 업체 삭제 -->
+<update id="deleteDelivery" parameterType="java.util.Map">
+	UPDATE tb_delivery
+	SET    del_cd = "1"
+	WHERE  deli_no = #{deli_no}
+</update>
+<!-- 납품 업체 복원 -->
+<update id="recoveryDelivery" parameterType="java.util.Map">
+	UPDATE tb_delivery
+	SET    del_cd = "0"
+	WHERE  deli_no = #{deli_no}
+</update>
+
+<!-- 납품 업체 단건 조회 -->
+<select id="selectDelivery" resultType="kr.happyjob.chainmaker.scm.model.SupplierInfoModel">
+/*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.selectDelivery*/
+	SELECT d.deli_no as deli_no
+		 , d.deli_company as deli_company
+ 		 , d.deli_id as deli_id
+ 		 , d.deli_password as deli_password
+ 		 , d.deli_name as deli_name
+ 		 , d.deli_phone as deli_phone
+ 		 , d.del_cd as del_cd
+ 	FROM   tb_delivery as d
+ 	WHERE  d.deli_no = #{deli_no}
+
+</select>
+
+
+</mapper>

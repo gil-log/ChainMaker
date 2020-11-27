@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.dlm.dao.DlmPurchaseOrderDao">
+  
+  <!-- 창고 담당자별 납품업체 발주 리스트 목록 -->
+  <select id="purchaseOrderListByMng" resultType="kr.happyjob.chainmaker.dlm.model.DlmPurchaseOrderVO">
+  /** kr.happyjob.chainmaker.dlm.dao.DlmPurchaseOrderDao.purchaseOrderListByMng */
+    SELECT deli.deli_no,
+           deli.deli_company, 
+           FORMAT(SUM(proio.pro_io_qty * prod.pro_deli_price),'##,##0') 'total_price'
+           
+      FROM tb_purchase as purc 
+      JOIN tb_product as prod 
+        ON purc.pro_no = prod.pro_no
+      JOIN tb_delivery as deli 
+        ON prod.deli_no = deli.deli_no 
+      JOIN tb_warehouse as ware 
+        ON purc.ware_no = ware.ware_no
+      JOIN tb_userinfo as ui
+        ON ware.loginID = ui.loginID
+      JOIN tb_product_io_warehouse as proio
+        ON (purc.purchase_no = proio.purchase_no AND purc.ware_no = proio.ware_no)
+        
+    <where>
+      <if test="(searchKey != null) and (!searchKey.equals(''))">
+        <choose>
+          <when test="(searchKey != null) and (searchKey eq 'company'.toString())"> 
+            deli.deli_company LIKE CONCAT('%', #{searchWord}, '%')
+          </when>
+          <when test="(searchKey != null) and (searchKey eq 'all'.toString())">
+            (deli.deli_company LIKE CONCAT('%', #{searchWord}, '%') OR deli.deli_no LIKE CONCAT('%',#{searchWord}, '%'))
+          </when>
+        </choose>
+      </if>
+      <if test="(startDate != null) and (!startDate.equals('')) and (endDate != null) and (!endDate.equals(''))">
+        AND DATE_FORMAT(purc.purchase_date, '%Y-%m-%d') BETWEEN #{startDate} AND #{endDate}
+      </if>
+      AND ui.del_cd = 'n'
+      AND ui.approval_cd = 'y'
+      AND purc.purchase_cd = '2'
+      AND proio.pro_io_cd = 'in_pre'
+      AND ware.loginID = #{loginID}
+    </where>
+    GROUP BY deli.deli_company
+    LIMIT  #{pageIndex}, #{pageSize}
+  </select>
+  
+  <!-- 업체별 발주 리스트 조회 목록 수 -->
+  <select id="purchaseOrderListTotal" resultType="int"> 
+  /** kr.happyjob.chainmaker.dlm.dao.DlmPurchaseOrderDao.purchaseOrderListTotal */
+  SELECT COUNT(DISTINCT deli_company) as totalcnt
+   
+    FROM tb_purchase as purc
+    JOIN tb_product as prod 
+      ON purc.pro_no = prod.pro_no 
+    JOIN tb_delivery as deli 
+      ON prod.deli_no = deli.deli_no 
+    JOIN tb_warehouse as ware 
+      ON purc.ware_no = ware.ware_no 
+    JOIN tb_userinfo as ui
+      ON ware.loginID = ui.loginID
+    JOIN tb_product_io_warehouse as proio
+      ON (purc.purchase_no = proio.purchase_no AND purc.ware_no = proio.ware_no)
+      
+   WHERE ui.del_cd = 'n' 
+     AND ui.approval_cd = 'y'
+     AND purc.purchase_cd = '2'
+     AND proio.pro_io_cd = 'in_pre'
+     AND ware.loginID = #{loginID}
+  </select>
+  
+  <!-- 업체별 발주 상세 목록 -->
+  <select id="purchaseOrderDtlListByCompany" resultType="kr.happyjob.chainmaker.dlm.model.DlmPurchaseOrderVO">
+  /** kr.happyjob.chainmaker.dlm.dao.DlmPurchaseOrderDao.purchaseOrderDtlListByCompany */
+    SELECT purc.purchase_no, 
+           prod.pro_no, 
+           dtl.detail_name, 
+           prod.pro_name, 
+           prod.pro_manu_name, 
+           purc.purchase_date, 
+           proio.pro_io_qty,
+           prod.pro_deli_price,
+           ware.ware_no,
+           deli.deli_no
+           
+      FROM tb_purchase as purc 
+      JOIN tb_product as prod 
+        ON purc.pro_no = prod.pro_no
+      JOIN tb_delivery as deli 
+        ON prod.deli_no = deli.deli_no 
+      JOIN tb_warehouse as ware 
+        ON purc.ware_no = ware.ware_no
+      JOIN tb_userinfo as ui
+        ON ware.loginID = ui.loginID
+      JOIN tb_detail_code as dtl
+        ON prod.pro_cd = dtl.detail_code
+      JOIN tb_product_io_warehouse as proio
+        ON (purc.purchase_no = proio.purchase_no AND purc.ware_no = proio.ware_no)
+    
+     WHERE ui.del_cd = 'n'
+       AND ui.approval_cd = 'y'
+       AND purc.purchase_cd = '2'
+       AND proio.pro_io_cd = 'in_pre'
+       AND ware.loginID = #{loginID}
+       AND deli.deli_no = #{deli_no}
+  ORDER BY purc.purchase_no
+     LIMIT #{pageIndex}, #{pageSize}
+  </select>
+  
+  <!-- 업체별 발주 리스트 조회 목록 수 -->
+  <select id="purchaseOrderDtlListTotal" resultType="int"> 
+  /** kr.happyjob.chainmaker.dlm.dao.DlmPurchaseOrderDao.purchaseOrderDtlListTotal */
+  SELECT COUNT(*) as totalcnt
+   
+    FROM tb_purchase as purc 
+    JOIN tb_product as prod 
+      ON purc.pro_no = prod.pro_no
+    JOIN tb_delivery as deli 
+      ON prod.deli_no = deli.deli_no 
+    JOIN tb_warehouse as ware 
+      ON purc.ware_no = ware.ware_no
+    JOIN tb_userinfo as ui
+      ON ware.loginID = ui.loginID
+    JOIN tb_detail_code as dtl
+      ON prod.pro_cd = dtl.detail_code
+    JOIN tb_product_io_warehouse as proio
+      ON (purc.purchase_no = proio.purchase_no AND purc.ware_no = proio.ware_no)
+      
+   WHERE ui.del_cd = 'n' 
+     AND ui.approval_cd = 'y'
+     AND purc.purchase_cd = '2'
+     AND proio.pro_io_cd = 'in_pre'
+     AND ware.loginID = #{loginID}
+     AND deli.deli_no = #{deli_no}
+  </select>
+  
+  
+  
+  
+  
+  
+  
+  
+</mapper>

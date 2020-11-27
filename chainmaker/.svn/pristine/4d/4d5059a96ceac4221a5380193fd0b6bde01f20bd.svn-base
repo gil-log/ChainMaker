@@ -1,0 +1,40 @@
+package kr.happyjob.chainmaker.dashboard.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.happyjob.chainmaker.dashboard.dao.DashboardGedDao;
+import kr.happyjob.chainmaker.dashboard.model.MonthCompanyVO;
+
+@Transactional
+@Service("DashboardGedServiceImpl")
+public class DashboardGedServiceImpl implements DashboardGedService{
+
+	@Autowired
+	private DashboardGedDao dashboardGedDao;
+	
+	
+	@Override
+	public Map<String, Object> getMonthChartData() {
+		
+		Map<String, Object> map = new HashMap<>();
+		
+		List<MonthCompanyVO> CompanyVoList = dashboardGedDao.selectMonthCompany();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		return null;
+	}
+
+}

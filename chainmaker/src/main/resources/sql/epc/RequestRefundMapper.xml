@@ -4,11 +4,20 @@
 
 	<select id ="selectOrderListQtyAndDate" resultType="kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO">
         SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
-        order_date.order_mod_date, order_date.order_expdate, order_names.pro_name
+        order_date.order_mod_date, order_date.order_expdate, order_names.pro_name, order_qty.order_cd, IF(tb_shipping.ship_cd IS NULL, 'YET', tb_shipping.ship_cd) as ship_cd
 		FROM  
-		(SELECT	order_no, sum(order_qty) as order_total_qty
-		FROM tb_order
+		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd
+		FROM tb_order, tb_product product
         WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
+        
+        <if test='pro_name != null'>
+        
+        
+        AND tb_order.pro_no = product.pro_no
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        
+        </if>
+        
 		GROUP BY order_no
 		) order_qty LEFT JOIN
 		(
@@ -24,18 +33,8 @@
 		(
 		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
 		tb_order.order_expdate, tb_order.order_cd
-		FROM tb_order tb_order, tb_product product
+		FROM tb_order tb_order
         WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
-        
-        <if test='pro_name != null'>
-        
-        
-        AND tb_order.pro_no = product.pro_no
-        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
-        
-        </if>
-        
-        
 		GROUP BY tb_order.order_no
 		) order_date ON order_qty.order_no = order_date.order_no
         LEFT JOIN
@@ -46,8 +45,10 @@
         AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
         GROUP BY orders.order_no
         ) order_names ON order_qty.order_no = order_names.order_no
-		
-		WHERE 1=1
+		LEFT JOIN tb_shipping
+        ON order_qty.order_no = tb_shipping.order_no
+        
+		WHERE order_qty.loginID = #{loginID}
 		<if test='startDate != null and endDate != null'>
 		AND DATE(order_date.order_date) BETWEEN #{startDate} AND #{endDate}
 		</if>
@@ -60,11 +61,20 @@
 		FROM
 		(
         SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
-        order_date.order_mod_date, order_date.order_expdate, order_names.pro_name
+        order_date.order_mod_date, order_date.order_expdate, order_names.pro_name, order_qty.order_cd, IF(tb_shipping.ship_cd IS NULL, 'YET', tb_shipping.ship_cd) as ship_cd
 		FROM  
-		(SELECT	order_no, sum(order_qty) as order_total_qty
-		FROM tb_order
+		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd
+		FROM tb_order, tb_product product
         WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
+        
+        <if test='pro_name != null'>
+        
+        
+        AND tb_order.pro_no = product.pro_no
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        
+        </if>
+        
 		GROUP BY order_no
 		) order_qty LEFT JOIN
 		(
@@ -80,17 +90,8 @@
 		(
 		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
 		tb_order.order_expdate, tb_order.order_cd
-		FROM tb_order tb_order, tb_product product
+		FROM tb_order tb_order
         WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
-        
-        <if test='pro_name != null'>
-        
-        
-        AND tb_order.pro_no = product.pro_no
-        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
-        
-        </if>
-        
 		GROUP BY tb_order.order_no
 		) order_date ON order_qty.order_no = order_date.order_no
         LEFT JOIN
@@ -101,25 +102,16 @@
         AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
         GROUP BY orders.order_no
         ) order_names ON order_qty.order_no = order_names.order_no
-		
-		WHERE 1=1
-		
+		LEFT JOIN tb_shipping
+        ON order_qty.order_no = tb_shipping.order_no
+        
+		WHERE order_qty.loginID = #{loginID}
 		<if test='startDate != null and endDate != null'>
 		AND DATE(order_date.order_date) BETWEEN #{startDate} AND #{endDate}
 		</if>
 		) order_date_count
 	</select>
 	
-	
-	
-	
-	
-	
-	
-	
-	
-
-
 	<select id="selectOrderDetailProductInfoByOrderNo" resultType="kr.happyjob.chainmaker.epc.model.OrderDetailVO">
 		SELECT orders.order_no, product.pro_no, product.pro_cd, product.pro_name, 
 		product.pro_manu_name, orders.order_qty, product.pro_price

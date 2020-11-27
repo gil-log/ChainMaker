@@ -1,0 +1,16 @@
+package kr.happyjob.chainmaker.dashboard.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.happyjob.chainmaker.dashboard.dao.DashboardEpcDao;
+
+@Transactional
+@Service("DashboardEpcServiceImpl")
+public class DashboardEpcServiceImpl implements DashboardEpcService {
+
+	@Autowired
+	private DashboardEpcDao dashboardEpcDao;
+	
+}

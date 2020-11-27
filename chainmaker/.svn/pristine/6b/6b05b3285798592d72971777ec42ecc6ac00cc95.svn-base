@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.NoticeDao">
+
+	<!-- 공지사항 작성 -->
+	<insert id="insertNotice">
+		INSERT INTO tb_notice
+		(notice_no, notice_title, notice_content, notice_regdate, notice_moddate, loginID, notice_hit)
+		VALUES(
+		#{notice_no},
+		#{notice_title},
+		#{notice_content},
+		curdate(),
+		curdate(),
+		#{loginID},
+		0 
+		)
+	</insert>
+	
+	<!--  notice_no +1  -->
+	<select id="numPlus" resultType="int">
+		SELECT (IFNULL(MAX(notice_no),0) +1) as notice_no 
+		FROM tb_notice
+	</select>
+	
+	<!-- 파일 테이블에 제품 내용 등록 -->
+	<insert id="insertNoticeFile">
+		INSERT INTO tb_file
+		(file_server_path, file_local_path, file_new_name , file_ofname , file_size , notice_no)
+		VALUES(
+		#{file_server_path},
+		#{file_local_path},
+		#{file_new_name},
+		#{file_ofname},
+		#{file_size},
+		#{notice_no}
+		)
+	</insert>
+	
+	<!-- 파일 조회 -->
+	<select id="selectFile" resultType="kr.happyjob.chainmaker.scm.model.FileModel">	
+		SELECT file_no, file_ofname, file_new_name, file_size, notice_no 		
+		FROM tb_file
+		WHERE notice_no = #{notice_no} 		
+	</select>
+		
+	<!-- 공지사항 리스트 -->
+	<select id="selectNoticeList" resultType="kr.happyjob.chainmaker.scm.model.NoticeModel">
+		SELECT
+		notice_no, notice_title, loginID, notice_regdate, notice_moddate, notice_hit, del_cd
+		FROM tb_notice
+		WHERE del_cd = "n"
+		<where>		
+			<choose>
+				<when test="(oname eq 'title'.toString())">
+					and notice_moddate between #{from_date} and #{to_date}
+					and notice_title Like CONCAT('%', #{sname}, '%')
+				</when>
+				<when test="(oname eq 'content'.toString())">
+					and notice_moddate between #{from_date} and
+					#{to_date}
+					and notice_content LIKE CONCAT('%', #{sname}, '%')
+				</when>
+				<when test="(oname eq 'all'.toString())">	
+					and notice_moddate between #{from_date} and
+					#{to_date}
+					and (notice_title Like CONCAT('%', #{sname}, '%')
+					or
+					notice_content LIKE CONCAT('%', #{sname}, '%'))
+					
+				</when>
+			</choose>			
+		</where>
+		ORDER BY notice_moddate DESC, notice_no DESC
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	<!-- 공지 사항 수 구하기 -->
+	<select id="noticeTotalCnt" resultType="int">
+		SELECT COUNT(*) as total_cnt from
+		(SELECT notice_no,
+		         notice_title,
+		         loginID
+		FROM tb_notice
+		WHERE del_cd = "n"
+		<where>
+			<choose>				
+				<when test="(oname eq 'title'.toString())">
+					and notice_moddate between #{from_date} and
+					#{to_date}
+					and notice_title Like CONCAT('%', #{sname}, '%')
+				</when>
+				<when test="(oname eq 'content'.toString())">
+					and notice_moddate between #{from_date} and
+					#{to_date}
+					and notice_content LIKE CONCAT('%', #{sname}, '%')
+				</when>
+				<when test="(oname eq 'all'.toString())">
+					and notice_moddate between #{from_date} and
+					#{to_date}
+					and (notice_title Like CONCAT('%', #{sname}, '%')
+					or notice_content
+					LIKE CONCAT('%', #{sname}, '%'))
+				</when>
+			</choose>
+		</where>
+		)a
+	</select>
+
+	<!-- 공지사항 상세보기 -->
+	<select id="detailNotice" resultType="kr.happyjob.chainmaker.scm.model.NoticeModel">
+		<![CDATA[
+		SELECT notice_no,
+			   loginID,
+			   notice_title,
+			   notice_regdate,
+			   notice_moddate,
+			   notice_content
+		FROM   tb_notice
+		WHERE  notice_no = #{notice_no}
+			]]>
+		<choose>
+			<when test="(oname eq 'title'.toString())">
+				and notice_moddate between #{from_date} and #{to_date}
+				and notice_title Like CONCAT('%', #{sname}, '%')
+			</when>
+			<when test="(oname eq 'content'.toString())">
+				and notice_moddate between #{from_date} and #{to_date}
+				and notice_content LIKE CONCAT('%', #{sname}, '%')
+			</when>
+			<when test="(oname eq 'all'.toString())">
+				and notice_moddate between #{from_date} and #{to_date}
+				and (notice_title Like CONCAT('%', #{sname}, '%')
+				or notice_content LIKE CONCAT('%', #{sname}, '%'))
+			</when>
+		</choose>
+	</select>
+
+	<!-- 공지사항 조회수 -->
+	<update id="updateHit">
+		UPDATE tb_notice
+		SET notice_hit = notice_hit+1
+		WHERE notice_no = #{notice_no}
+	</update>
+
+	<!-- 공지사항 수정 -->
+	<update id="updateNotice">
+		UPDATE tb_notice
+		SET notice_title = #{notice_title},
+		notice_content = #{notice_content},
+		notice_moddate = curdate()
+		WHERE notice_no = #{notice_no}
+	</update>
+
+	<!-- 공지사항 삭제 -->
+	<update id="deleteNotice">
+		UPDATE tb_notice
+		SET del_cd = "y"
+		WHERE notice_no = #{notice_no};
+	</update>
+	
+<!-- 첨부파일 삭제  
+	<delete id="deleteFile">
+		DELETE FROM tb_file 
+		WHERE notice_no = #{notice_no}
+	</delete> -->
+	
+</mapper>

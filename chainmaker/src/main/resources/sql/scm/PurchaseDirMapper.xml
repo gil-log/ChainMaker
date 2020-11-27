@@ -70,7 +70,7 @@
 		AND dt.group_code = 'purchaseCD'
 		AND (@rownum:=0)=0	
 	</where>
-		ORDER BY p.purchase_no ASC
+		ORDER BY p.purchase_no DESC
 		LIMIT #{pageIndex}, #{pageSize}
 
 </select>

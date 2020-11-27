@@ -1,0 +1,49 @@
+package kr.happyjob.chainmaker.pcm.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.happyjob.chainmaker.pcm.dao.ReturnPurchseDao;
+import kr.happyjob.chainmaker.pcm.model.ReturnPurchaseModel;
+
+
+@Service
+public class ReturnPurchseServiceImpl implements ReturnPurchaseService {
+
+	@Autowired
+	private ReturnPurchseDao returnPurchseDao;
+	
+	@Override
+	public List<ReturnPurchaseModel> returnPurchaseList(Map<String, Object> paramMap) {
+		
+		return returnPurchseDao.returnPurchaseList(paramMap);
+	}
+
+	@Override
+	public int countReturnPurchaseList(Map<String, Object> paramMap) {
+		
+		return returnPurchseDao.countReturnPurchaseList(paramMap);
+	}
+
+	@Override
+	public ReturnPurchaseModel returnPurchaseSelect(Map<String, Object> paramMap) {
+		
+		return returnPurchseDao.returnPurchaseSelect(paramMap);
+	}
+
+	@Override
+	public int countReturnPurchaseSelect(Map<String, Object> paramMap) {
+		
+		return returnPurchseDao.countReturnPurchaseSelect(paramMap);
+	}
+
+	@Override
+	public int updateRefundCD(Map<String, Object> paramMap) {
+		return returnPurchseDao.updateRefundCD(paramMap);
+	}
+
+
+}

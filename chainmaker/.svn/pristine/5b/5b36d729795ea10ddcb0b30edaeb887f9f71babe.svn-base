@@ -1,0 +1,17 @@
+package kr.happyjob.chainmaker.dashboard.controller;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.happyjob.chainmaker.dashboard.service.DashboardEpcService;
+
+@Controller
+@RequestMapping("/dashboard/epc")
+public class DashboardEpcController {
+
+	@Resource(name="DashboardEpcServiceImpl")
+	private DashboardEpcService dashboardEpcServiceImpl;
+	
+}

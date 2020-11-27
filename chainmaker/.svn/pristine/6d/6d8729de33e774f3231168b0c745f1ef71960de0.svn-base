@@ -1,0 +1,143 @@
+package kr.happyjob.chainmaker.scm.service;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.happyjob.chainmaker.scm.dao.DailyOrderHistoryDao;
+import kr.happyjob.chainmaker.scm.model.DailyOrderListVO;
+import kr.happyjob.chainmaker.scm.model.OrderDetailByOrderNoAndProNoDTO;
+import kr.happyjob.chainmaker.scm.model.OrderDetailByOrderNoAndProNoVO;
+import kr.happyjob.chainmaker.scm.model.PageAndOrderInfoDTO;
+import kr.happyjob.chainmaker.scm.model.ShippingDirectionDTO;
+import kr.happyjob.chainmaker.scm.model.WHInfoByProNoDTO;
+import kr.happyjob.chainmaker.scm.model.WHInfoByProNoVO;
+
+@Transactional
+@Service("DailyOrderHistoryServiceImpl")
+public class DailyOrderHistroyServiceImpl implements DailyOrderHistoryService{
+	
+	private final Logger logger = LogManager.getLogger(this.getClass());
+	
+	@Autowired
+	private DailyOrderHistoryDao dailyOrderHistoryDao;
+
+	@Override
+	public List<DailyOrderListVO> listDailyOrder(PageAndOrderInfoDTO pageOrderInfoDTO) {
+		return dailyOrderHistoryDao.listDailyOrder(pageOrderInfoDTO);
+	}
+
+	@Override
+	public int countListDailyOrder() {
+		return dailyOrderHistoryDao.countListDailyOrder();
+	}
+
+	@Override
+	public OrderDetailByOrderNoAndProNoDTO selectOrderDetailByOrderNoAndProNo(PageAndOrderInfoDTO pageOrderInfoDTO) {
+		
+		int order_no = pageOrderInfoDTO.getOrder_no();
+		String pro_no = pageOrderInfoDTO.getPro_no();
+		System.out.println("service:"+order_no+" a"+pro_no);
+		
+		OrderDetailByOrderNoAndProNoVO orderDetailVO = dailyOrderHistoryDao.selectOrderDetailByOrderNoAndProNo(pageOrderInfoDTO);
+		
+
+		System.out.println("VO:"+orderDetailVO.getOrder_no()+" a"+orderDetailVO.getPro_no());
+		
+		
+		OrderDetailByOrderNoAndProNoDTO orderDetailDTO = new OrderDetailByOrderNoAndProNoDTO(orderDetailVO);
+		
+		
+		return orderDetailDTO;
+	}
+
+	@Override
+	public List<WHInfoByProNoDTO> selectWHInfoByProNo(String pro_no) {
+		
+		List<WHInfoByProNoVO> whInfoByProNoVOList = dailyOrderHistoryDao.selectWHInfoByProNo(pro_no);
+		
+		Iterator<WHInfoByProNoVO> whInfoIterator = whInfoByProNoVOList.iterator();
+		
+		List<WHInfoByProNoDTO> whInfoByProNoDTOList = new LinkedList<>();
+		
+		while(whInfoIterator.hasNext()) {
+			WHInfoByProNoVO whInfoByProNoVO = whInfoIterator.next();
+			
+			WHInfoByProNoDTO whInfoByProNoDTO = new WHInfoByProNoDTO(whInfoByProNoVO);
+			
+			whInfoByProNoDTOList.add(whInfoByProNoDTO);
+			
+		}
+		
+		return whInfoByProNoDTOList;
+	}
+
+	@Override
+	public int createShippingInfoReturnShipNo(List<ShippingDirectionDTO> shippingDirectionDTOList, String writerID) {
+		// 먼저 첫 ship key값 만들어주기
+		ShippingDirectionDTO firstShippingDriectionDTO = shippingDirectionDTOList.remove(0);
+		int shipNo = 0;
+		try {
+			// 1개인 상황
+			if(shippingDirectionDTOList.isEmpty()) {
+
+				dailyOrderHistoryDao.insertFirstShippingInfo(firstShippingDriectionDTO);
+				shipNo = firstShippingDriectionDTO.getShip_no();
+				Map<String, Object> map = new HashMap<>();
+
+				map.put("shippingDirectionDTOList", firstShippingDriectionDTO);
+				dailyOrderHistoryDao.insertShippingInfoList(map);
+				
+				dailyOrderHistoryDao.updateOrderCDtoComplete(firstShippingDriectionDTO);
+				
+				firstShippingDriectionDTO.setWriter_id(writerID);
+				map.replace("shippingDirectionDTOList", firstShippingDriectionDTO);
+				// 배송 지시서 작성
+				dailyOrderHistoryDao.insertShippingDirectionList(map);
+			} else {
+				dailyOrderHistoryDao.insertFirstShippingInfo(firstShippingDriectionDTO);
+				shipNo = firstShippingDriectionDTO.getShip_no();
+				
+				logger.info("첫 ship_no : " + shipNo);
+				
+				Map<String, Object> map = new HashMap<>();
+				
+				for(ShippingDirectionDTO shippingDirectionDTO : shippingDirectionDTOList) {
+					shippingDirectionDTO.setShip_no(shipNo);
+				}
+				map.put("shippingDirectionDTOList", shippingDirectionDTOList);
+				
+				
+				dailyOrderHistoryDao.insertShippingInfoList(map);
+				
+				dailyOrderHistoryDao.updateOrderCDtoComplete(firstShippingDriectionDTO);
+				
+				// 배송 지시서 작성 위해 다시 첫 항목 추가
+				shippingDirectionDTOList.add(firstShippingDriectionDTO);
+
+				for(ShippingDirectionDTO shippingDirectionDTO : shippingDirectionDTOList) {
+					shippingDirectionDTO.setWriter_id(writerID);
+				}
+				
+				map.replace("shippingDirectionDTOList", shippingDirectionDTOList);
+				
+				// 배송 지시서 작성
+				dailyOrderHistoryDao.insertShippingDirectionList(map);
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return -1;
+		}
+		return shipNo;
+	}
+	
+}

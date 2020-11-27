@@ -9,6 +9,7 @@
 		
 		FROM
 		(    
+
 		SELECT shipping.ship_no, shipping.pro_no, sum(shipping.ship_qty) as ship_total_qty, shipping.ware_no, shipping.order_no, 
 		orders.loginID, orders.order_date, orders.deposit_cd, shipping.ship_cd, orders.order_expdate
 		FROM tb_shipping shipping, tb_order orders
@@ -16,11 +17,14 @@
 		WHERE shipping.order_no = orders.order_no
 		AND shipping.pro_no = orders.pro_no
 
+
+
 		<if test='ship_cd != null'>
 		AND shipping.ship_cd IN ('waiting', 'loading')
 		</if>
 
-		GROUP BY orders.pro_no
+
+		GROUP BY shipping.ship_no
 		) order_info
 
 		LEFT JOIN tb_product product
@@ -50,11 +54,14 @@
 		WHERE shipping.order_no = orders.order_no
 		AND shipping.pro_no = orders.pro_no
 
+
+
 		<if test='ship_cd != null'>
 		AND shipping.ship_cd IN ('waiting', 'loading')
 		</if>
 
-		GROUP BY orders.pro_no
+
+		GROUP BY shipping.ship_no
 		) order_info
 
 		LEFT JOIN tb_product product

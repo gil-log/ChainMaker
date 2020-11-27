@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.ProductListDAO">
+
+	<!-- 그룹코드 목록 조회 -->
+	<select id="listProductList" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">
+		SELECT	pro_no as pro_num	
+			,	pro_cd as pro_cod
+			,	pro_model_name as pro_cod_nam
+			,	pro_manu_name as pro_manu_nm
+			,	pro_price as pro_prc
+		FROM	tb_product
+		<where>
+				<choose>
+					<when
+						test="(v != null) and (!v.equals(''))">
+							and pro_cd = #{p}
+							and pro_manu_name = #{v}
+							and (pro_no Like CONCAT('%', #{sname}, '%')
+							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+					</when>
+					
+					<when
+						test="(oname eq 'pro_cod_num'.toString()) and (sname != null)">
+							
+							and (pro_no Like CONCAT('%', #{sname}, '%')
+							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+					</when>
+					
+				</choose>
+			
+		</where>
+		
+		LIMIT #{pageIndex}, #{pageSize}
+		
+	</select>
+	
+
+	
+	<!-- 그룹코드 목록 총 갯수 조회 -->
+	<select id="countListProductList" resultType="int">
+		/*kr.kosmo.jobkorea.epc.dao.ProductListDAO.countListProductList*/
+		SELECT COUNT(1) AS tot_cnt FROM tb_product
+		
+		<where>
+				<choose>
+					<when
+						test="(v != null) and (!v.equals(''))">
+							and pro_cd = #{p}
+							and pro_manu_name = #{v}
+							and (pro_no Like CONCAT('%', #{sname}, '%')
+							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+					</when>
+					<when
+						test="(oname eq 'pro_cod_num'.toString()) and (sname != null)">
+							
+							and (pro_no Like CONCAT('%', #{sname}, '%')
+							or pro_model_name Like CONCAT('%', #{sname} , '%'))
+					</when>
+					
+				</choose>
+				
+		</where>
+	</select>
+	
+		<!-- 동적 셀렉트 조회 -->
+	<select id = "selectProduct" resultType = "kr.happyjob.chainmaker.epc.model.ProductDetailModel">
+		select pro_manu_name as pro_manu_nm 
+			 , pro_cd 
+			from tb_product
+			
+					<where>
+					and pro_cd = #{p}
+					
+					</where>
+						
+				
+			group by pro_manu_name	
+     
+	
+	</select>
+	
+	<!-- 제품 1건 상세정보 -->
+	<select id="selectProductDetail" parameterType="Map" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">
+
+		SELECT
+				pro_no as pro_num	
+			,	pro_manu_name as pro_manu_nm
+			,	pro_price as pro_prc
+		 	,	pro_detail as pro_det
+		FROM tb_product
+        <where>
+        and pro_no = #{pro_num}
+        </where>
+        
+		 
+	</select>	
+	
+	
+	<!-- 주문저장 -->
+	<insert id="insertOrder">
+		/*kr.kosmo.jobkorea.epc.dao.ProductListDAO.insertOrder*/
+		INSERT INTO tb_order
+		(
+                      pro_no,
+                      order_qty,
+                      order_cd,
+                      deposit_cd,
+                      order_date,
+                      order_expdate,
+                      order_mod_date,
+                      loginID)
+		VALUES
+		(
+				#{pro_num}
+			,	#{od_qty}
+			,	"order"
+			, 	0
+			,	NOW()
+			,	#{startDate}
+			,	NOW()
+			,	#{login_id}
+		)
+	</insert>
+	
+	<!-- 장바구니저장 -->
+	<insert id="insertBasket">
+		/*kr.kosmo.jobkorea.epc.dao.ProductListDAO.insertBasket*/
+		INSERT INTO tb_basket 
+					(  	 pro_no
+                       , loginID
+                       , bas_qty
+                       , bas_date)
+                       
+                       VALUES(  #{pro_num}
+                              , #{login_id}
+                              , #{od_qty}
+                              ,	 NOW() )
+	</insert>
+	
+</mapper>
+
+

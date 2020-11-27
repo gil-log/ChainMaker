@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.DailyOrderHistoryDao">
+
+	<!-- 일일 수주 목록 조회 -->
+	<select id="selectDailyOrderListByOrderCD" resultType="kr.happyjob.chainmaker.scm.model.DailyOrderListVO">
+      SELECT	@rownum:=@rownum+1 as row_num	
+			,tb_order.order_no
+			, tb_order.pro_no
+			, tb_userinfo.user_company
+			, tb_product.pro_name
+			, tb_product.pro_deli_price
+			, tb_product.pro_price
+			, tb_order.order_qty
+			, tb_order.order_cd
+            , tb_product_warehouse.pro_ware_qty
+			, tb_order.deposit_cd
+			, tb_order.order_date
+			, tb_order.order_expdate
+			, tb_order.order_mod_date
+			, tb_order.loginID
+			
+			FROM tb_order tb_order LEFT JOIN tb_product tb_product
+			ON tb_order.pro_no = tb_product.pro_no
+			
+			LEFT JOIN tb_userinfo tb_userinfo
+			ON tb_order.loginID = tb_userinfo.loginID
+			,
+            (SELECT pro_no, sum(pro_ware_qty) as pro_ware_qty
+            FROM tb_product_warehouse 
+            GROUP BY PRO_NO
+            ) tb_product_warehouse
+            
+			WHERE (@rownum:=0)=0
+            AND tb_product_warehouse. pro_no = tb_order.pro_no
+			AND tb_order.order_cd = #{order_cd}
+			ORDER BY tb_order.order_expdate
+			LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	
+	<select id="selectDailyOrderListByDateAndOrderCD" resultType="kr.happyjob.chainmaker.scm.model.DailyOrderListVO">
+	      SELECT	@rownum:=@rownum+1 as row_num	
+			,tb_order.order_no
+			, tb_order.pro_no
+			, tb_userinfo.user_company
+			, tb_product.pro_name
+			, tb_product.pro_deli_price
+			, tb_product.pro_price
+			, tb_order.order_qty
+			, tb_order.order_cd
+            , tb_product_warehouse.pro_ware_qty
+			, tb_order.deposit_cd
+			, tb_order.order_date
+			, tb_order.order_expdate
+			, tb_order.order_mod_date
+			, tb_order.loginID
+			
+			FROM tb_order tb_order LEFT JOIN tb_product tb_product
+			ON tb_order.pro_no = tb_product.pro_no
+			
+			LEFT JOIN tb_userinfo tb_userinfo
+			ON tb_order.loginID = tb_userinfo.loginID
+			,
+            (SELECT pro_no, sum(pro_ware_qty) as pro_ware_qty
+            FROM tb_product_warehouse 
+            GROUP BY PRO_NO
+            ) tb_product_warehouse
+            
+			WHERE (@rownum:=0)=0
+            AND tb_product_warehouse. pro_no = tb_order.pro_no
+			AND tb_order.order_cd = #{order_cd}
+            AND DATE(tb_order.order_date) BETWEEN #{startDate} AND #{endDate}
+			ORDER BY tb_order.order_expdate
+			LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	<!-- 수주 목록 총 갯수 조회 -->
+	<select id="countListDailyOrderByOrderCD" resultType="int">
+           SELECT COUNT(1) AS tot_cnt
+            FROM(
+                  SELECT	@rownum:=@rownum+1 as row_num	
+			,tb_order.order_no
+			, tb_order.pro_no
+			, tb_userinfo.user_company
+			, tb_product.pro_name
+			, tb_product.pro_deli_price
+			, tb_product.pro_price
+			, tb_order.order_qty
+			, tb_order.order_cd
+            , tb_product_warehouse.pro_ware_qty
+			, tb_order.deposit_cd
+			, tb_order.order_date
+			, tb_order.order_expdate
+			, tb_order.order_mod_date
+			, tb_order.loginID
+			
+			FROM tb_order tb_order LEFT JOIN tb_product tb_product
+			ON tb_order.pro_no = tb_product.pro_no
+			
+			LEFT JOIN tb_userinfo tb_userinfo
+			ON tb_order.loginID = tb_userinfo.loginID
+			,
+            (SELECT pro_no, sum(pro_ware_qty) as pro_ware_qty
+            FROM tb_product_warehouse 
+            GROUP BY PRO_NO
+            ) tb_product_warehouse
+            
+			WHERE (@rownum:=0)=0
+            AND tb_product_warehouse. pro_no = tb_order.pro_no
+			AND tb_order.order_cd = #{order_cd}
+			) total
+	</select>
+			
+	<!-- 수주 목록 총 갯수 조회 -->
+	<select id="countListDailyOrderByDateAndOrderCD" resultType="int">
+		    SELECT COUNT(1) AS tot_cnt
+            FROM(
+                  SELECT	@rownum:=@rownum+1 as row_num	
+			,tb_order.order_no
+			, tb_order.pro_no
+			, tb_userinfo.user_company
+			, tb_product.pro_name
+			, tb_product.pro_deli_price
+			, tb_product.pro_price
+			, tb_order.order_qty
+			, tb_order.order_cd
+            , tb_product_warehouse.pro_ware_qty
+			, tb_order.deposit_cd
+			, tb_order.order_date
+			, tb_order.order_expdate
+			, tb_order.order_mod_date
+			, tb_order.loginID
+			
+			FROM tb_order tb_order LEFT JOIN tb_product tb_product
+			ON tb_order.pro_no = tb_product.pro_no
+			
+			LEFT JOIN tb_userinfo tb_userinfo
+			ON tb_order.loginID = tb_userinfo.loginID
+			,
+            (SELECT pro_no, sum(pro_ware_qty) as pro_ware_qty
+            FROM tb_product_warehouse 
+            GROUP BY PRO_NO
+            ) tb_product_warehouse
+            
+			WHERE (@rownum:=0)=0
+            AND tb_product_warehouse. pro_no = tb_order.pro_no
+			AND tb_order.order_cd = #{order_cd}
+            AND DATE(tb_order.order_date) BETWEEN #{startDate} AND #{endDate}
+			) total
+	</select>
+	
+	<!-- 단일 주문번호, 제품번호 조회 -->
+	<select id="selectOrderDetailByOrderNoAndProNo" resultType="kr.happyjob.chainmaker.scm.model.OrderDetailByOrderNoAndProNoVO">
+	      SELECT 
+	      tb_order.order_no,
+	      tb_product.pro_no,
+	      tb_order.order_date,
+	      tb_userinfo.user_company,
+	      tb_product.pro_name,
+	      tb_order.order_expdate,
+	      tb_order.order_qty,
+	      tb_order.deposit_cd,
+	      tb_order.order_cd
+	      
+	      FROM tb_order tb_order LEFT JOIN tb_product tb_product
+	      ON tb_order.pro_no = tb_product.pro_no
+	      LEFT JOIN tb_userinfo tb_userinfo
+	      ON tb_order.loginID = tb_userinfo.loginID
+	      
+	      WHERE tb_order.order_no = #{order_no}
+	      AND tb_product.pro_no = #{pro_no}
+	</select>
+	
+	<!-- pro_no로 제품, 창고, 재고 디테일 -->
+	<select id="selectProductDetailByProNo" resultType="kr.happyjob.chainmaker.scm.model.ProductDetailVO">
+		SELECT product.pro_no, product.pro_name, 
+				delivery.deli_company, product_warehouse.ware_no, 
+				product_warehouse.pro_ware_qty, warehouse.ware_name
+				
+		FROM tb_product product LEFT JOIN tb_delivery delivery
+		ON product.deli_no = delivery.deli_no
+		
+		LEFT JOIN tb_product_warehouse product_warehouse
+		ON product.pro_no = product_warehouse.pro_no
+		
+		LEFT JOIN tb_warehouse warehouse
+		ON warehouse.ware_no = product_warehouse.ware_no
+		
+		WHERE product.pro_no = #{pro_no}
+	</select>
+	
+	<!-- pro_no로 해당하는 제품이 포함된 창고에 관련된 정보 가져오기 -->
+	<select id="selectWHInfoByProNo" resultType="kr.happyjob.chainmaker.scm.model.WHInfoByProNoVO">
+		SELECT tb_product_wh.ware_no,
+				tb_product_wh.pro_no,
+				tb_product_wh.pro_ware_qty,
+				tb_warehouse.ware_name,
+				tb_userinfo.name,
+				tb_product.pro_name
+
+		FROM tb_product_warehouse tb_product_wh
+		LEFT JOIN tb_warehouse tb_warehouse
+		ON tb_product_wh.ware_no = tb_warehouse.ware_no
+		
+		LEFT JOIN tb_product tb_product
+		ON tb_product_wh.pro_no = tb_product.pro_no
+		
+		LEFT JOIN tb_userinfo tb_userinfo
+		ON tb_warehouse.loginID = tb_userinfo.loginID
+
+		WHERE tb_product_wh.pro_no = #{pro_no}
+	</select>
+	
+	<insert id="insertShippingInfo" useGeneratedKeys="true" keyProperty="ship_no"
+	parameterType="kr.happyjob.chainmaker.scm.model.ShippingDirectionDTO">
+		INSERT INTO tb_shipping (ship_cd, ship_date, ship_manager, pro_no, order_no, ship_qty, ware_no)
+        VALUES ('waiting', now(), #{deli_master_name}, #{pro_no}, #{order_no}, #{ship_qty}, #{ware_no})
+	</insert>
+	
+	<insert id="insertShippingInfoList" parameterType="java.util.Map">
+		INSERT INTO tb_shipping (ship_no, ship_cd, ship_date, ship_manager, pro_no, order_no, ship_qty, ware_no)
+		VALUES 
+		<foreach collection="shippingDirectionDTOList" item="shippingInfo" separator=",">
+        	(#{shippingInfo.ship_no}, 'waiting', now(), #{shippingInfo.deli_master_name}, 
+        	#{shippingInfo.pro_no}, #{shippingInfo.order_no}, #{shippingInfo.ship_qty}, #{shippingInfo.ware_no})
+        </foreach>
+	</insert>
+	
+	<update id="updateOrderCDtoComplete">
+		UPDATE tb_order
+		SET order_cd = 'complete', order_mod_date = now()
+		WHERE order_no = #{order_no}
+		AND pro_no = #{pro_no}
+	</update>
+	
+	<insert id="insertShippingDirectionList">
+		INSERT INTO tb_direction(pro_no, direction_manager, direction_out_qty, direction_note, direction_cd, order_no, ship_no)
+		VALUES
+		<foreach collection="shippingDirectionDTOList" item="shippingInfo" separator=",">
+        	(#{shippingInfo.pro_no}, #{shippingInfo.writer_id}, #{shippingInfo.ship_qty}, '주문 배송으로 인한 출고',
+        	'shipping', #{shippingInfo.order_no}, #{shippingInfo.ship_no})
+        </foreach>
+	</insert>
+	
+	<insert id="insertShippingDirection">
+		INSERT INTO tb_direction(pro_no, direction_manager, direction_out_qty, direction_note, direction_cd, order_no, ship_no, ware_no)
+		VALUES
+        	(#{pro_no}, #{writer_id}, #{ship_qty}, '주문 배송으로 인한 출고',
+        	'shipping', #{order_no}, #{ship_no}, #{ware_no})
+	</insert>
+	
+	
+	<insert id="insertPurchaseInfo" useGeneratedKeys="true" keyProperty="purchase_no"
+	parameterType="kr.happyjob.chainmaker.scm.model.PurchaseInfoDTO">
+		INSERT INTO tb_purchase(purchase_qty, purchase_cd, purchase_date, pro_no, loginID, ware_no)
+		VALUES (#{purchase_qty}, 0, now(), #{pro_no}, #{loginID}, #{ware_no})
+	</insert>
+	
+	<insert id="insertPurchaseInfoList" parameterType="java.util.Map">
+		INSERT INTO tb_purchase(purchase_no, purchase_qty, purchase_cd, purchase_date, pro_no, loginID, ware_no)
+		VALUES 
+		<foreach collection="purchaseInfoDTOList" item="purchaseInfo" separator=",">
+		(#{purchaseInfo.purchase_no}, #{purchaseInfo.purchase_qty}, 0, now(), 
+		#{purchaseInfo.pro_no}, #{purchaseInfo.loginID}, #{purchaseInfo.ware_no})
+		</foreach>
+	</insert>
+	
+	<insert id="insertPurchaseDirection" parameterType="kr.happyjob.chainmaker.scm.model.PurchaseInfoDTO">
+		INSERT INTO tb_direction(pro_no, direction_manager, direction_in_qty, direction_note, direction_cd, purchase_no, ware_no)
+		VALUES (#{pro_no}, #{loginID}, #{purchase_qty}, '발주 신청으로 인한 입고 예정', 'purchase', #{purchase_no}, #{ware_no})
+	</insert>
+	
+	<insert id="insertPurchaseDirectionList">
+		INSERT INTO tb_direction(pro_no, direction_manager, direction_in_qty, direction_note, direction_cd, purchase_no, ware_no)
+		VALUES
+		<foreach collection="purchaseInfoDTOList" item="purchaseDirectionInfo" separator=",">
+        	(#{purchaseDirectionInfo.pro_no}, #{purchaseDirectionInfo.loginID}, #{purchaseDirectionInfo.purchase_qty}, 
+        	'발주 신청으로 인한 입고 예정','purchase', #{purchaseDirectionInfo.purchase_no}, #{purchaseDirectionInfo.ware_no})
+        </foreach>
+	</insert>
+	
+</mapper>

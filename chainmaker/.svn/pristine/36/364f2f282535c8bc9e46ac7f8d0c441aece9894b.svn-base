@@ -1,0 +1,182 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<!-- 슬라이드 쇼 slick 라이브러리 -->
+<script src="${CTX_PATH}/js/slick/slick.js"></script>
+<script src="${CTX_PATH}/js/slick/slick.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="${CTX_PATH}/js/slick/slick.css">
+<link rel="stylesheet" type="text/css" href="${CTX_PATH}/js/slick/slick-theme.css">
+
+
+<link rel="stylesheet" href="${CTX_PATH}/css/chosen/chosen.css">
+<script src="${CTX_PATH}/js/chosen/chosen.jquery.js"></script>
+
+
+<script src="${CTX_PATH}/js/view/dashboard/epc/dashboardEpc.js"></script>
+
+<!-- font awesome css -->
+<link rel="stylesheet" type="text/css" href="${CTX_PATH}/js/statistics/css/font-awesome.min.css">
+
+
+<style>
+/*post slider*/
+.post-slider{
+  width:90%;
+  margin:0px auto;
+  position:relative;
+}
+.post-slider .silder-title{
+  text-align:center;
+  margin:30px auto;
+}
+.post-slider .next{
+  position:absolute;
+  top:50%;
+  right:30px;
+  font-size:2em;
+  color:gray;
+  cursor: pointer;
+}
+.post-slider .prev{
+  position:absolute;
+  top:50%;
+  left:30px;
+  font-size:2em;
+  color:gray;
+    cursor: pointer;
+}
+.post-slider .post-wrapper{
+
+  width:95%;
+  height:350px;
+  margin:0px auto;
+  overflow: hidden;
+  padding:10px 0px 10px 0px;
+}
+.post-slider .post-wrapper .post{
+  width:600px;
+  height:300px;
+  margin:0px 10px;
+  display:inline-block;
+  background:white;
+  border-radius: 5px;
+}
+.post-slider .post-wrapper .post .post-info{
+  font-size:15px;
+  height:30%;
+  padding-left:10px;
+}
+.post-slider .post-wrapper .post .slider-image{
+  width:100%;
+  height:175px;
+  border-top-left-radius:5px;
+  border-top-right-radius:5px;
+}
+
+
+.img-button{
+float: right;
+background-image: url(/images/view/dashboard/epc/cart.png);
+
+        border: none;
+        width: 32px;
+        height: 32px;
+}
+
+
+</style>
+
+</head>
+<body>
+
+    <div class="page-wrapper" style="position:relative;">
+      <!--page slider -->
+      <div class="post-slider">
+        <h1 class="silder-title">- ChainMaker Products -</h1>
+        <i class="fas fa-chevron-left prev"></i>
+        <i class="fas fa-chevron-right next"></i>
+        
+        <select id="productCategory" style="float : left"
+        onchange="fSelectedOptions(this.options[this.selectedIndex].value)"></select>
+        
+        <div class="post-wrapper">
+        
+          <div class="post">
+            <img src="img/paris.jpg" class="slider-image" onclick="fImgClick();">
+            <div class="post-info">
+            	<img src="/images/view/dashboard/epc/cart.png" style="height: 40px; width: 40px; float:right;"
+            	onclick="fImgClick();">
+              <h4><a href="#" class="post-subject">제품명 : 모니터</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 3000</i></h6>
+              <i class="far fa-user" style="height:10%;">32인치 모니터 어쩌고 저쩌고</i>
+            </div>
+          </div>
+          
+          <div class="post">
+            <img src="img/architecture.jpg" class="slider-image">
+            <div class="post-info">
+              <h4><a href="#" class="post-subject">제품명 : 스위치</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 34000</i></h6>
+              <i class="far fa-user" style="height:10%;">스위치치치치치치직</i>
+            </div>
+          </div>
+          
+          <div class="post">
+            <img src="img/paris.jpg" class="slider-image">
+            <div class="post-info">
+              <h4><a href="#" class="post-subject">제품명 : 맥북</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 1340000</i></h6>
+              <i class="far fa-user" style="height:10%;">갖고싶다</i></div>
+          </div>
+          
+          <div class="post">
+            <img src="img/gyungju.jpg" class="slider-image">
+            <div class="post-info">
+              <h4><a href="#" class="post-subject">제품명 : 마우스</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 13000</i></h6>
+              <i class="far fa-user" style="height:10%;">찍찍찍</i>
+            </div>
+          </div>
+          
+          <div class="post">
+            <img src="img/gyungju.jpg" class="slider-image">
+            <div class="post-info">
+              <h4><a href="#" class="post-subject">제품명 : 키보드</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 1200</i></h6>
+              <i class="far fa-user" style="height:10%;">키보르드르르르륵</i>
+            </div>
+          </div>
+          
+          <div class="post">
+            <img src="img/gyungju.jpg" class="slider-image">
+            <div class="post-info">
+              <h4><a href="#" class="post-subject">제품명 : 라우터</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 2100</i></h6>
+              <i class="far fa-user" style="height:10%;">라우러</i>
+            </div>
+          </div>
+          
+           <div class="post">
+            <img src="img/gyungju.jpg" class="slider-image">
+            <div class="post-info">
+              <h4><a href="#" class="post-subject">제품명 : 소화기</a></h4>
+              <h6><i class="far fa-user" style="height:10%;">가격 : 2000</i></h6>
+              <i class="far fa-user" style="height:10%;">소화기 저쩌고</i>
+            </div>
+          </div>
+          
+          
+        </div>
+      </div>
+      <!--post slider-->
+    </div>
+
+
+</body>
+</html>

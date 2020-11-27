@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.login.dao.LoginDao">
+   
+   <!-- 사용자 로그인 체크 -->
+   <select id="checkLogin" resultType="String">
+      /*kr.kosmo.jobkorea.login.dao.LoginDao.checkLogin*/
+            SELECT  user_Type
+              FROM    tb_userinfo 
+            WHERE   loginID = #{lgn_Id}
+               AND  password = #{pwd}
+     </select>
+     
+   
+   <!-- 사용자 로그인 -->
+   <select id="selectLogin" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.kosmo.jobkorea.login.dao.LoginDao.selectLogin*/
+      SELECT  loginID as lgn_id
+               , name as usr_nm
+                  , user_Type as mem_author
+      FROM tb_userinfo 
+     WHERE loginID = #{lgn_Id}
+        AND password = #{pwd}
+     </select>
+     
+     
+<!-- 사용자 메뉴 권한 -->
+   <select id="listUsrMnuAtrt" resultType="kr.happyjob.chainmaker.login.model.UsrMnuAtrtModel">
+         /*kr.kosmo.jobkorea.login.dao.LoginDao.listUsrMnuAtrt*/
+            SELECT  ta.mnu_id
+                  ,   ta.hir_mnu_id
+                  ,   ta.mnu_nm
+                  ,   ta.mnu_url
+                  ,   ta.mnu_dvs_cod
+                  ,   ta.grp_num
+                  ,   ta.odr
+                  ,   ta.lvl
+                  ,   ta.mnu_ico_cod
+<!--                   ,   ta.use_poa
+                  ,   ta.dlt_poa -->
+               FROM  tm_mnu_mst ta
+               WHERE EXISTS (
+                             SELECT  1
+                             FROM  tn_usr_mnu_atrt tb
+                             WHERE ta.mnu_id = tb.mnu_id
+                                  AND tb.user_type = #{userType}
+                           )
+                  AND ta.lvl=0
+               ORDER BY ta.odr
+     </select>
+     
+     <!-- 사용자 자식 메뉴 권한 -->
+   <select id="listUsrChildMnuAtrt" resultType="kr.happyjob.chainmaker.login.model.UsrMnuChildAtrtModel">
+      /*kr.kosmo.jobkorea.login.dao.LoginDao.listUsrChildMnuAtrt*/
+         SELECT  ta.mnu_id
+               ,   ta.hir_mnu_id
+               ,   ta.mnu_nm
+               ,   ta.mnu_url
+               ,   ta.mnu_dvs_cod
+               ,   ta.grp_num
+               ,   ta.odr
+               ,   ta.lvl
+               ,   ta.use_poa
+               ,   ta.dlt_poa
+         FROM  tm_mnu_mst ta
+         WHERE EXISTS (
+                          SELECT  1
+                            FROM  tn_usr_mnu_atrt tb
+                          WHERE ta.mnu_id = tb.mnu_id
+                               AND tb.user_type = #{userType}
+                     )
+            AND ta.lvl=1
+            AND hir_mnu_id = #{hir_mnu_id}
+         ORDER BY ta.odr
+     </select>
+     
+     <!-- 회원가입 -->
+     <insert id="registerUser" parameterType="java.util.Map">
+     /*kr.kosmo.jobkorea.login.dao.LoginDao.registerUser*/
+     INSERT INTO tb_userinfo (
+     							loginID
+     						,	user_type
+     						,	name
+     						,	password
+     						,	gender_cd
+     						,	user_tel1
+     						,	user_tel2
+     						,	user_tel3
+     						,	user_zipcode
+     						,	user_address
+     						,	user_dt_address
+     						,	user_account
+     						,	bank_cd
+     						,	del_cd
+     						,	div_cd
+     						,	user_email
+     						,	user_company
+     						)
+     						VALUES (
+     								#{loginID}
+								,	#{user_type}
+								,	#{name}  
+								,	#{password}  
+								,	#{gender_cd}  
+								,	#{user_tel1}  
+								,	#{user_tel2}  
+								,	#{user_tel3}  
+								,	#{user_zipcode}  
+								,	#{user_address}  
+								,	#{user_dt_address}
+								,	#{user_account}
+								,	#{bank_cd}
+								,	#{del_cd}
+								,	#{div_cd}    	
+								,	#{user_email}  
+								,	#{user_company}					
+     						)
+     
+     
+     </insert>
+     
+     
+     <!-- loginID 중복검사 -->
+	<select id="check_loginID" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM tb_userinfo
+		WHERE loginID = #{loginID}
+	</select>
+	
+     <!-- 사용자 ID 찾기 -->
+      <select id="selectFindId" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.happyjob.chainmaker.login.dao.LoginDao.selectFindId*/
+      SELECT  u.loginID as loginID
+      	  ,	  u.user_email as user_email
+      FROM    tb_userinfo as u
+      WHERE   u.del_cd =0
+      AND	  u.user_email = #{user_email}
+     </select>
+<!--    <select id="selectFindId" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.kosmo.jobkorea.login.dao.LoginDao.selectFindId*/
+      SELECT  ta.lgn_id
+      , tb.cpn_ctr
+      , tb.cpn_1
+      , tb.cpn_2
+      , tb.cpn_3
+      , tb.eml
+      FROM   tm_usr_mst ta
+         ,   tn_usr_dtl_info tb
+      WHERE   ta.usr_sst_id = tb.usr_sst_id
+      AND   ta.use_poa = 'Y'
+      AND   ta.dlt_poa = 'N'
+      <choose>
+         <when test ="(type != null) and (type eq 'P'.toString())">
+            AND   ta.usr_nm = #{usr_nm}
+            AND tb.cpn_ctr = #{cpn_ctr}
+            AND tb.cpn_1 = #{cpn_1}
+            AND tb.cpn_2 = #{cpn_2} 
+            AND tb.cpn_3 = #{cpn_3}
+         </when>
+         <when test ="(type != null) and (type eq 'E'.toString())">
+            AND   ta.usr_nm = #{usr_nm}
+            AND tb.eml = #{eml}
+         </when>
+         <otherwise>
+            AND 1=2
+         </otherwise>
+      </choose>
+     </select> -->
+     <!-- select박스 은행 목록 -->
+     <select id="selectBankList" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+     /*kr.happyjob.chainmaker.login.dao.LoginDao.selectBankList*/
+     SELECT detail_name 
+     	,	detail_code
+     FROM   tb_detail_code
+	 WHERE  group_code = 'bankCD'
+     </select>
+      
+     <!-- 사용자 PW 찾기 -->
+     <select id="selectFindPw" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.happyjob.chainmaker.login.dao.LoginDao.selectFindPw*/
+      SELECT  u.loginID as loginID
+      	  ,   u.password as password
+      	  ,	  u.user_email as user_email
+      FROM    tb_userinfo as u
+      WHERE   u.del_cd =0
+      AND	  u.user_email = #{user_email}
+      AND 	  u.loginID = #{loginID}
+     </select>
+   <!-- <select id="selectFindPw" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+      /*kr.kosmo.jobkorea.login.dao.LoginDao.selectFindPw*/
+      SELECT  ta.lgn_id
+      , ta.pwd
+      , tb.cpn_ctr
+      , tb.cpn_1
+      , tb.cpn_2
+      , tb.cpn_3
+      , tb.eml
+      FROM   tm_usr_mst ta
+         ,   tn_usr_dtl_info tb
+      WHERE   ta.usr_sst_id = tb.usr_sst_id
+      AND   ta.use_poa = 'Y'
+      AND   ta.dlt_poa = 'N'
+      <choose>
+         <when test ="(type != null) and (type eq 'P'.toString())">
+            AND ta.lgn_id = #{lgn_id}
+            AND   ta.usr_nm = #{usr_nm}
+            AND tb.cpn_ctr = #{cpn_ctr}
+            AND tb.cpn_1 = #{cpn_1}
+            AND tb.cpn_2 = #{cpn_2}
+            AND tb.cpn_3 = #{cpn_3}
+         </when>
+         <when test ="(type != null) and (type eq 'E'.toString())">
+            AND ta.lgn_id = #{lgn_id}
+            AND   ta.usr_nm = #{usr_nm}
+            AND tb.eml = #{eml}
+         </when>
+         <otherwise>
+            AND 1=2
+         </otherwise>
+      </choose>
+     </select> -->
+     
+     <!-- 사용자 PW 찾기 ID 체크-->
+     <select id="registerIdCheck" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
+     SELECT     u.loginID as loginID
+     FROM    	tb_userinfo as u
+     WHERE   	u.del_cd =0
+     AND 	  	u.loginID = #{loginID}
+     </select>
+     
+
+</mapper>

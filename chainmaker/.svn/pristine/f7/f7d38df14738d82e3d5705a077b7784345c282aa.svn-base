@@ -1,0 +1,8 @@
+package kr.happyjob.chainmaker.pcm.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class RefundFinalProcessingServiceImpl implements RefundFinalProcessingService {
+
+}

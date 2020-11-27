@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.pcm.dao.ReturnPurchseDao">
+
+	<!-- 구매담당자_반품 지시서 목록 조회 -->
+	<select id="returnPurchaseList" resultType="kr.happyjob.chainmaker.pcm.model.ReturnPurchaseModel">
+		SELECT tb_refund.refund_no,	   
+		       tb_refund.refund_qty,       
+		       tb_refund.refund_cd,      
+		       tb_refund.refund_date,
+		       tb_direction.direction_cd,
+		       tb_product.pro_no,
+		       tb_product.pro_name,
+		       tb_product.pro_deli_price,
+		       (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
+		       <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
+		       tb_delivery.deli_company,
+		       tb_delivery.deli_name,
+		       tb_delivery.deli_phone,
+		       tb_delivery.deli_email,
+		       tb_warehouse.ware_no,
+		       tb_warehouse.ware_name,
+		       tb_warehouse.ware_address,
+		       tb_warehouse.ware_dt_address
+		  FROM tb_refund  
+		  
+		  LEFT JOIN tb_direction 
+				 ON tb_refund.refund_no=tb_direction.refund_no
+		         
+		  LEFT JOIN tb_purchase 
+				 ON tb_refund.purchase_no=tb_purchase.purchase_no
+		         
+		  LEFT JOIN tb_warehouse 
+				 ON tb_refund.ware_no=tb_warehouse.ware_no
+		         
+		  LEFT JOIN tb_product
+				 ON tb_refund.pro_no=tb_product.pro_no
+		         
+		  LEFT JOIN tb_delivery 
+				 ON tb_product.deli_no=tb_delivery.deli_no
+		  <where>
+		   AND direction_cd='refund' 
+		   AND tb_direction.purchase_no IS NOT NULL
+		  	<if test="(searchKey != null) and (!searchKey.equals(''))">
+		  		<choose>
+		  			<when test="(searchKey != null) and (searchKey eq 'deli_company'.toString())">
+		  				AND tb_delivery.deli_company LIKE CONCAT('%', #{searchWord}, '%')	
+		  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+		  					<![CDATA[
+		  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+		  						AND tb_refund.refund_date < DATE(#{endDate})+1
+		  					]]>						  					
+		  				</if>	  				
+		  			</when>
+		  			<when test="(searchKey != null) and (searchKey eq 'pro_name'.toString())">
+		  				AND tb_product.pro_name LIKE CONCAT('%', #{searchWord}, '%')
+		  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+		  					<![CDATA[
+		  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+		  						AND tb_refund.refund_date < DATE(#{endDate})+1
+		  					]]>	  								  					
+		  				</if>
+		  			</when>
+		  		</choose>
+		  	</if>
+		  </where>	
+		 GROUP BY tb_refund.refund_no
+		 ORDER BY tb_refund.refund_no DESC
+		 LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	<!-- 구매담당자_반품 지시서 목록 조회 카운트 -->
+	<select id="countReturnPurchaseList" resultType="int">
+		SELECT COUNT(*)
+		  FROM (SELECT tb_refund.refund_no,	   
+					   tb_refund.refund_qty,       
+					   tb_refund.refund_cd,      
+					   tb_refund.refund_date,
+					   tb_direction.direction_cd,
+					   tb_product.pro_no,
+					   tb_product.pro_name,
+					   tb_product.pro_deli_price,
+					   (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
+					   <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
+					   tb_delivery.deli_company,
+					   tb_delivery.deli_name,
+					   tb_delivery.deli_phone,
+					   tb_delivery.deli_email,
+					   tb_warehouse.ware_no,
+					   tb_warehouse.ware_name,
+					   tb_warehouse.ware_address,
+					   tb_warehouse.ware_dt_address
+				  FROM tb_refund    
+				  
+				  LEFT JOIN tb_direction 
+						 ON tb_refund.refund_no=tb_direction.refund_no 
+						         
+				  LEFT JOIN tb_purchase 
+						 ON tb_refund.purchase_no=tb_purchase.purchase_no
+						          
+				  LEFT JOIN tb_warehouse 
+						 ON tb_refund.ware_no=tb_warehouse.ware_no 
+						         
+				  LEFT JOIN tb_product
+						 ON tb_refund.pro_no=tb_product.pro_no  
+						        
+				  LEFT JOIN tb_delivery 
+						 ON tb_product.deli_no=tb_delivery.deli_no         
+				  <where>
+				   AND direction_cd='refund' 
+				   AND tb_direction.purchase_no IS NOT NULL
+				  	<if test="(searchKey != null) and (!searchKey.equals(''))">
+				  		<choose>
+				  			<when test="(searchKey != null) and (searchKey eq 'deli_company'.toString())">
+				  				AND tb_delivery.deli_company LIKE CONCAT('%', #{searchWord}, '%')	
+				  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+				  					<![CDATA[
+				  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+				  						AND tb_refund.refund_date < DATE(#{endDate})+1
+				  					]]>						  					
+				  				</if>	  				
+				  			</when>
+				  			<when test="(searchKey != null) and (searchKey eq 'pro_name'.toString())">
+				  				AND tb_product.pro_name LIKE CONCAT('%', #{searchWord}, '%')
+				  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+				  					<![CDATA[
+				  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+				  						AND tb_refund.refund_date < DATE(#{endDate})+1
+				  					]]>	  								  					
+				  				</if>
+				  			</when>
+				  		</choose>
+				  	</if>
+				  </where>	   
+				 GROUP BY tb_refund.refund_no
+				 ORDER BY tb_refund.refund_no DESC)
+			tb_refund
+	</select>
+	
+	<!-- 구매담당자_반품 지시서 목록 단건 조회 -->
+	<select id="returnPurchaseSelect" resultType="kr.happyjob.chainmaker.pcm.model.ReturnPurchaseModel">
+		SELECT tb_refund.refund_no,	   
+		       tb_refund.refund_qty,       
+		       tb_refund.refund_cd,      
+		       tb_refund.refund_date,
+		       tb_direction.direction_cd,
+		       tb_product.pro_no,
+		       tb_product.pro_name,
+		       tb_product.pro_deli_price,
+		       (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
+		       <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
+		       tb_delivery.deli_company,
+		       tb_delivery.deli_name,
+		       tb_delivery.deli_phone,
+		       tb_delivery.deli_email,
+		       tb_warehouse.ware_no,
+		       tb_warehouse.ware_name,
+		       tb_warehouse.ware_address,
+		       tb_warehouse.ware_dt_address
+		  FROM tb_refund  
+		  
+		  LEFT JOIN tb_direction 
+				 ON tb_refund.refund_no=tb_direction.refund_no
+		         
+		  LEFT JOIN tb_purchase 
+				 ON tb_refund.purchase_no=tb_purchase.purchase_no
+		         
+		  LEFT JOIN tb_warehouse 
+				 ON tb_refund.ware_no=tb_warehouse.ware_no
+		         
+		  LEFT JOIN tb_product
+				 ON tb_refund.pro_no=tb_product.pro_no
+		         
+		  LEFT JOIN tb_delivery 
+				 ON tb_product.deli_no=tb_delivery.deli_no
+		         
+		 WHERE direction_cd='refund' 
+		   AND tb_direction.purchase_no IS NOT NULL 
+		   AND tb_refund.refund_no=#{refund_no}
+		   
+		 GROUP BY tb_refund.refund_no, tb_refund.ware_no, tb_refund.pro_no
+		 ORDER BY tb_refund.refund_no DESC
+	</select>
+	
+	<!-- 구매담당자_반품 지시서 디테일 목록 조회 -->
+	<select id="returnPurchaseDtlList" resultType="kr.happyjob.chainmaker.pcm.model.ReturnPurchaseModel">
+		SELECT tb_refund.refund_no,	   
+		       tb_refund.refund_qty,       
+		       tb_refund.refund_cd,      
+		       tb_refund.refund_date,
+		       tb_direction.direction_cd,
+		       tb_product.pro_no,
+		       tb_product.pro_name,
+		       tb_product.pro_deli_price,
+		       (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
+		       <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
+		       tb_delivery.deli_company,
+		       tb_delivery.deli_name,
+		       tb_delivery.deli_phone,
+		       tb_delivery.deli_email,
+		       tb_warehouse.ware_no,
+		       tb_warehouse.ware_name,
+		       tb_warehouse.ware_address,
+		       tb_warehouse.ware_dt_address
+		  FROM tb_refund  
+		  
+		  LEFT JOIN tb_direction 
+				 ON tb_refund.refund_no=tb_direction.refund_no
+		         
+		  LEFT JOIN tb_purchase 
+				 ON tb_refund.purchase_no=tb_purchase.purchase_no
+		         
+		  LEFT JOIN tb_warehouse 
+				 ON tb_refund.ware_no=tb_warehouse.ware_no
+		         
+		  LEFT JOIN tb_product
+				 ON tb_refund.pro_no=tb_product.pro_no
+		         
+		  LEFT JOIN tb_delivery 
+				 ON tb_product.deli_no=tb_delivery.deli_no
+		         
+		 WHERE direction_cd='refund' 
+		   AND tb_direction.purchase_no IS NOT NULL 
+		   AND tb_refund.refund_no=#{refund_no}
+		   
+		 GROUP BY tb_refund.refund_no, tb_refund.ware_no, tb_refund.pro_no
+		 ORDER BY tb_refund.refund_no DESC
+	</select>
+	<!-- 구매담당자_반품 지시서 디테일 목록 조회 카운트 -->
+	<select id="countReturnPurchaseDtlList" resultType="int">
+		SELECT COUNT(*)
+		  FROM (SELECT tb_refund.refund_no,	   
+					   tb_refund.refund_qty,       
+					   tb_refund.refund_cd,      
+					   tb_refund.refund_date,
+					   tb_direction.direction_cd,
+					   tb_product.pro_no,
+					   tb_product.pro_name,
+					   tb_product.pro_deli_price,
+					   (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
+					   tb_delivery.deli_company,
+					   tb_delivery.deli_name,
+					   tb_delivery.deli_phone,
+					   tb_delivery.deli_email,
+					   tb_warehouse.ware_no,
+					   tb_warehouse.ware_name,
+					   tb_warehouse.ware_address,
+					   tb_warehouse.ware_dt_address
+				  FROM tb_refund  
+				    
+				  LEFT JOIN tb_direction 
+						 ON tb_refund.refund_no=tb_direction.refund_no 
+						         
+				  LEFT JOIN tb_purchase 
+						 ON tb_refund.purchase_no=tb_purchase.purchase_no  
+						        
+				  LEFT JOIN tb_warehouse 
+						 ON tb_refund.ware_no=tb_warehouse.ware_no 
+						         
+				  LEFT JOIN tb_product
+						 ON tb_refund.pro_no=tb_product.pro_no 
+						         
+				  LEFT JOIN tb_delivery 
+						 ON tb_product.deli_no=tb_delivery.deli_no 
+						 
+					  WHERE tb_direction.direction_cd='refund' 
+						AND tb_direction.purchase_no IS NOT NULL
+						AND tb_refund.refund_no=#{refund_no}
+						
+				   GROUP BY tb_refund.refund_no, tb_refund.ware_no, tb_refund.pro_no     
+				   ORDER BY tb_refund.refund_no DESC)
+				tb_refund 
+	</select>	
+	
+	<!-- 구매담당자_반품 지시서 전송에 대한 refund_cd 변경 -->
+	<update id="updateSendRefundDirection">
+		UPDATE tb_refund SET refund_cd='1' WHERE refund_no=#{refund_no}
+	</update>
+	<!-- 구매담당자_반품 지시서 목록 반품금액 입금 확인에 대한 refund_cd 변경 -->
+	<update id="updateConfirmRefundPrice">
+		UPDATE tb_refund SET refund_cd='2' WHERE refund_no=#{refund_no}
+	</update>
+</mapper>

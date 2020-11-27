@@ -78,7 +78,7 @@
         </where>
 		ORDER BY u.user_type
 		LIMIT #{pageIndex}, #{pageSize};
-
+		
 	</select>
 
 	<!-- 회원 1건 상세정보 -->
@@ -140,7 +140,7 @@
 	<!-- 회원 컴백 -->
 	<update id="comebackUser" parameterType="java.util.Map">
 		UPDATE tb_userinfo
-		SET del_cd = "0"
+		SET del_cd = "n"
 		WHERE loginID = #{loginID};
 	</update>
 	
@@ -173,7 +173,7 @@
 			, #{dt_address}
 			, #{email}
 			, #{company}
-			, "0"
+			, "n"
 				<if test="checkstaff.equals('instaff')">
 			, #{checkstaff}
 			, #{selectChaCD}

@@ -1,0 +1,51 @@
+package kr.happyjob.chainmaker.dlm.controller;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.happyjob.chainmaker.dlm.service.DlmPurchaseOrderService;
+
+@Controller
+@RequestMapping("/dlm")
+public class DlmPurchaseOrderController {
+  
+  // Set logger
+  private final Logger logger = LogManager.getLogger(this.getClass());
+  
+  // Get class name for logger
+  private final String className = this.getClass().toString();
+  
+  @Autowired
+  DlmPurchaseOrderService dlmPurchaseOrderService;
+  
+  // 발주 지시서 ( 납품 업체 ) 목록 페이지
+  @RequestMapping("purchaseorder.do")
+  public String purchaseOrder() {
+    
+    logger.info("발주 지시서 (납품 업체) 목록 페이지");
+    logger.info(" + Start - " + className + ".initPurchaseOrderInfo");
+    
+    return "dlm/purchaseOrderList";
+  }
+  
+  // 발주 지시서 목록 조회
+  @RequestMapping("purchaseOrderList.do")
+  public String purchaseOrderList() {
+    
+    
+    return "dlm/purchaseList";
+  }
+  
+  // 발주 지시서 상세 목록 조회
+  @RequestMapping("purchaseOrderDtlList.do")
+  public String purchaseOrderDtlList() {
+    
+    
+    return "dlm/purchaseDtlList";
+  }
+  
+  
+}

@@ -19,9 +19,11 @@
       SELECT  loginID as lgn_id
                , name as usr_nm
                   , user_Type as mem_author
+                  ,approval_cd as approval_cd
       FROM tb_userinfo 
      WHERE loginID = #{lgn_Id}
         AND password = #{pwd}
+        AND del_cd="n"
      </select>
      
      
@@ -96,6 +98,7 @@
      						,	div_cd
      						,	user_email
      						,	user_company
+     						,	approval_cd
      						)
      						VALUES (
      								#{loginID}
@@ -110,11 +113,12 @@
 								,	#{user_address}  
 								,	#{user_dt_address}
 								,	#{user_account}
-								,	#{bank_cd}
+								,	(select detail_code from tb_detail_code where detail_name = #{bank_cd})
 								,	#{del_cd}
 								,	#{div_cd}    	
 								,	#{user_email}  
-								,	#{user_company}					
+								,	#{user_company}		
+								,	#{approval_cd}			
      						)
      
      
@@ -134,7 +138,7 @@
       SELECT  u.loginID as loginID
       	  ,	  u.user_email as user_email
       FROM    tb_userinfo as u
-      WHERE   u.del_cd =0
+      WHERE   u.del_cd ="n"
       AND	  u.user_email = #{user_email}
      </select>
 <!--    <select id="selectFindId" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
@@ -183,7 +187,7 @@
       	  ,   u.password as password
       	  ,	  u.user_email as user_email
       FROM    tb_userinfo as u
-      WHERE   u.del_cd =0
+      WHERE   u.del_cd ="n"
       AND	  u.user_email = #{user_email}
       AND 	  u.loginID = #{loginID}
      </select>
@@ -225,7 +229,7 @@
      <select id="registerIdCheck" resultType="kr.happyjob.chainmaker.login.model.LgnInfoModel">
      SELECT     u.loginID as loginID
      FROM    	tb_userinfo as u
-     WHERE   	u.del_cd =0
+     WHERE   	u.del_cd ="n"
      AND 	  	u.loginID = #{loginID}
      </select>
      

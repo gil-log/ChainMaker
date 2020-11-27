@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.pcm.dao.RefundFinalProcessingDao">
+
+	<!-- 구매담당자_기업고객_반품내역 목록 조회 -->
+	<select id="refundFinalProcessingList" resultType="kr.happyjob.chainmaker.pcm.model.RefundFinalProcessingModel">
+		SELECT tb_refund.refund_no,
+			   tb_refund.refund_qty,
+			   tb_refund.refund_date,
+			   tb_refund.refund_confirm_cd,
+			   tb_refund.refund_note,
+			   tb_refund.pro_no,
+			   tb_refund.order_no,
+			   (tb_refund.refund_qty*tb_product.pro_price) sum_price,
+		       SUM(tb_refund.refund_qty*tb_product.pro_price) total_price,
+			   tb_product.pro_name,
+			   tb_product.pro_price,
+		       tb_userinfo.loginID,
+			   tb_userinfo.name,
+			   tb_userinfo.user_company,
+			   (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
+			   tb_userinfo.user_account,
+			   tb_userinfo.user_email,
+			   tb_userinfo.user_tel1,
+			   tb_userinfo.user_tel2,
+			   tb_userinfo.user_tel3      
+		  FROM tb_refund
+		  
+		  LEFT JOIN (SELECT * FROM tb_order WHERE order_cd='refund') tb_order
+		         ON tb_refund.order_no=tb_order.order_no
+		         
+		  LEFT JOIN tb_product
+		         ON tb_refund.pro_no=tb_product.pro_no
+		         
+		  LEFT JOIN tb_userinfo
+		         ON tb_order.loginID=tb_userinfo.loginID		         				 
+			<where> 
+			   AND tb_refund.refund_confirm_cd='3'
+			   AND tb_refund.order_no IS NOT NULL
+			  	<if test="(searchKey != null) and (!searchKey.equals(''))">
+			  		<choose>
+			  			<when test="(searchKey != null) and (searchKey eq 'user_company'.toString())">
+			  				AND tb_userinfo.user_company LIKE CONCAT('%', #{searchWord}, '%')	
+			  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+			  					<![CDATA[
+			  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+			  						AND tb_refund.refund_date < DATE(#{endDate})+1
+			  					]]>						  					
+			  				</if>	  				
+			  			</when>
+			  			<when test="(searchKey != null) and (searchKey eq 'pro_name'.toString())">
+			  				AND tb_product.pro_name LIKE CONCAT('%', #{searchWord}, '%')
+			  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+			  					<![CDATA[
+			  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+			  						AND tb_refund.refund_date < DATE(#{endDate})+1
+			  					]]>	  								  					
+			  				</if>
+			  			</when>
+		  			</choose>
+			  	</if>
+			  </where>
+		 GROUP BY tb_refund.refund_no
+		 ORDER BY tb_refund.refund_no DESC
+		 LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	<!-- 구매담당자_기업고객_반품내역 목록 조회 카운트 -->
+	<select id="countRefundFinalProcessingList" resultType="int">
+		SELECT COUNT(*)    
+		  FROM (SELECT tb_refund.refund_no,
+					   tb_refund.refund_qty,
+					   tb_refund.refund_date,
+					   tb_refund.refund_confirm_cd,
+					   tb_refund.refund_note,
+					   tb_refund.pro_no,
+					   tb_refund.order_no,
+					   (tb_refund.refund_qty*tb_product.pro_price) sum_price,
+					   SUM(tb_refund.refund_qty*tb_product.pro_price) total_price,
+					   tb_product.pro_name,
+					   tb_product.pro_price,
+					   tb_userinfo.loginID,
+					   tb_userinfo.name,
+					   tb_userinfo.user_company,
+					   (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
+					   tb_userinfo.user_account,
+			  		   tb_userinfo.user_email,
+					   tb_userinfo.user_tel1,
+					   tb_userinfo.user_tel2,
+					   tb_userinfo.user_tel3      
+				  FROM tb_refund
+				  
+				  LEFT JOIN (SELECT * FROM tb_order WHERE order_cd='refund') tb_order
+						 ON tb_refund.order_no=tb_order.order_no 
+						 
+				  LEFT JOIN tb_product
+						 ON tb_refund.pro_no=tb_product.pro_no
+						 
+				  LEFT JOIN tb_userinfo
+						 ON tb_order.loginID=tb_userinfo.loginID				 
+					<where> 
+					   AND tb_refund.refund_confirm_cd='3'
+					   AND tb_refund.order_no IS NOT NULL
+					  	<if test="(searchKey != null) and (!searchKey.equals(''))">
+					  		<choose>
+					  			<when test="(searchKey != null) and (searchKey eq 'user_company'.toString())">
+					  				AND tb_userinfo.user_company LIKE CONCAT('%', #{searchWord}, '%')	
+					  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+					  					<![CDATA[
+					  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+					  						AND tb_refund.refund_date < DATE(#{endDate})+1
+					  					]]>						  					
+					  				</if>	  				
+					  			</when>
+					  			<when test="(searchKey != null) and (searchKey eq 'pro_name'.toString())">
+					  				AND tb_product.pro_name LIKE CONCAT('%', #{searchWord}, '%')
+					  				<if test="(!startDate.equals('')) or (!endDate.equals(''))">
+					  					<![CDATA[
+					  						AND tb_refund.refund_date >= DATE(#{startDate}) 
+					  						AND tb_refund.refund_date < DATE(#{endDate})+1
+					  					]]>	  								  					
+					  				</if>
+					  			</when>
+				  			</choose>
+					  	</if>
+					  </where>
+				 GROUP BY tb_refund.refund_no
+				 ORDER BY tb_refund.refund_no DESC)
+			   tb_refund 
+	</select>
+	
+	<!-- 구매담당자_기업고객_반품내역 목록 단건 조회 -->
+	<select id="refundFinalProcessingSelect" resultType="kr.happyjob.chainmaker.pcm.model.RefundFinalProcessingModel">
+		SELECT tb_refund.refund_no,
+			   tb_refund.refund_qty,
+			   tb_refund.refund_date,
+			   tb_refund.refund_confirm_cd,
+			   tb_refund.refund_note,
+			   tb_refund.pro_no,
+			   tb_refund.order_no,
+			   (tb_refund.refund_qty*tb_product.pro_price) sum_price,
+		       SUM(tb_refund.refund_qty*tb_product.pro_price) total_price,
+			   tb_product.pro_name,
+			   tb_product.pro_price,
+		       tb_userinfo.loginID,
+			   tb_userinfo.name,
+			   tb_userinfo.user_company,
+			   (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
+			   tb_userinfo.user_account,
+			   tb_userinfo.user_email,
+			   tb_userinfo.user_tel1,
+			   tb_userinfo.user_tel2,
+			   tb_userinfo.user_tel3      
+		  FROM tb_refund
+		  
+		  LEFT JOIN (SELECT * FROM tb_order WHERE order_cd='refund') tb_order
+		         ON tb_refund.order_no=tb_order.order_no
+		         
+		  LEFT JOIN tb_product
+		         ON tb_refund.pro_no=tb_product.pro_no
+		         
+		  LEFT JOIN tb_userinfo
+		         ON tb_order.loginID=tb_userinfo.loginID
+		         	
+		   WHERE tb_refund.refund_confirm_cd='3'
+		   AND tb_refund.order_no IS NOT NULL
+		   AND tb_refund.refund_no=#{refund_no}
+		   
+		 GROUP BY tb_refund.refund_no, tb_order.pro_no
+		 ORDER BY tb_refund.refund_no DESC
+		 LIMIT 0, 1
+	</select>
+	
+	<!-- 구매담당자_기업고객_반품내역 디테일 목록 조회 -->
+	<select id="refundFinalProcessingDtlList" resultType="kr.happyjob.chainmaker.pcm.model.RefundFinalProcessingModel">
+		SELECT tb_refund.refund_no,
+			   tb_refund.refund_qty,
+			   tb_refund.refund_date,
+			   tb_refund.refund_confirm_cd,
+			   tb_refund.refund_note,
+			   tb_refund.pro_no,
+			   tb_refund.order_no,
+			   (tb_refund.refund_qty*tb_product.pro_price) sum_price,
+		       SUM(tb_refund.refund_qty*tb_product.pro_price) total_price,
+			   tb_product.pro_name,
+			   tb_product.pro_price,
+		       tb_userinfo.loginID,
+			   tb_userinfo.name,
+			   tb_userinfo.user_company,
+			   (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
+			   tb_userinfo.user_account,
+			   tb_userinfo.user_email,
+			   tb_userinfo.user_tel1,
+			   tb_userinfo.user_tel2,
+			   tb_userinfo.user_tel3      
+		  FROM tb_refund
+		  
+		  LEFT JOIN (SELECT * FROM tb_order WHERE order_cd='refund') tb_order
+		         ON tb_refund.order_no=tb_order.order_no
+		         
+		  LEFT JOIN tb_product
+		         ON tb_refund.pro_no=tb_product.pro_no
+		         
+		  LEFT JOIN tb_userinfo
+		         ON tb_order.loginID=tb_userinfo.loginID
+		         	
+		   WHERE tb_refund.refund_confirm_cd='3'
+		   AND tb_refund.order_no IS NOT NULL
+		   AND tb_refund.refund_no=#{refund_no}
+		   
+		 GROUP BY tb_refund.refund_no, tb_refund.pro_no
+		 ORDER BY tb_refund.refund_no DESC
+		 LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	<!-- 구매담당자_기업고객_반품내역 디테일 목록 조회 카운트 -->
+	<select id="countRefundFinalProcessingDtlList" resultType="int">
+		 SELECT COUNT(*)     
+		   FROM (SELECT tb_refund.refund_no,
+					    tb_refund.refund_qty,
+					    tb_refund.refund_date,
+					    tb_refund.refund_confirm_cd,
+					    tb_refund.refund_note,
+					    tb_refund.pro_no,
+					    tb_refund.order_no,
+					    (tb_refund.refund_qty*tb_product.pro_price) sum_price,
+					    SUM(tb_refund.refund_qty*tb_product.pro_price) total_price,
+					    tb_product.pro_name,
+					    tb_product.pro_price,
+					    tb_userinfo.loginID,
+					    tb_userinfo.name,
+					    tb_userinfo.user_company,
+					    (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
+					    tb_userinfo.user_account,
+			  		    tb_userinfo.user_email,
+					    tb_userinfo.user_tel1,
+					    tb_userinfo.user_tel2,
+					    tb_userinfo.user_tel3      
+				   FROM tb_refund
+				   LEFT JOIN (SELECT * FROM tb_order WHERE order_cd='refund') tb_order
+						  ON tb_refund.order_no=tb_order.order_no 
+				   LEFT JOIN tb_product
+						  ON tb_refund.pro_no=tb_product.pro_no
+				   LEFT JOIN tb_userinfo
+						  ON tb_order.loginID=tb_userinfo.loginID
+				  WHERE tb_refund.refund_confirm_cd='3'
+				    AND tb_refund.order_no IS NOT NULL
+				    AND tb_refund.refund_no=#{refund_no}
+				  GROUP BY tb_refund.refund_no, tb_refund.pro_no
+				  ORDER BY tb_refund.refund_no DESC)
+			    tb_refund
+	</select>
+	
+	<update id="updateRefundComplete">
+		UPDATE tb_refund 
+		   SET refund_confirm_cd='4'
+		 WHERE refund_confirm_cd='3'
+		   AND refund_no=#{refund_no}
+	</update>
+</mapper>

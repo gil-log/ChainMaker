@@ -1,0 +1,12 @@
+package kr.happyjob.chainmaker.ged.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/ged/salesStatus.do")
+public class SalesStatusController {
+	
+	
+	
+}

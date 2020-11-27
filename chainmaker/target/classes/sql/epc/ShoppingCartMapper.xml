@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.ShoppingCartDao">
+	<!-- 빌립 페이지  -->
+	<!-- 장바구니 리스트가져오기 
+		DATE_FORMAT( DATETIME date, FORMAT )
+		%Y 연도(1987, 2000, 2013)
+		%c 월(1, 2, ..., 12)
+		%d 일(00, 01, 02, ...)  
+	-->
+	<select id="listCart" resultType="kr.happyjob.chainmaker.epc.model.ShoppingCartModel">
+		SELECT b.bas_no as bas_no
+			, p.pro_name as pro_name
+			, p.pro_price as pro_price
+			, DATE_FORMAT( b.bas_date, "%Y-%c-%d" ) as bas_date
+			, b.bas_qty as bas_qty
+			, f.file_server_path as file_server_path
+		FROM tb_product p
+		JOIN tb_basket b ON p.pro_no = b.pro_no
+		JOIN tb_file f ON p.pro_no = f.pro_no
+		AND b.loginID = #{loginID}
+		LIMIT #{pageIndex}, #{pageSize};
+	</select>
+	
+	<select id="countListCart" resultType="int">
+		SELECT count(*) as total_cnt
+		FROM tb_product p
+		JOIN tb_basket b ON p.pro_no = b.pro_no
+		JOIN tb_file f ON p.pro_no = f.pro_no
+		AND b.loginID = #{loginID}
+	</select>
+
+	<delete id ="delcart">
+		DELETE FROM tb_basket
+		WHERE bas_no = #{no}
+	</delete>
+	
+	<update id ="basketUpdateDate">
+		UPDATE tb_basket
+		SET bas_date = #{date}
+		WHERE bas_no = #{no}
+	</update>
+	
+	
+	<insert id="basketOrder" parameterType="HashMap">
+	INSERT INTO tb_order( order_no
+						, pro_no
+						, loginID
+						, order_qty
+						, order_expdate
+						, order_cd
+						, deposit_cd
+						, order_mod_date)
+	SELECT (SELECT Auto_increment 
+			FROM information_schema.tables 
+			WHERE table_schema = 'chainmaker' 
+			AND table_name = 'tb_order') 
+		,pro_no
+		, loginID
+		, bas_qty
+		, bas_date
+		, "order"
+		, "0" 
+		, now()
+	FROM tb_basket
+	WHERE bas_no IN
+		<foreach collection="param.basNoList" index="index" item="test" open='(' close=')' separator=','>
+			#{test.bas_no}
+		</foreach>
+	</insert>
+	
+	<select id="selectSeq" resultType="int">
+		SELECT Auto_increment 
+		FROM information_schema.tables 
+		WHERE table_schema = 'chainmaker' 
+		AND table_name = 'tb_order'
+	</select>
+	
+	<delete id="deleteBasket" parameterType="HashMap">
+		DELETE FROM tb_basket
+		WHERE bas_no IN
+			<foreach collection="param.basNoList" index="index" item="test" open='(' close=')' separator=','>
+				 #{test.bas_no}
+			</foreach>
+	</delete>
+
+	
+	<!-- admin 계좌 가져오기 -->
+	<select id="adminBank" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		SELECT u.user_account as user_account
+			, d.detail_name as bank_name
+			, u.name as name
+		FROM tb_userinfo u 
+		JOIN tb_detail_code d 
+		ON u.bank_cd = d.detail_code
+		WHERE loginID = "admin";
+	</select>
+	
+	
+</mapper>
