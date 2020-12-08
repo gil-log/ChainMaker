@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.ged.dao.RefundConfirmDao">
+	<!-- 26페이지 반품관련 임원승인 혜원  -->
+	
+	
+	<!-- 1. 승인전 반품 목록 띄우기  -->
+	<select id="selectBeforeApproveRefundList" parameterType="Map"
+		resultType="kr.happyjob.chainmaker.ged.model.RefundConfirmInfoVO">
+
+		SELECT <!-- @rownum:=@rownum+1 as row_num, -->
+			r.refund_no,
+			r.pro_no,
+			r.ware_no,
+			u.user_company,
+			p.pro_name,
+			o.order_date,
+			r.refund_date,
+			o.order_qty,
+			r.refund_qty,
+			p.pro_price * r.refund_qty as total_price
+		FROM tb_refund r
+		     JOIN tb_order o on r.pro_no = o.pro_no and r.order_no = o.order_no
+		     JOIN tb_product p on o.pro_no = p.pro_no
+		     JOIN tb_userinfo u on o.loginID = u.loginID and u.user_type  = 'C'
+		 <where>     		  
+				<if test="(sname != null) and (!sname.equals('')) ">
+					<choose>					
+						<when test= "searchKey eq 'all'.toString()">
+							AND CONCAT(u.user_company, p.pro_name) REGEXP CONCAT('.', #{sname}, '.')
+						</when>	
+						<when test= "searchKey eq 'user_company'.toString()">
+							AND u.user_company LIKE CONCAT('%', #{sname}, '%')
+						</when>	
+						<when test= "searchKey eq 'pro_name'.toString()">
+							AND p.pro_name LIKE CONCAT('%', #{sname}, '%')
+						</when>	
+
+					</choose>
+				</if>
+				<if test="(fromDate != null) and (toDate != null)">
+					AND r.refund_date <![CDATA[ >= date(#{fromDate}) ]]> 
+					AND r.refund_date <![CDATA[ <= date(#{toDate})+1 ]]>
+				</if>		    
+		<!--  AND (@rownum:=0)=0 -->
+		 AND r.order_no is not null
+		 AND r.refund_confirm_cd = 1
+	    </where>
+	    ORDER BY r.refund_no ,r.pro_no ,r.ware_no DESC
+		LIMIT #{pageIndex},#{pageSize}
+	</select>		
+	
+	
+	<!-- 2. 반품 목록 갯수 -->
+	<select id="countBeforeApprovePurchaseList" parameterType="Map" resultType="int">
+		SELECT count(1) 
+		FROM tb_refund r
+		JOIN tb_order o on r.pro_no = o.pro_no and r.order_no = o.order_no
+		JOIN tb_product p on o.pro_no = p.pro_no
+		JOIN tb_userinfo u on o.loginID = u.loginID and u.user_type  = 'C'
+		<where>
+				<if test="(sname != null) and (!sname.equals('')) ">
+					<choose>					
+						<when test= "searchKey eq 'all'.toString()">
+							AND CONCAT(u.user_company, p.pro_name) REGEXP CONCAT('.', #{sname}, '.')
+						</when>	
+						<when test= "searchKey eq 'user_company'.toString()">
+							AND u.user_company LIKE CONCAT('%', #{sname}, '%')
+						</when>	
+						<when test= "searchKey eq 'pro_name'.toString()">
+							AND p.pro_name LIKE CONCAT('%', #{sname}, '%')
+						</when>	
+
+					</choose>
+				</if>
+				<if test="(fromDate != null) and (toDate != null)">
+					AND r.refund_date <![CDATA[ >= date(#{fromDate}) ]]> 
+					AND r.refund_date <![CDATA[ <= date(#{toDate})+1 ]]>
+				</if>
+		AND r.order_no IS NOT NULL
+		AND r.refund_confirm_cd = 1
+		</where>
+	</select>
+	
+	
+	<!-- 임원승인이 최종 승인버튼 따악 누르면!  tb_refund 에 컨펌cd  1에서 2로   -->
+	<update id="updateRefundConfirm" parameterType="Map" >
+        UPDATE tb_refund SET
+            refund_confirm_cd = 2            
+        <where>
+        	AND pro_no = #{pro_no}
+        	AND refund_no = #{refund_no}
+        	AND ware_no = #{ware_no}
+        	AND refund_confirm_cd = 1   
+        </where>
+    </update> 
+   
+	
+	
+</mapper>

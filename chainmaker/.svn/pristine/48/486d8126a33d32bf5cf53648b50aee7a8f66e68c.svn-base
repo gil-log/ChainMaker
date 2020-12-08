@@ -1,0 +1,314 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<title>PurchaseOrder</title>
+<!-- common Include -->
+<jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
+<script>
+  // 상단테이블 페이징 설정
+  const pageSizePurchaseOrderList = 5;
+  const pageBlockSizePurchaseOrderList = 5;
+
+  // 하단테이블 페이징 설정
+  const pageSizePurchaseOrderDtlList = 10;
+  const pageBlockSizePurchaseOrderDtlList = 5;
+
+  // 페이지로드 작동 메서드
+  $(document).ready(function() {
+
+    // 발주 지시서 목록 가져오기
+    purchaseOrderList();
+
+    // 데이트피커 활성화        
+    fDatePicker();
+
+    // 버튼 이벤트 등록
+    fButtonClickEvent();
+
+  });
+
+  function fButtonClickEvent() {
+    $('a[name=btn]').click(function(e) {
+      e.preventDefault();
+
+      const btnId = $(this).attr('id');
+
+      //alert("btnId : " + btnId);
+
+      switch (btnId) {
+      case 'btnRefundOrder':
+        fRefundOrder();
+        break;
+      case 'btnPurchaseOrder':
+        fPurchaseOrder();
+        break;
+      }
+    });
+  }
+
+  function fRefundOrder() {
+
+    const url = "/dlm/refundOrder";
+    const checkedItem = $("input[name='chk']:checked");
+
+    if (checkedItem.length === 0) {
+      alert("선택 된 내역이 없습니다. \n하나 이상의 내역을 선택 해주세요.");
+      return;
+    }
+   const param = createParam(checkedItem);
+    console.log(param);
+
+    alert("반품 하시겠습니까?");
+
+    const resultCallback = function(data) {
+      alert("refundResult - "+data.refundResult +"\n directionResult - "+data.directionResult+"\n proIoQtyResult - "+data.proIoQtyResult);
+      location.href = "";
+    };
+
+    $.ajax({
+    url : url,
+    contentType : 'application/json',
+    dataType : "json", //json 형태의 타입
+    data : JSON.stringify(param),
+    type : "POST",
+    success : function(data) {
+      resultCallback(data);
+    },
+    error : function(xhr, status, error) {
+      console.log("xhr:" + xhr + ", status:" + status + ", error:" + error);
+    }
+    });
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  
+  function fPurchaseOrder() {
+    const url = "/dlm/purchaseOrder";
+    const checkedItem = $("input[name='chk']:checked");
+
+    if (checkedItem.length === 0) {
+      alert("선택 된 내역이 없습니다. \n하나 이상의 내역을 선택 해주세요.");
+      return;
+    }
+    
+    if(!checkItems(checkedItem)) {
+      alert("처리 개수가 부족한 항목이 있습니다. \n반품 먼저 진행해 주세요.");
+      return;
+    }
+    
+    //let storage = [];
+/*     checkedItem.each(function (index, item) {
+      let origin = item.parentElement.parentElement.children[7].innerText;
+      let compare = item.parentElement.parentElement.children[8].children[0].value;
+      if(origin !== compare){
+        
+        storage[index] = {};
+        storage[index].purchase_no = item.parentElement.parentElement.children[1].innerText;
+        storage[index].pro_no = item.parentElement.parentElement.children[2].innerText;
+        storage[index].detail_name = item.parentElement.parentElement.children[3].innerText;
+        storage[index].pro_name = item.parentElement.parentElement.children[4].innerText;
+        storage[index].pro_manu_name = item.parentElement.parentElement.children[5].innerText;
+        storage[index].purchase_date = item.parentElement.parentElement.children[6].innerText;
+        storage[index].pro_io_qty = item.parentElement.parentElement.children[8].children[0].value;
+        storage[index].pro_deli_price = item.parentElement.parentElement.children[9].innerText;
+        storage[index].ware_no = item.parentElement.parentElement.children[10].innerText;
+
+      }
+    }); */
+    //console.log(storage);
+
+   const param = createParam(checkedItem);
+    
+    console.log("param-- ",param);
+
+    alert("발주 처리 하시겠습니까?");
+
+    const resultCallback = function(data) {
+      alert(data.resultRow);
+      location.href = "";
+    };
+
+    $.ajax({
+    url : url,
+    contentType : 'application/json',
+    dataType : "json", //json 형태의 타입
+    data : JSON.stringify(param),
+    type : "POST",
+    success : function(data) {
+      resultCallback(data);
+    },
+    error : function(xhr, status, error) {
+      console.log("xhr:" + xhr + ", status:" + status + ", error:" + error);
+    }
+    });
+  }
+  
+  
+  
+  
+  
+  // 아이템 총 개수와 처리 개수 비교 함수
+  function checkItems(items){
+    let result = true;
+    for(let i=0; i<items.length; i++){
+      let origin = items[i].parentElement.parentElement.children[7].innerText;
+      let compare = items[i].parentElement.parentElement.children[8].children[0].value;
+      if(origin !== compare){
+        result = false;
+        break;
+      }
+    }
+    return result;
+  }
+  
+  // 필요한 prop 생성
+  function createParam(items, param=[]){
+    
+    for(let i=0; i < items.length; i++){
+      param[i] = {};
+      param[i].purchase_no = items[i].parentElement.parentElement.children[1].innerText;
+      param[i].ware_no = items[i].parentElement.parentElement.children[10].innerText;
+      param[i].pro_no = items[i].parentElement.parentElement.children[2].innerText;
+      param[i].pro_io_qty = items[i].parentElement.parentElement.children[8].children[0].value;
+    }
+    return param;
+  }
+
+
+  function refundModalInit() {
+
+  }
+</script>
+<script src="${CTX_PATH}/js/view/dlm/orderList/purchaseListAndDatePicker.js"></script>
+<script src="${CTX_PATH}/js/view/dlm/check/allCheckAndValidation.js"></script>
+</head>
+<body>
+  <form id="myForm" action="" method="">
+    <input type="hidden" name="currentPagePurchaseOrderList" id="currentPagePurchaseOrderList" value="">
+    <input type="hidden" name="currentPagePurchaseOrderDtlList" id="currentPagePurchaseOrderDtlList" value="">
+    <div id="wrap_area">
+      <!-- header Include -->
+      <jsp:include page="/WEB-INF/view/common/header.jsp"></jsp:include>
+      <div id="container">
+        <ul>
+          <li class="lnb">
+            <!-- lnb Include --> <jsp:include page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include>
+          </li>
+          <li class="contents">
+            <div class="content">
+              <!-- 메뉴 경로 영역 -->
+              <p class="Location">
+                <a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a>
+                <a href="#" class="btn_nav">기업 고객</a>
+                <span class="btn_nav bold">배송 지시서 목록</span>
+                <a href="" class="btn_set refresh">새로고침</a>
+              </p>
+              <!-- 검색 영역 -->
+              <p class="search"></p>
+              <p class="conTitle" id="searchArea">
+                <span>발주 지시서 목록</span>
+                <span class="fr">
+                  <select id="searchKey" name="searchKey" style="width: 80px;">
+                    <option value="all" id="option1" selected="selected">검색 조건</option>
+                    <option value="company" id="option2">업체 명</option>
+                  </select>
+                  <input type="text" id="searchWord" name="searchWord" placeholder="검색어를 입력해주세요." style="height: 28px;">
+                  <input type="text" id="startDate" placeholder="시작일 선택" style="height: 28px; width: 80px" readonly="readonly"></input>
+                  <input type="text" id="endDate" placeholder="종료일 선택" style="height: 28px; width: 80px" readonly="readonly"></input>
+                  <a class="btnType blue" href="javascript:purchaseOrderList()" onkeydown="enterKey()" name="search">
+                    <span id="searchEnter">검색</span>
+                  </a>
+                </span>
+              </p>
+              <!-- 상단 테이블 영역 -->
+              <div class="divPurchaseOrderList" id="divPurchaseOrderList">
+                <table class="col">
+                  <colgroup>
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="12%">
+                  <thead>
+                    <tr>
+                      <th scope="col">No.</th>
+                      <th scope="col">업체 명</th>
+                      <th scope="col">총 액</th>
+                    </tr>
+                  </thead>
+                  <!-- 상단테이블 DB데이터 출력 영역 -->
+                  <tbody id="listPurchaseOrder">
+                    <!-- 검색 결과 출력 영역 -->
+                  </tbody>
+                </table>
+              </div>
+              <!-- .divWhInventoryList 종료 -->
+              <!-- 상단테이블 페이지 네비게이션 영역 -->
+              <div class="paging_area" id="listPurchaseOrderPagination"></div>
+              <p class="conTitle mt50">
+                <span>발주 지시서 상세 내역</span>
+                <span class="fr"></span>
+              </p>
+              <!-- 하단 테이블 영역 -->
+              <div class="divPurchaseOrderDtlList" id="divPurchaseOrderDtlList">
+                <table class="col">
+                  <colgroup>
+                    <col width="3%">
+                    <col width="5%">
+                    <col width="10%">
+                    <col width="7%">
+                    <col width="12%">
+                    <col width="8%">
+                    <col width="20%">
+                    <col width="5%">
+                    <col width="7%">
+                    <col width="10%">
+                    <col width="7%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th scope="col"><input type="checkbox" id="chk_all" onclick="allCheckAble()" /></th>
+                      <th scope="col">번호</th>
+                      <th scope="col">모델 번호</th>
+                      <th scope="col">장비 구분</th>
+                      <th scope="col">모델 명</th>
+                      <th scope="col">제조사</th>
+                      <th scope="col">발주 날짜</th>
+                      <th scope="col">개수</th>
+                      <th scope="col">처리 개수</th>
+                      <th scope="col">판매 가격</th>
+                      <th scope="col">창고 번호</th>
+                    </tr>
+                  </thead>
+                  <!-- 하단테이블 DB 데이터 출력 영역 -->
+                  <tbody id="listPurchaseOrderDtl">
+                    <!-- 배송 지시서 상세 내역 영역 -->
+                  </tbody>
+                </table>
+              </div>
+              <!-- 하단테이블 Pagenation 영역 -->
+              <div class="paging_area" id="listPurchaseOrderDtlPagination"></div>
+              <!-- 버튼 영역 -->
+              <div class="btn_areaC mt30" id="btnBox" style="margin-bottom: 30px;">
+                <a href="" class="btnType grey" id="btnRefundOrder" name="btn">
+                  <span>반품 처리</span>
+                </a>
+                <a href="" class="btnType blue" id="btnPurchaseOrder" name="btn">
+                  <span>발주 처리</span>
+                </a>
+              </div>
+            </div> <!-- .content 종료 -->
+          </li>
+          <!-- .content 종료 -->
+        </ul>
+      </div>
+      <!-- #container 종료 -->
+      <!-- footer Include -->
+      <jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
+    </div>
+    <!-- #wrap_area 종료 -->
+    <%-- <jsp:include page="/WEB-INF/view/dlm/refundModal.jsp"></jsp:include> --%>
+  </form>
+</body>
+</html>

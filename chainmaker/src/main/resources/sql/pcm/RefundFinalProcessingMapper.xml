@@ -35,8 +35,13 @@
 		  LEFT JOIN tb_userinfo
 		         ON tb_order.loginID=tb_userinfo.loginID		         				 
 			<where> 
-			   AND tb_refund.refund_confirm_cd='3'
 			   AND tb_refund.order_no IS NOT NULL
+			   <if test="(checkBoxStatus != null) and (checkBoxStatus eq 'checked'.toString())">
+		   			AND tb_refund.refund_confirm_cd='3'
+		  	   </if>
+			   <if test="(checkBoxStatus == null) or (checkBoxStatus eq 'unChecked'.toString())">
+		   			AND tb_refund.refund_confirm_cd IN ('3', '4')
+		  	   </if>
 			  	<if test="(searchKey != null) and (!searchKey.equals(''))">
 			  		<choose>
 			  			<when test="(searchKey != null) and (searchKey eq 'user_company'.toString())">
@@ -98,8 +103,13 @@
 				  LEFT JOIN tb_userinfo
 						 ON tb_order.loginID=tb_userinfo.loginID				 
 					<where> 
-					   AND tb_refund.refund_confirm_cd='3'
 					   AND tb_refund.order_no IS NOT NULL
+					    <if test="(checkBoxStatus != null) and (checkBoxStatus eq 'checked'.toString())">
+				   			AND tb_refund.refund_confirm_cd='3'
+				  	    </if>
+					    <if test="(checkBoxStatus == null) or (checkBoxStatus eq 'unChecked'.toString())">
+				   			AND tb_refund.refund_confirm_cd IN ('3', '4')
+				  	    </if>
 					  	<if test="(searchKey != null) and (!searchKey.equals(''))">
 					  		<choose>
 					  			<when test="(searchKey != null) and (searchKey eq 'user_company'.toString())">
@@ -161,7 +171,7 @@
 		  LEFT JOIN tb_userinfo
 		         ON tb_order.loginID=tb_userinfo.loginID
 		         	
-		   WHERE tb_refund.refund_confirm_cd='3'
+		   WHERE tb_refund.refund_confirm_cd IN ('3', '4')
 		   AND tb_refund.order_no IS NOT NULL
 		   AND tb_refund.refund_no=#{refund_no}
 		   
@@ -203,7 +213,7 @@
 		  LEFT JOIN tb_userinfo
 		         ON tb_order.loginID=tb_userinfo.loginID
 		         	
-		   WHERE tb_refund.refund_confirm_cd='3'
+		   WHERE tb_refund.refund_confirm_cd IN ('3', '4')
 		   AND tb_refund.order_no IS NOT NULL
 		   AND tb_refund.refund_no=#{refund_no}
 		   
@@ -241,7 +251,7 @@
 						  ON tb_refund.pro_no=tb_product.pro_no
 				   LEFT JOIN tb_userinfo
 						  ON tb_order.loginID=tb_userinfo.loginID
-				  WHERE tb_refund.refund_confirm_cd='3'
+				  WHERE tb_refund.refund_confirm_cd IN ('3', '4')
 				    AND tb_refund.order_no IS NOT NULL
 				    AND tb_refund.refund_no=#{refund_no}
 				  GROUP BY tb_refund.refund_no, tb_refund.pro_no

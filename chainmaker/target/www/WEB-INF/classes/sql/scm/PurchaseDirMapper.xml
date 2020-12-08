@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.PurchaseDirDao">
+
+
+<!-- 발주 지시서 조회 -->
+<select id="selectDirection" parameterType="Map" resultType="kr.happyjob.chainmaker.scm.model.PurchaseDirectionModel">
+
+	SELECT @rownum:=@rownum+1 as row_num 
+		, p.purchase_no as purchase_no
+		, p.purchase_qty as purchase_qty
+		, p.purchase_cd as purchase_cd
+	    , dt.detail_name as purchase_cd_name
+		, p.purchase_date as purchase_date
+	    , p.pro_no as pro_no
+	    , pd.pro_cd as pro_cd
+	    , pd.pro_name as pro_name
+	    , pd.deli_company as deli_company
+	    , pd.detail_name as pro_cd_name
+	    , p.ware_no as ware_no
+	    , w.ware_name as ware_name
+	FROM tb_purchase p
+	
+	LEFT OUTER JOIN (
+	
+		SELECT p.pro_no as pro_no
+			, p.pro_cd as pro_cd
+	        , p.pro_name as pro_name
+			, dc.detail_name as detail_name
+			, dv.deli_company as deli_company
+		FROM tb_product p
+		LEFT OUTER JOIN tb_detail_code dc
+		ON p.pro_cd = dc.detail_code
+		LEFT OUTER JOIN tb_delivery dv
+		ON p.deli_no = dv.deli_no
+	)
+	pd
+	ON p.pro_no = pd.pro_no
+	
+	JOIN tb_detail_code dt
+	ON p.purchase_cd = dt.detail_code
+	
+	JOIN tb_warehouse w
+	ON p.ware_no = w.ware_no
+	
+	<where>
+		<if test="(searchWord != null) and (!searchWord.equals('')) ">
+			<choose>
+			
+				<when test= "searchKey eq 'all'.toString()">
+					AND concat( pd.deli_company, pd.detail_name, pd.pro_name) REGEXP concat('.', #{searchWord}, '.')
+				</when>	
+				<when test= "searchKey eq 'manu_nm'.toString()">
+					AND pd.deli_company LIKE concat('%', #{searchWord}, '%')
+				</when>	
+				<when test= "searchKey eq 'pro_type'.toString()">
+					AND pd.detail_name LIKE concat('%', #{searchWord}, '%')
+				</when>	
+				<when test= "searchKey eq 'pro_nm'.toString()">
+					AND pd.pro_name LIKE concat('%', #{searchWord}, '%')
+				</when>	
+			</choose>
+		</if>
+		<if test="(fromDate != null) and (toDate != null)">
+			AND p.purchase_date <![CDATA[ >= date(#{fromDate}) ]]> 
+			AND p.purchase_date <![CDATA[ <= date(#{toDate})+1 ]]>
+		</if>
+		
+		AND dt.group_code = 'purchaseCD'
+		AND (@rownum:=0)=0	
+	</where>
+		ORDER BY p.purchase_no DESC
+		LIMIT #{pageIndex}, #{pageSize}
+
+</select>
+
+<!-- 발주 지시서 조회 -->
+<select id="countDirection" parameterType="Map" resultType="int">
+
+	SELECT count(1)
+	FROM tb_purchase p
+	
+	LEFT OUTER JOIN (
+	
+		SELECT p.pro_no as pro_no
+			, p.pro_cd as pro_cd
+	        , p.pro_name as pro_name
+			, dc.detail_name as detail_name
+			, dv.deli_company as deli_company
+		FROM tb_product p
+		LEFT OUTER JOIN tb_detail_code dc
+		ON p.pro_cd = dc.detail_code
+		LEFT OUTER JOIN tb_delivery dv
+		ON p.deli_no = dv.deli_no
+	)
+	pd
+	ON p.pro_no = pd.pro_no
+	
+	JOIN tb_detail_code dt
+	ON p.purchase_cd = dt.detail_code
+	
+	JOIN tb_warehouse w
+	ON p.ware_no = w.ware_no
+
+	<where>
+		<if test="(searchWord != null) and (!searchWord.equals('')) ">
+			<choose>
+			
+				<when test= "searchKey eq 'all'.toString()">
+					AND concat( pd.deli_company, pd.detail_name, pd.pro_name) REGEXP concat('.', #{searchWord}, '.')
+				</when>	
+				<when test= "searchKey eq 'manu_nm'.toString()">
+					AND pd.deli_company LIKE concat('%', #{searchWord}, '%')
+				</when>	
+				<when test= "searchKey eq 'pro_type'.toString()">
+					AND pd.detail_name LIKE concat('%', #{searchWord}, '%')
+				</when>	
+				<when test= "searchKey eq 'pro_nm'.toString()">
+					AND pd.pro_name LIKE concat('%', #{searchWord}, '%')
+				</when>	
+			</choose>
+		</if>
+		<if test="(fromDate != null) and (toDate != null)">
+			AND p.purchase_date <![CDATA[ >= date(#{fromDate}) ]]> 
+			AND p.purchase_date <![CDATA[ <= date(#{toDate})+1 ]]>
+		</if>
+		
+		AND dt.group_code = 'purchaseCD'
+	</where>
+		ORDER BY p.purchase_no ASC
+
+</select>
+
+
+</mapper>

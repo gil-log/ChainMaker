@@ -14,8 +14,8 @@
 					 notice_moddate,
 					 loginID
 		 FROM tb_notice
-		 WHERE (@rownum:=0)=0
-		 ORDER BY notice_no  DESC 
+		 WHERE (@rownum:=0)=0 AND del_cd = "n"
+		 ORDER BY notice_moddate DESC, notice_no DESC 
 		 LIMIT #{pageIndex}, #{pageSize}
 	</select>
 	
@@ -34,6 +34,11 @@
 		  WHERE notice_no = #{notice_no}
 	</select>
 	
-	
+		<!-- 파일 조회 -->
+	<select id="selectFile" resultType="kr.happyjob.chainmaker.scm.model.FileModel">	
+		SELECT file_no, file_ofname, file_new_name, file_size, notice_no 		
+		FROM tb_file
+		WHERE notice_no = #{notice_no} 		
+	</select>
 	
 </mapper>

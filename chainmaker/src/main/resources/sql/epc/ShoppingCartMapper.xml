@@ -16,17 +16,16 @@
 			, DATE_FORMAT( b.bas_date, "%Y-%c-%d" ) as bas_date
 			, b.bas_qty as bas_qty
 			, f.file_server_path as file_server_path
-		FROM tb_product p
-		JOIN tb_basket b ON p.pro_no = b.pro_no
+		FROM tb_basket b
+		JOIN tb_product p ON p.pro_no = b.pro_no
 		JOIN tb_file f ON p.pro_no = f.pro_no
-		AND b.loginID = #{loginID}
-		LIMIT #{pageIndex}, #{pageSize};
+		AND b.loginID = #{loginID};
 	</select>
 	
 	<select id="countListCart" resultType="int">
 		SELECT count(*) as total_cnt
-		FROM tb_product p
-		JOIN tb_basket b ON p.pro_no = b.pro_no
+		FROM tb_basket b
+		JOIN tb_product p ON p.pro_no = b.pro_no
 		JOIN tb_file f ON p.pro_no = f.pro_no
 		AND b.loginID = #{loginID}
 	</select>
@@ -42,6 +41,11 @@
 		WHERE bas_no = #{no}
 	</update>
 	
+	<update id ="basketUpdateQty">
+		UPDATE tb_basket
+		SET bas_qty = #{qty}
+		WHERE bas_no = #{no}
+	</update>
 	
 	<insert id="basketOrder" parameterType="HashMap">
 	INSERT INTO tb_order( order_no

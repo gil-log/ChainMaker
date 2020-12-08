@@ -6,18 +6,19 @@
         SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
         order_date.order_mod_date, order_date.order_expdate, order_names.pro_name, order_qty.order_cd, IF(tb_shipping.ship_cd IS NULL, 'YET', tb_shipping.ship_cd) as ship_cd
 		FROM  
-		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd
-		FROM tb_order, tb_product product
-        WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
-        
-        <if test='pro_name != null'>
-        
-        
-        AND tb_order.pro_no = product.pro_no
-        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
-        
+		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd, GROUP_CONCAT(pro_no) as pro_no
+		FROM tb_order
+		
+		<if test='pro_name != null'>
+        LEFT JOIN tb_product product
+        ON tb_order.pro_no = product.pro_no
         </if>
         
+        WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
+        <if test='pro_name != null'>
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        </if>
+
 		GROUP BY order_no
 		) order_qty LEFT JOIN
 		(
@@ -45,8 +46,13 @@
         AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
         GROUP BY orders.order_no
         ) order_names ON order_qty.order_no = order_names.order_no
-		LEFT JOIN tb_shipping
+		LEFT JOIN (
+        SELECT *
+        FROM tb_shipping
+        GROUP BY order_no
+        )tb_shipping
         ON order_qty.order_no = tb_shipping.order_no
+        AND tb_shipping.pro_no IN (order_qty.pro_no)
         
 		WHERE order_qty.loginID = #{loginID}
 		<if test='startDate != null and endDate != null'>
@@ -63,16 +69,17 @@
         SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
         order_date.order_mod_date, order_date.order_expdate, order_names.pro_name, order_qty.order_cd, IF(tb_shipping.ship_cd IS NULL, 'YET', tb_shipping.ship_cd) as ship_cd
 		FROM  
-		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd
-		FROM tb_order, tb_product product
+		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd, GROUP_CONCAT(pro_no) as pro_no
+		FROM tb_order
+		
+		<if test='pro_name != null'>
+        LEFT JOIN tb_product product
+        ON tb_order.pro_no = product.pro_no
+        </if>
+        
         WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
-        
         <if test='pro_name != null'>
-        
-        
-        AND tb_order.pro_no = product.pro_no
         AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
-        
         </if>
         
 		GROUP BY order_no
@@ -104,6 +111,7 @@
         ) order_names ON order_qty.order_no = order_names.order_no
 		LEFT JOIN tb_shipping
         ON order_qty.order_no = tb_shipping.order_no
+        AND tb_shipping.pro_no IN (order_qty.pro_no)
         
 		WHERE order_qty.loginID = #{loginID}
 		<if test='startDate != null and endDate != null'>
@@ -118,6 +126,8 @@
 		
 		FROM tb_product product, tb_order orders
 		WHERE product.pro_no = orders.pro_no
+        AND orders.deposit_cd = '1'
+        AND orders.order_cd IN ('order', 'complete')
 		AND orders.order_no = #{order_no}
 	</select>
 
@@ -161,10 +171,10 @@
 	
 	
 	<insert id="insertRefundDirection" parameterType="java.util.Map">
-		INSERT INTO tb_direction(pro_no, refund_no, direction_date, direction_in_qty, direction_note, direction_cd)
+		INSERT INTO tb_direction(pro_no, refund_no, direction_date, direction_in_qty, direction_note, direction_cd, order_no)
 		VALUES
 		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
-			 (#{refundInfo.pro_no}, #{refundInfo.refund_no}, now(), #{refundInfo.refund_qty}, '반품 신청으로 인한 입고 예정', 'refund')
+			 (#{refundInfo.pro_no}, #{refundInfo.refund_no}, now(), #{refundInfo.refund_qty}, '반품 신청으로 인한 입고 예정', 'refund', #{refundInfo.order_no})
 		</foreach>
 	</insert>
 	

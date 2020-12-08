@@ -116,14 +116,17 @@
 	<!-- 제품 1건 상세정보 -->
 	<select id="selectProductDetail" parameterType="Map" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">
 
-		SELECT
-				pro_no as pro_num	
-			,	pro_manu_name as pro_manu_nm
-			,	pro_price as pro_prc
-		 	,	pro_detail as pro_det
-		FROM tb_product
+		 SELECT
+				TA.pro_no as pro_num
+			,	TA.pro_manu_name as pro_manu_nm
+			,	TA.pro_price as pro_prc
+		 	,	TA.pro_detail as pro_det
+            , 	TB.file_server_path as file_server_path
+		FROM tb_product TA
+		LEFT JOIN tb_file TB
+        ON TA.pro_no = TB.pro_no
         <where>
-        and pro_no = #{pro_num}
+        and TA.pro_no = #{pro_num}
         </where>
         
 		 
@@ -181,6 +184,29 @@
                        								AND loginID = #{login_id}
                        									)				
 	</insert>
+	<select id="existBasket" parameterType="Map" resultType="int">
+		select count(*) 
+			from tb_basket
+			where pro_no = #{pro_num} 
+			and loginID = #{login_id}; 
+	
+	
+	</select>
+	
+	
+	<!-- admin 계좌 가져오기 -->
+	<select id="adminBank" resultType="kr.happyjob.chainmaker.epc.model.ProductListModel">
+		SELECT u.user_account as user_account
+			, d.detail_name as bank_name
+			, u.name as name
+            , (p.pro_price*#{od_qty}) as pro_prc
+		FROM tb_userinfo u 
+		JOIN tb_detail_code d 
+        ON u.bank_cd = d.detail_code
+        join tb_product p
+		WHERE loginID = "admin"
+        and p.pro_no = #{pro_num};
+	</select>
 	
 </mapper>
 

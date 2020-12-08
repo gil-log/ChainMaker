@@ -2,4 +2,193 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.happyjob.chainmaker.dlm.dao.RefundBuyerDao">
 
+	<select id="selectEPCRefundListByRefundDateAndCompanyName" resultType="kr.happyjob.chainmaker.dlm.model.EPCRefundInfoVO"
+	parameterType="kr.happyjob.chainmaker.dlm.model.RefundInfoRequestDTO">
+	SELECT refund.refund_no, tb_userinfo.user_company, GROUP_CONCAT(tb_product.pro_name SEPARATOR ', ') as pro_name, SUM(refund.refund_qty) as refund_qty, refund.refund_date, refund.refund_confirm_cd, GROUP_CONCAT(refund.refund_note SEPARATOR ', ') as refund_note, 
+		GROUP_CONCAT(refund.pro_no SEPARATOR ', ') as pro_no, refund.order_no, refund.ware_no, refund.ware_name
+		,  GROUP_CONCAT(tb_product.pro_model_name SEPARATOR ', ') as pro_model_name, 
+		GROUP_CONCAT(tb_product.pro_manu_name SEPARATOR ', ') as pro_manu_name, GROUP_CONCAT(tb_detail_code.detail_name SEPARATOR ', ') as detail_name
+
+		FROM
+		(
+		SELECT tb_refund.*, warehouse.ware_name, tb_order.loginID
+		FROM tb_refund
+		LEFT JOIN (
+		SELECT order_no, loginID
+		FROM tb_order
+		GROUP BY(order_no)
+		) tb_order
+		ON tb_refund.order_no = tb_order.order_no,
+		(
+		SELECT tb_warehouse.*
+		FROM tb_warehouse
+		LEFT JOIN tb_userinfo
+		ON tb_warehouse.loginID = tb_userinfo.loginID
+		WHERE tb_userinfo.loginID = #{loginID}
+		) warehouse
+
+
+		WHERE tb_refund.ware_no = warehouse.ware_no
+		AND tb_refund.refund_confirm_cd = 2
+
+		<if test='startDate != null and endDate != null'>
+		AND DATE_FORMAT(tb_refund.refund_date, "%Y-%m-%d") BETWEEN #{startDate} AND #{endDate}
+		</if>
+
+		) refund
+		LEFT JOIN tb_product
+		ON refund.pro_no = tb_product.pro_no
+		LEFT JOIN tb_detail_code
+		ON tb_detail_code.detail_code = tb_product.pro_cd
+		LEFT JOIN tb_userinfo
+		ON tb_userinfo.loginID = refund.loginID
+
+		WHERE tb_detail_code.group_code = 'proCD'
+
+		<if test='user_company != null'>
+		AND tb_userinfo.user_company LIKE CONCAT('%', #{user_company}, '%')
+		</if>
+
+		GROUP BY refund.order_no
+		ORDER BY user_company
+		
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	<select id="countEPCRefundListByRefundDateAndCompanyName" resultType="int"
+	parameterType="kr.happyjob.chainmaker.dlm.model.RefundInfoRequestDTO">
+		SELECT COUNT(1) as tot_cnt
+		FROM
+		(
+		SELECT refund.refund_no, tb_userinfo.user_company, GROUP_CONCAT(tb_product.pro_name SEPARATOR ', ') as pro_name, SUM(refund.refund_qty) as refund_qty, refund.refund_date, refund.refund_confirm_cd, GROUP_CONCAT(refund.refund_note SEPARATOR ', ') as refund_note, 
+		GROUP_CONCAT(refund.pro_no SEPARATOR ', ') as pro_no, refund.order_no, refund.ware_no, refund.ware_name
+		,  GROUP_CONCAT(tb_product.pro_model_name SEPARATOR ', ') as pro_model_name, 
+		GROUP_CONCAT(tb_product.pro_manu_name SEPARATOR ', ') as pro_manu_name, GROUP_CONCAT(tb_detail_code.detail_name SEPARATOR ', ') as detail_name
+
+		FROM
+		(
+		SELECT tb_refund.*, warehouse.ware_name, tb_order.loginID
+		FROM tb_refund
+		LEFT JOIN (
+		SELECT order_no, loginID
+		FROM tb_order
+		GROUP BY(order_no)
+		) tb_order
+		ON tb_refund.order_no = tb_order.order_no,
+		(
+		SELECT tb_warehouse.*
+		FROM tb_warehouse
+		LEFT JOIN tb_userinfo
+		ON tb_warehouse.loginID = tb_userinfo.loginID
+		WHERE tb_userinfo.loginID = #{loginID}
+		) warehouse
+
+
+		WHERE tb_refund.ware_no = warehouse.ware_no
+		AND tb_refund.refund_confirm_cd = 2
+
+		<if test='startDate != null and endDate != null'>
+		AND DATE_FORMAT(tb_refund.refund_date, "%Y-%m-%d") BETWEEN #{startDate} AND #{endDate}
+		</if>
+
+		) refund
+		LEFT JOIN tb_product
+		ON refund.pro_no = tb_product.pro_no
+		LEFT JOIN tb_detail_code
+		ON tb_detail_code.detail_code = tb_product.pro_cd
+		LEFT JOIN tb_userinfo
+		ON tb_userinfo.loginID = refund.loginID
+
+		WHERE tb_detail_code.group_code = 'proCD'
+
+		<if test='user_company != null'>
+		AND tb_userinfo.user_company LIKE CONCAT('%', #{user_company}, '%')
+		</if>
+
+		GROUP BY refund.order_no
+		ORDER BY user_company
+		) total_cnt
+	</select>
+	
+	<select id="selectRefundDetailListByRefundNo" parameterType="kr.happyjob.chainmaker.dlm.model.RefundInfoRequestDTO"
+	resultType="kr.happyjob.chainmaker.dlm.model.EPCRefundDetailInfoVO">
+		SELECT tb_refund.refund_no, tb_refund.pro_no, tb_refund.refund_qty, tb_product.pro_model_name, 
+			tb_product.pro_name, tb_product.pro_manu_name, tb_detail_code.detail_name, tb_refund.order_no, 
+			tb_refund.ware_no, tb_warehouse.ware_name, tb_refund.refund_note
+		FROM tb_refund
+
+		LEFT JOIN tb_product
+		ON tb_refund.pro_no = tb_product.pro_no
+		LEFT JOIN tb_detail_code
+		ON tb_detail_code.detail_code = tb_product.pro_Cd
+
+		LEFT JOIN tb_warehouse
+		ON tb_refund.ware_no = tb_warehouse.ware_no
+
+		WHERE  tb_detail_code.group_code = 'proCD'
+		AND tb_refund.refund_no = #{refund_no}
+	</select>
+	
+	<select id="countRefundDetailListByRefundNo" parameterType="kr.happyjob.chainmaker.dlm.model.RefundInfoRequestDTO"
+	resultType="int">
+		SELECT COUNT(1) as tot_cnt
+		FROM
+		(
+		SELECT tb_refund.refund_no, tb_refund.pro_no, tb_refund.refund_qty, tb_product.pro_model_name, 
+			tb_product.pro_name, tb_product.pro_manu_name, tb_detail_code.detail_name, tb_refund.order_no, tb_refund.ware_no, tb_warehouse.ware_name
+		FROM tb_refund
+
+		LEFT JOIN tb_product
+		ON tb_refund.pro_no = tb_product.pro_no
+		LEFT JOIN tb_detail_code
+		ON tb_detail_code.detail_code = tb_product.pro_Cd
+
+		LEFT JOIN tb_warehouse
+		ON tb_refund.ware_no = tb_warehouse.ware_no
+
+		WHERE  tb_detail_code.group_code = 'proCD'
+		AND tb_refund.refund_no = #{refund_no}
+		) total
+	</select>
+	
+	<select id="selectProductIOInfoByRefundNoAndProIOCD" parameterType="kr.happyjob.chainmaker.dlm.model.StockProcessingRequestDTO"
+	resultType="kr.happyjob.chainmaker.dlm.model.ProductInPreVO">
+		SELECT tb_product_io_warehouse.ware_no, tb_product_io_warehouse.pro_io_qty, tb_product_io_warehouse.pro_no, tb_product_io_warehouse.refund_no
+		FROM tb_product_io_warehouse
+		
+		WHERE pro_io_cd = #{pro_io_cd}
+		AND refund_no = #{refund_no}
+	</select>
+	
+
+	<update id="updateProWareQtyByProNoAndWareNo" parameterType="java.util.Map">
+		<foreach item="item" collection="productInPreVOList" separator=";">
+		UPDATE tb_product_warehouse
+		SET pro_ware_qty = (pro_ware_qty + #{item.pro_io_qty})
+		WHERE pro_no = #{item.pro_no}
+		AND ware_no = #{item.ware_no}
+		</foreach>
+	</update>
+	
+	<update id="updateProIOCDtoInDoneByRefundNoAndProNoAndWareNo" parameterType="java.util.Map">
+		<foreach item="item" collection="productInPreVOList" separator=";">
+		UPDATE tb_product_io_warehouse
+		SET pro_io_cd = 'in_done', pro_io_memo = '반품 재고 처리 완료로 인한 입고 완료', 
+		pro_io_date = now()
+		WHERE refund_no = #{item.refund_no}
+		AND pro_no = #{item.pro_no}
+		AND ware_no = #{item.ware_no}
+		</foreach>
+	</update>
+	
+	<update id="updateRefundConfirmCDtoThreeByRefundNoAndProNoAndWareNo" parameterType="java.util.Map">
+		<foreach item="item" collection="productInPreVOList" separator=";">
+		UPDATE tb_refund
+		SET refund_confirm_cd = 3, refund_date = now()
+		WHERE refund_no = #{item.refund_no}
+		AND pro_no = #{item.pro_no}
+		AND ware_no = #{item.ware_no}
+		</foreach>
+	</update>
+	
 </mapper>

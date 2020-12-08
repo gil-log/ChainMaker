@@ -64,15 +64,18 @@
 	<!-- 그룹코드 단건 조회 -->
 	<select id="selectComnGrpCod" resultType="kr.happyjob.chainmaker.system.model.ComnGrpCodModel">
 		/*kr.kosmo.jobkorea.system.dao.ComnCodDao.selectComnGrpCod*/
-		SELECT	group_code as grp_cod
-			,	group_name as grp_cod_nm
-			,	use_yn as use_poa
-			,	reg_date as fst_enlm_dtt
-			,	regId as fst_rgst_sst_id
-			,	update_date as fnl_mdfd_dtt
-			,	updateId as fnl_mdfr_sst_id
-		FROM	tb_group_code
-		WHERE	group_code = #{grp_cod}
+		SELECT			TA.group_code as grp_cod
+			,	TA.group_name as grp_cod_nm
+			,	TA.use_yn as use_poa
+			,	TA.reg_date as fst_enlm_dtt
+			,	TA.regId as fst_rgst_sst_id
+			,	TA.update_date as fnl_mdfd_dtt
+			,	TA.updateId as fnl_mdfr_sst_id
+            ,   count(TB.group_code) as tmp_fld_01
+		FROM	tb_group_code TA
+        LEFT JOIN tb_detail_code TB
+        ON TA.group_code = TB.group_code
+		WHERE	TA.group_code = #{grp_cod}
 	</select>
 		
 	<!-- 그룹코드 저장 -->

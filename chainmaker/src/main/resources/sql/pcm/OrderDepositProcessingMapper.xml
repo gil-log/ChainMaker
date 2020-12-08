@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.happyjob.chainmaker.pcm.dao.OrderDepositProcessingDao">
 
-	<!-- 구매담당자_기업고객_주문내역 목록 조회  -->
+	<!-- 구매담당자_기업고객_주문내역 조회  -->
 	<select id="orderDepositProcessingList" resultType="kr.happyjob.chainmaker.pcm.model.OrderDepositProcessingModel">
 		SELECT tb_order.order_no,
 		       tb_order.order_qty,
@@ -19,12 +19,14 @@
 		  
 		  LEFT JOIN tb_userinfo 
 				 ON tb_order.loginID=tb_userinfo.loginID
-				 
+				  
 		  LEFT JOIN tb_product 
 				 ON tb_order.pro_no=tb_product.pro_no
 		 <where>
-		   AND tb_order.order_cd='order' 
-		   AND tb_order.deposit_cd='0'
+		   AND tb_order.order_cd='order'
+		   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
+		  	 AND tb_order.deposit_cd='0'
+		   </if>
 		  	<if test="(searchKey != null) and (!searchKey.equals(''))">
 		  		<choose>
 		  			<when test="(searchKey != null) and (searchKey eq 'user_company'.toString())">
@@ -54,7 +56,7 @@
 		 
 		 LIMIT #{pageIndex}, #{pageSize}
 	</select>
-	<!-- 구매담당자_기업고객_주문내역 목록 카운트 -->
+	<!-- 구매담당자_기업고객_주문내역 조회 카운트 -->
 	<select id="countOrderDepositProcessingList" resultType="int">
 		  SELECT COUNT(*)
 		    FROM (SELECT tb_order.order_no,
@@ -78,8 +80,10 @@
 				    LEFT JOIN tb_product 
 						   ON tb_order.pro_no=tb_product.pro_no
 					<where>
-						  AND tb_order.order_cd='order' 
-				    	  AND tb_order.deposit_cd='0'
+						  AND tb_order.order_cd='order'
+						   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
+						  	 AND tb_order.deposit_cd='0'
+						   </if>
 					  	<if test="(searchKey != null) and (!searchKey.equals(''))">
 					  		<choose>
 					  			<when test="(searchKey != null) and (searchKey eq 'user_company'.toString())">
@@ -131,13 +135,12 @@
 			     ON tb_order.pro_no=tb_product.pro_no
 			     
 	     WHERE tb_order.order_cd='order' 
-   	       AND tb_order.deposit_cd='0'
    	       AND tb_order.order_no=#{order_no}
    	       
    	     GROUP BY tb_order.order_no
 	</select>
 	
-	<!-- 구매담당자_기업고객_주문내역 디테일 목록 조회 -->
+	<!-- 구매담당자_기업고객_주문내역 디테일  조회 -->
 	<select id="orderDepositProcessingDtlList" resultType="kr.happyjob.chainmaker.pcm.model.OrderDepositProcessingModel">
 	   SELECT tb_order.order_no,
 		      tb_order.order_qty,
@@ -160,28 +163,40 @@
 			    ON tb_order.pro_no=tb_product.pro_no
 			    		 
 	    WHERE tb_order.order_cd='order' 
-	      AND tb_order.deposit_cd='0'
 	      AND tb_order.order_no=#{order_no}
 	</select>
-	<!-- 구매담당자_기업고객_주문내역 디테일 목록 카운트 -->
+	<!-- 구매담당자_기업고객_주문내역 디테일 조회 카운트 -->
 	<select id="countOrderDepositProcessingDtlList" resultType="int">
 	   SELECT COUNT(*)		    
-	     FROM tb_order		
-	     
-	     LEFT JOIN tb_userinfo 
-			    ON tb_order.loginID=tb_userinfo.loginID	  
+	     FROM (SELECT tb_order.order_no,
+				      tb_order.order_qty,
+				      tb_order.deposit_cd,
+				      tb_order.order_mod_date,
+				      tb_userinfo.name,
+				      (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
+				      tb_userinfo.user_account,
+				      tb_userinfo.user_company,
+				      tb_product.pro_no,
+				      tb_product.pro_name,
+				      tb_product.pro_price,
+			          (tb_order.order_qty*tb_product.pro_price) sum_price		    
+			     FROM tb_order		
 			     
-	     LEFT JOIN tb_product 
-			    ON tb_order.pro_no=tb_product.pro_no	
-			    	 
-	    WHERE tb_order.order_cd='order' 
-	      AND tb_order.deposit_cd='0'
-	      AND tb_order.order_no=#{order_no}
+			     LEFT JOIN tb_userinfo 
+					    ON tb_order.loginID=tb_userinfo.loginID	 
+					      
+			     LEFT JOIN tb_product 
+					    ON tb_order.pro_no=tb_product.pro_no
+					    		 
+			    WHERE tb_order.order_cd='order' 
+			      AND tb_order.order_no=#{order_no})
+      		tb_order
 	</select>
 	
 	<update id="updateOrderDepositProcessing">
 		UPDATE tb_order
-		   SET deposit_cd='1'
+		   SET deposit_cd='1'		   	   
+		   	  
 		 WHERE order_cd='order'
 		   AND order_no=#{order_no}
 	</update>

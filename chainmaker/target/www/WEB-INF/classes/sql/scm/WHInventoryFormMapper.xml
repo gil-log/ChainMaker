@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.WHInventoryFormDao">
+	
+	<!-- 창고별 재고 조회 -->
+	<select id="whInventoryList" resultType="kr.happyjob.chainmaker.scm.model.WHInventoryFormModel">
+		SELECT tb_product.pro_no,
+			   tb_product.pro_name,
+			   tb_warehouse.ware_no,
+			   tb_warehouse.ware_name,
+			   tb_warehouse.ware_address,
+			   tb_warehouse.ware_dt_address,
+			   tb_product_warehouse.pro_ware_qty,
+			   tb_product_io_warehouse.pro_io_qty,
+			   (SELECT detail_name FROM tb_detail_code where detail_code=tb_product_io_warehouse.pro_io_cd) pro_io_cd_name,
+			   tb_product_io_warehouse.pro_io_cd       
+		  FROM tb_product_warehouse
+		  
+		  LEFT JOIN tb_warehouse 
+			ON tb_product_warehouse.ware_no=tb_warehouse.ware_no
+			
+		  LEFT JOIN tb_product 
+			ON tb_product_warehouse.pro_no=tb_product.pro_no
+			
+		  LEFT JOIN tb_product_io_warehouse 
+			ON tb_product_io_warehouse.pro_no=tb_product.pro_no
+			<where>
+			 	<if test="(searchKey != null) and (!searchKey.equals(''))">
+			 		<choose>
+			 			<when test="(searchKey != null) and (searchKey eq 'pro_name'.toString())">
+			 				AND tb_product.pro_name LIKE CONCAT('%', #{searchWord}, '%')
+			 			</when>
+			 			<when test="(searchKey != null) and (searchKey eq 'ware_name'.toString())">
+			 				AND tb_warehouse.ware_name LIKE CONCAT('%', #{searchWord}, '%')
+			 			</when>
+			 		</choose>
+			 	</if>
+			</where>			
+		  GROUP BY tb_warehouse.ware_name, tb_product.pro_no
+		  ORDER BY tb_warehouse.ware_no, tb_product.pro_no 	
+		  LIMIT #{pageIndex}, #{pageSize}
+	</select>		
+	<!-- 창고별 재고 조회 카운트 -->
+	<select id="countWHInventoryList" resultType="int">
+		SELECT count(*)
+		  FROM (SELECT tb_product.pro_no,
+					   tb_product.pro_name,
+					   tb_warehouse.ware_no,
+					   tb_warehouse.ware_name,
+					   tb_warehouse.ware_address,
+					   tb_warehouse.ware_dt_address,
+					   tb_product_warehouse.pro_ware_qty,
+					   tb_product_io_warehouse.pro_io_qty,
+					   (SELECT detail_name FROM tb_detail_code where detail_code=tb_product_io_warehouse.pro_io_cd) pro_io_cd_name,
+					   tb_product_io_warehouse.pro_io_cd       
+				  FROM tb_product_warehouse
+				  
+				  LEFT JOIN tb_warehouse 
+					ON tb_product_warehouse.ware_no=tb_warehouse.ware_no
+					
+				  LEFT JOIN tb_product 
+					ON tb_product_warehouse.pro_no=tb_product.pro_no
+					
+				  LEFT JOIN tb_product_io_warehouse 
+					ON tb_product_io_warehouse.pro_no=tb_product.pro_no
+					<where>
+					 	<if test="(searchKey != null) and (!searchKey.equals(''))">
+					 		<choose>
+					 			<when test="(searchKey != null) and (searchKey eq 'pro_name'.toString())">
+					 				AND tb_product.pro_name LIKE CONCAT('%', #{searchWord}, '%')
+					 			</when>
+					 			<when test="(searchKey != null) and (searchKey eq 'ware_name'.toString())">
+					 				AND tb_warehouse.ware_name LIKE CONCAT('%', #{searchWord}, '%')
+					 			</when>
+					 		</choose>
+					 	</if>
+					 </where>
+				  GROUP BY tb_warehouse.ware_name, tb_product.pro_no
+				  ORDER BY tb_warehouse.ware_no, tb_product.pro_no)
+			  tb_product_warehouse 
+	</select>
+
+	<!-- 창고별 제품 입출고 내역 조회 -->
+	<select id="whProductList"  resultType="kr.happyjob.chainmaker.scm.model.WHInventoryFormModel">
+		SELECT pro_no,
+			   (SELECT pro_name FROM tb_product WHERE pro_no=#{pro_no}) pro_name,
+			   pro_io_cd,
+		       pro_io_date,
+			   (SELECT detail_name FROM tb_detail_code where detail_code=tb_product_io_warehouse.pro_io_cd) pro_io_cd_name,
+		       pro_io_qty,
+		       pro_io_memo
+		  FROM tb_product_io_warehouse 
+		 WHERE pro_no=#{pro_no} 
+		   AND ware_no=#{ware_no}
+		   AND pro_io_cd IN ('in_done', 'out_done')
+	 	 LIMIT #{pageIndex}, #{pageSize}
+	</select>	
+	
+	<!-- 창고별 제품 입출고 내역 조회 카운트 -->
+	<select id="countWHProductList" resultType="int">
+		SELECT COUNT(*)
+		  FROM (SELECT pro_no,
+					   (SELECT pro_name FROM tb_product WHERE pro_no=#{pro_no}) pro_name,
+					   pro_io_cd,
+					   pro_io_date,
+					   (SELECT detail_name FROM tb_detail_code where detail_code=tb_product_io_warehouse.pro_io_cd) pro_io_cd_name,
+					   pro_io_qty,
+					   pro_io_memo
+				  FROM tb_product_io_warehouse 
+				 WHERE pro_no=#{pro_no}  
+				   AND ware_no=#{ware_no}
+				   AND pro_io_cd IN ('in_done', 'out_done'))
+				tb_product_io_warehouse
+	</select>
+</mapper>

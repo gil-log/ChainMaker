@@ -11,6 +11,7 @@
  		 , d.deli_password as deli_password
  		 , d.deli_name as deli_name
  		 , d.deli_phone as deli_phone
+ 		 , d.deli_email as deli_email
  	FROM   tb_delivery as d
  	   	 , tb_product as p
 		<where>
@@ -84,7 +85,7 @@
 /*kr.happyjob.chainmaker.scm.dao.SupplierInfoDao.insertDelivery*/
 	INSERT INTO tb_delivery 
 	(
-	deli_no, deli_company, deli_id, deli_password, deli_name, deli_phone
+	deli_no, deli_company, deli_id, deli_password, deli_name, deli_phone, deli_email
 	)
 	VALUES
 	(
@@ -93,7 +94,8 @@
 	#{deli_id},
 	#{deli_password},
 	#{deli_name},
-	#{deli_phone}
+	#{deli_phone},
+	#{deli_email}
 	) 
 </insert>
 
@@ -106,6 +108,7 @@
 		 , deli_password = #{deli_password}
 		 , deli_name = #{deli_name}
 		 , deli_phone = #{deli_phone}
+		 , deli_email = #{deli_email}
 	WHERE deli_no = #{deli_no}
 </update>
 
@@ -131,6 +134,7 @@
  		 , d.deli_password as deli_password
  		 , d.deli_name as deli_name
  		 , d.deli_phone as deli_phone
+ 		 , d.deli_email as deli_email
  	FROM   tb_delivery as d
  	WHERE  d.deli_no = #{deli_no}
 

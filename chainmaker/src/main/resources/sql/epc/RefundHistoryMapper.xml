@@ -42,4 +42,28 @@
  	 AND o.loginID = #{loginID}
  	 GROUP BY refund_no, refund_date) as b
 	</select>
+	
+	<!-- 반품 단건 조회 -->
+	<select id ="detailRefundHistory" resultType="kr.happyjob.chainmaker.epc.model.RefundHistoryVO">
+	SELECT r.refund_no, r.order_no, p.pro_name, r.pro_no, r.refund_qty, r.refund_date, r.refund_note, r.refund_confirm_cd, p.pro_price*r.refund_qty as pro_price
+	FROM tb_refund as r
+ 	JOIN (SELECT pro_name, pro_no, pro_price FROM tb_product) as p
+ 	ON r.pro_no = p.pro_no
+ 	WHERE r.order_no IS NOT NULL
+  	AND r.refund_no = #{refund_no}
+  	AND r.refund_date = #{refund_date}
+	ORDER BY r.refund_no;
+	</select>
+	
+	<!-- 반품 목록 단건 조회 카운트 -->
+	<select id="totalDetailRefundHistory" resultType="int">
+	SELECT count(*)
+	FROM tb_refund as r
+ 	JOIN (SELECT pro_name, pro_no FROM tb_product) as p
+ 	ON r.pro_no = p.pro_no
+ 	WHERE r.order_no IS NOT NULL
+  	AND r.refund_no = #{refund_no}
+  	AND r.refund_date = #{refund_date}
+	ORDER BY r.refund_no;
+	</select>
 </mapper>

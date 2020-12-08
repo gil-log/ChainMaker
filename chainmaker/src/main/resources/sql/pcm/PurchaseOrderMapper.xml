@@ -29,15 +29,18 @@
 			ON tb_direction.purchase_no=tb_purchase.purchase_no	
 			
 		  LEFT JOIN tb_product 
-			ON tb_direction.pro_no=tb_product.pro_no
+			ON tb_purchase.pro_no=tb_product.pro_no
 				
 		  LEFT JOIN tb_delivery 
 			ON tb_product.deli_no=tb_delivery.deli_no
 				
 		  LEFT JOIN tb_warehouse 
-			ON tb_direction.ware_no=tb_warehouse.ware_no  
+			ON tb_purchase.ware_no=tb_warehouse.ware_no  
 		<where>  
-		   AND tb_direction.direction_cd='purchase'
+		   AND tb_direction.direction_cd='purchase'	
+		   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
+		   		AND tb_purchase.purchase_cd IN ('0', '1')
+		   </if>		 
 		 <if test="(searchKey != null) and (!searchKey.equals(''))">
 		  		<choose>
 		  			<when test="(searchKey != null) and (searchKey eq 'deli_company'.toString())">
@@ -94,15 +97,18 @@
 					ON tb_direction.purchase_no=tb_purchase.purchase_no
 						
 				  LEFT JOIN tb_product 
-					ON tb_direction.pro_no=tb_product.pro_no
+					ON tb_purchase.pro_no=tb_product.pro_no
 						
 				  LEFT JOIN tb_delivery 
 					ON tb_product.deli_no=tb_delivery.deli_no	
 					
 				  LEFT JOIN tb_warehouse 
-					ON tb_direction.ware_no=tb_warehouse.ware_no  
+					ON tb_purchase.ware_no=tb_warehouse.ware_no  
 				<where>  
 				   AND tb_direction.direction_cd='purchase'
+				   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
+				   		AND tb_purchase.purchase_cd IN ('0', '1')
+				   </if>	
 				 <if test="(searchKey != null) and (!searchKey.equals(''))">
 				  		<choose>
 				  			<when test="(searchKey != null) and (searchKey eq 'deli_company'.toString())">
@@ -150,8 +156,6 @@
 		       tb_warehouse.ware_name,
 		       tb_warehouse.ware_address,
 		       tb_warehouse.ware_dt_address,
-		       <!-- (SELECT detail_name FROM tb_detail_code where detail_code=tb_userinfo.bank_cd) user_bank,
-		       tb_userinfo.user_account, -->
 			   tb_direction.direction_cd
 		  FROM tb_purchase   
 		  
@@ -159,7 +163,7 @@
 			ON tb_direction.purchase_no=tb_purchase.purchase_no	
 			
 		  LEFT JOIN tb_product 
-			ON tb_direction.pro_no=tb_product.pro_no
+			ON tb_purchase.pro_no=tb_product.pro_no
 				
 		  LEFT JOIN tb_delivery 
 			ON tb_product.deli_no=tb_delivery.deli_no	
@@ -179,7 +183,7 @@
 	</select>
 	
 	
-	<!-- 구매담당자_발주 지시서 목록 단건 조회 -->
+	<!-- 구매담당자_발주 지시서 단건 상세 조회 -->
 	<select id="purchaseDtlList" resultType="kr.happyjob.chainmaker.pcm.model.PurchaseOrderModel">
 		SELECT tb_purchase.purchase_no,			     
 			   tb_purchase.purchase_date,
@@ -203,19 +207,24 @@
 		  FROM tb_purchase   
 		  LEFT JOIN tb_direction 
 			ON tb_direction.purchase_no=tb_purchase.purchase_no	
+			
 		  LEFT JOIN tb_product 
-			ON tb_direction.pro_no=tb_product.pro_no	
+			ON tb_purchase.pro_no=tb_product.pro_no	
+			
 		  LEFT JOIN tb_delivery 
-			ON tb_product.deli_no=tb_delivery.deli_no	
+			ON tb_product.deli_no=tb_delivery.deli_no
+				
 		  LEFT JOIN tb_warehouse 
-			ON tb_direction.ware_no=tb_warehouse.ware_no    
+			ON tb_purchase.ware_no=tb_warehouse.ware_no  
+			  
 		 WHERE tb_direction.direction_cd='purchase'
-		   AND tb_purchase.purchase_no=27
-		 GROUP BY tb_purchase.purchase_no, tb_warehouse.ware_no
-		 ORDER BY tb_purchase.purchase_no DESC ;
+		   AND tb_purchase.purchase_no=#{purchase_no}
+		   
+		 GROUP BY tb_purchase.purchase_no, tb_purchase.ware_no
+		 ORDER BY tb_purchase.purchase_no DESC
 	</select>
 	
-	<!-- 구매담당자_발주 지시서 목록 단건 조회 카운트-->
+	<!-- 구매담당자_발주 지시서 단건 상세 조회 카운트-->
 	<select id="countPurchaseDtlList" resultType="int">
 		SELECT COUNT(*)
 		  FROM (SELECT tb_purchase.purchase_no,			     
@@ -240,21 +249,26 @@
 				  FROM tb_purchase   
 				  LEFT JOIN tb_direction 
 					ON tb_direction.purchase_no=tb_purchase.purchase_no	
+					
 				  LEFT JOIN tb_product 
-					ON tb_direction.pro_no=tb_product.pro_no	
+					ON tb_purchase.pro_no=tb_product.pro_no
+						
 				  LEFT JOIN tb_delivery 
-					ON tb_product.deli_no=tb_delivery.deli_no	
+					ON tb_product.deli_no=tb_delivery.deli_no
+						
 				  LEFT JOIN tb_warehouse 
-					ON tb_direction.ware_no=tb_warehouse.ware_no    
+					ON tb_purchase.ware_no=tb_warehouse.ware_no 
+					   
 				 WHERE tb_direction.direction_cd='purchase'
-				   AND tb_purchase.purchase_no=27
-				 GROUP BY tb_purchase.purchase_no, tb_warehouse.ware_no
+				   AND tb_purchase.purchase_no=#{purchase_no}
+				   
+				 GROUP BY tb_purchase.purchase_no, tb_purchase.ware_no
 				 ORDER BY tb_purchase.purchase_no DESC) 
 			tb_purchase
 	</select>
 	
 	<!-- 구매담당자_발주 지시서 전송 및 입금확인에 대한 purchase_cd 변경 -->
 	<update id="updatePurchaseCD">
-		UPDATE tb_purchase SET purchase_cd='2' WHERE purchase_no=#{purchase_no}
+		UPDATE tb_purchase SET purchase_cd=2 WHERE purchase_no=#{purchase_no}
 	</update>
 </mapper>

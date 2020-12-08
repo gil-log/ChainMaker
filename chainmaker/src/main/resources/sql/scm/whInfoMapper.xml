@@ -18,6 +18,7 @@
           </when>
         </choose>
       </if>
+      AND <![CDATA[wh.ware_no <> 0]]>
     </where>
   </select> 
 
@@ -56,6 +57,7 @@
         </choose>
       </if>
      AND ui.del_cd = 'n'
+     AND <![CDATA[wh.ware_no <> 0]]>
     </where>
     ORDER BY wh.ware_no
     LIMIT  #{pageIndex}, #{pageSize}

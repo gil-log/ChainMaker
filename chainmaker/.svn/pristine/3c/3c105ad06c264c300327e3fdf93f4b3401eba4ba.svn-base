@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.RefundRequestDao">
+
+	<select id ="selectOrderListQtyAndDate" resultType="kr.happyjob.chainmaker.epc.model.OrderListWithQtyAndDateVO">
+        SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
+        order_date.order_mod_date, order_date.order_expdate, order_names.pro_name, order_qty.order_cd, IF(tb_shipping.ship_cd IS NULL, 'YET', tb_shipping.ship_cd) as ship_cd
+		FROM  
+		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd, GROUP_CONCAT(pro_no) as pro_no
+		FROM tb_order
+		
+		<if test='pro_name != null'>
+        LEFT JOIN tb_product product
+        ON tb_order.pro_no = product.pro_no
+        </if>
+        
+        WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
+        <if test='pro_name != null'>
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        </if>
+
+		GROUP BY order_no
+		) order_qty LEFT JOIN
+		(
+		SELECT tb_order.order_no, sum(tb_product.pro_price * tb_order.order_qty) as amount_payment
+		FROM tb_order tb_order LEFT JOIN tb_product tb_product
+		ON tb_order.pro_no = tb_product.pro_no
+        
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
+		GROUP BY tb_order.order_no
+		) order_price ON order_qty.order_no = order_price.order_no
+        
+        LEFT JOIN 
+		(
+		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
+		tb_order.order_expdate, tb_order.order_cd
+		FROM tb_order tb_order
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
+		GROUP BY tb_order.order_no
+		) order_date ON order_qty.order_no = order_date.order_no
+        LEFT JOIN
+        (
+        SELECT orders.order_no, GROUP_CONCAT(product.pro_name) as pro_name
+        FROM tb_order orders, tb_product product
+        WHERE orders.pro_no = product.pro_no
+        AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
+        GROUP BY orders.order_no
+        ) order_names ON order_qty.order_no = order_names.order_no
+		LEFT JOIN tb_shipping
+        ON order_qty.order_no = tb_shipping.order_no
+        AND tb_shipping.pro_no IN (order_qty.pro_no)
+        
+		WHERE order_qty.loginID = #{loginID}
+		<if test='startDate != null and endDate != null'>
+		AND DATE(order_date.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+	<select id="countOrderListByDate" resultType="int">
+	
+		SELECT COUNT(1) AS tot_cnt
+		FROM
+		(
+        SELECT order_qty.order_no, order_qty.order_total_qty, order_price.amount_payment, order_date.order_date, 
+        order_date.order_mod_date, order_date.order_expdate, order_names.pro_name, order_qty.order_cd, IF(tb_shipping.ship_cd IS NULL, 'YET', tb_shipping.ship_cd) as ship_cd
+		FROM  
+		(SELECT	order_no, sum(order_qty) as order_total_qty, loginID, order_cd, GROUP_CONCAT(pro_no) as pro_no
+		FROM tb_order
+		
+		<if test='pro_name != null'>
+        LEFT JOIN tb_product product
+        ON tb_order.pro_no = product.pro_no
+        </if>
+        
+        WHERE order_cd IN ('order', 'complete') AND deposit_cd = 1
+        <if test='pro_name != null'>
+        AND product.pro_name LIKE CONCAT('%', #{pro_name}, '%')
+        </if>
+        
+		GROUP BY order_no
+		) order_qty LEFT JOIN
+		(
+		SELECT tb_order.order_no, sum(tb_product.pro_price * tb_order.order_qty) as amount_payment
+		FROM tb_order tb_order LEFT JOIN tb_product tb_product
+		ON tb_order.pro_no = tb_product.pro_no
+        
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
+		GROUP BY tb_order.order_no
+		) order_price ON order_qty.order_no = order_price.order_no
+        
+        LEFT JOIN 
+		(
+		SELECT tb_order.order_no, tb_order.order_date, tb_order.order_mod_date, 
+		tb_order.order_expdate, tb_order.order_cd
+		FROM tb_order tb_order
+        WHERE tb_order.order_cd IN ('order', 'complete') AND tb_order.deposit_cd = 1
+		GROUP BY tb_order.order_no
+		) order_date ON order_qty.order_no = order_date.order_no
+        LEFT JOIN
+        (
+        SELECT orders.order_no, GROUP_CONCAT(product.pro_name) as pro_name
+        FROM tb_order orders, tb_product product
+        WHERE orders.pro_no = product.pro_no
+        AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
+        GROUP BY orders.order_no
+        ) order_names ON order_qty.order_no = order_names.order_no
+		LEFT JOIN tb_shipping
+        ON order_qty.order_no = tb_shipping.order_no
+        AND tb_shipping.pro_no IN (order_qty.pro_no)
+        
+		WHERE order_qty.loginID = #{loginID}
+		<if test='startDate != null and endDate != null'>
+		AND DATE(order_date.order_date) BETWEEN #{startDate} AND #{endDate}
+		</if>
+		) order_date_count
+	</select>
+	
+	<select id="selectOrderDetailProductInfoByOrderNo" resultType="kr.happyjob.chainmaker.epc.model.OrderDetailVO">
+		SELECT orders.order_no, product.pro_no, product.pro_cd, product.pro_name, 
+		product.pro_manu_name, orders.order_qty, product.pro_price
+		
+		FROM tb_product product, tb_order orders
+		WHERE product.pro_no = orders.pro_no
+        AND orders.deposit_cd = '1'
+        AND orders.order_cd IN ('order', 'complete')
+		AND orders.order_no = #{order_no}
+	</select>
+
+	<insert id="insertOneRefundInfo" useGeneratedKeys="true" keyProperty="refund_no"
+	parameterType="kr.happyjob.chainmaker.epc.model.RefundInfoDTO">
+		INSERT INTO tb_refund(refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no, ware_no)
+		VALUES (#{refund_qty}, now(), 0, 0, #{refund_note}, #{order_no}, #{pro_no}, 0)
+	</insert>
+	
+	<insert id="insertRefundInfoList" parameterType="java.util.Map">
+		INSERT INTO tb_refund(refund_no, refund_qty, refund_date, refund_cd, refund_confirm_cd, refund_note, order_no, pro_no, ware_no)
+		VALUES 
+		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
+			 (#{refundInfo.refund_no}, #{refundInfo.refund_qty}, now(), 0, 0, #{refundInfo.refund_note}, #{refundInfo.order_no}, #{refundInfo.pro_no}, 0)
+		</foreach>
+	</insert>
+	
+	<update id="updateOneOrderCDtoRefundByOrderNoAndProNo" parameterType="kr.happyjob.chainmaker.epc.model.RefundInfoDTO">
+		UPDATE tb_order
+		SET order_cd = 'refund', order_mod_date = now()
+		WHERE order_no = #{order_no}
+		AND pro_no = #{pro_no}
+	</update>
+	
+	<update id="updateListOrderCDtoRefundByOrderNoAndProNo" parameterType="java.util.Map">
+		UPDATE tb_order
+		SET order_cd = 'refund', order_mod_date = now()
+		WHERE order_no = #{order_no}
+		AND pro_no IN
+		<foreach collection="refundInfoDTOList" item="refundInfo"  open="(" separator="," close=")">
+			 #{refundInfo.pro_no}
+		</foreach>
+	</update>
+	
+	<select id="selectRefundUserInfo" resultType="kr.happyjob.chainmaker.epc.model.RefundUserInfoVO">
+		SELECT userinfo.user_address, userinfo.name, detail_code.detail_name as bank_name, userinfo.user_account
+		FROM tb_userinfo userinfo, tb_detail_code detail_code
+		WHERE userinfo.loginID = #{loginID}
+		AND userinfo.bank_cd = detail_code.detail_code
+	</select>
+	
+	
+	<insert id="insertRefundDirection" parameterType="java.util.Map">
+		INSERT INTO tb_direction(pro_no, refund_no, direction_date, direction_in_qty, direction_note, direction_cd, order_no)
+		VALUES
+		<foreach collection="refundInfoDTOList" item="refundInfo" separator=",">
+			 (#{refundInfo.pro_no}, #{refundInfo.refund_no}, now(), #{refundInfo.refund_qty}, '반품 신청으로 인한 입고 예정', 'refund', #{refundInfo.order_no})
+		</foreach>
+	</insert>
+	
+</mapper>

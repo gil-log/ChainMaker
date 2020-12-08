@@ -13,7 +13,6 @@
 		       tb_product.pro_name,
 		       tb_product.pro_deli_price,
 		       (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
-		       <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
 		       tb_delivery.deli_company,
 		       tb_delivery.deli_name,
 		       tb_delivery.deli_phone,
@@ -39,8 +38,11 @@
 		  LEFT JOIN tb_delivery 
 				 ON tb_product.deli_no=tb_delivery.deli_no
 		  <where>
-		   AND direction_cd='refund' 
+		   AND tb_direction.direction_cd='refund' 
 		   AND tb_direction.purchase_no IS NOT NULL
+		   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
+		   		AND tb_refund.refund_cd IN ('0', '1')
+		   </if>
 		  	<if test="(searchKey != null) and (!searchKey.equals(''))">
 		  		<choose>
 		  			<when test="(searchKey != null) and (searchKey eq 'deli_company'.toString())">
@@ -80,7 +82,6 @@
 					   tb_product.pro_name,
 					   tb_product.pro_deli_price,
 					   (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
-					   <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
 					   tb_delivery.deli_company,
 					   tb_delivery.deli_name,
 					   tb_delivery.deli_phone,
@@ -108,6 +109,9 @@
 				  <where>
 				   AND direction_cd='refund' 
 				   AND tb_direction.purchase_no IS NOT NULL
+				   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
+				   		AND tb_refund.refund_cd IN ('0', '1')
+				   </if>
 				  	<if test="(searchKey != null) and (!searchKey.equals(''))">
 				  		<choose>
 				  			<when test="(searchKey != null) and (searchKey eq 'deli_company'.toString())">
@@ -147,7 +151,6 @@
 		       tb_product.pro_name,
 		       tb_product.pro_deli_price,
 		       (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
-		       <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
 		       tb_delivery.deli_company,
 		       tb_delivery.deli_name,
 		       tb_delivery.deli_phone,
@@ -173,7 +176,7 @@
 		  LEFT JOIN tb_delivery 
 				 ON tb_product.deli_no=tb_delivery.deli_no
 		         
-		 WHERE direction_cd='refund' 
+		 WHERE tb_direction.direction_cd='refund' 
 		   AND tb_direction.purchase_no IS NOT NULL 
 		   AND tb_refund.refund_no=#{refund_no}
 		   
@@ -192,7 +195,6 @@
 		       tb_product.pro_name,
 		       tb_product.pro_deli_price,
 		       (tb_refund.refund_qty*tb_product.pro_deli_price) sum_price,
-		       <!-- SUM(tb_refund.refund_qty*tb_product.pro_deli_price) total_price, -->
 		       tb_delivery.deli_company,
 		       tb_delivery.deli_name,
 		       tb_delivery.deli_phone,
@@ -218,7 +220,7 @@
 		  LEFT JOIN tb_delivery 
 				 ON tb_product.deli_no=tb_delivery.deli_no
 		         
-		 WHERE direction_cd='refund' 
+		 WHERE tb_direction.direction_cd='refund' 
 		   AND tb_direction.purchase_no IS NOT NULL 
 		   AND tb_refund.refund_no=#{refund_no}
 		   

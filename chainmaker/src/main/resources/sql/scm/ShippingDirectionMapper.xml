@@ -76,7 +76,7 @@
 	
 	<select id="selectShippingOrderDetailListByOrderNo" resultType="kr.happyjob.chainmaker.scm.model.ShippingOrderDetailVO"
 	parameterType="kr.happyjob.chainmaker.scm.model.ShippingRequestDTO">
-		SELECT shipping_info.*, orders.deposit_cd, userinfo.name
+		SELECT shipping_info.*, orders.deposit_cd, userinfo.name, userinfo.loginID
 		FROM
 		(
 		SELECT orders.order_date, shipping.order_no, shipping.ship_qty, shipping.ware_no, 
@@ -102,7 +102,7 @@
 		AND orders.pro_no = shipping_info.pro_no
 
 		LEFT JOIN (
-		SELECT warehouse.ware_no, userinfo.name
+		SELECT warehouse.ware_no, userinfo.name, userinfo.loginID
 		FROM tb_warehouse warehouse, tb_userinfo userinfo
 		WHERE warehouse.loginID = userinfo.loginID
 

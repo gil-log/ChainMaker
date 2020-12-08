@@ -65,6 +65,9 @@
 			 , ware_address as ware_address
 			 , ware_dt_address as ware_dt_address
 		FROM tb_warehouse
+		<where>
+			AND ware_no != 0
+		</where>
 	</select>
 	
 	<select id="selectDelivery" resultType="kr.happyjob.chainmaker.scm.model.DeliveryModel">

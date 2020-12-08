@@ -32,6 +32,12 @@
 			</choose>
         </if>
 		AND u.del_cd = #{del_cd}
+		<if test="approval_cd eq 'n'.toString()">
+			AND u.approval_cd = #{approval_cd}
+		</if>
+		<if test="approval_cd eq 'y'.toString()">
+			AND u.approval_cd = #{approval_cd}
+		</if>
         </where>
 	</select> 
 
@@ -48,8 +54,11 @@
 			, u.user_tel1 as user_tel1
 			, u.user_tel2 as user_tel2
 			, u.user_tel3 as user_tel3
+			, u.bank_cd as bank_cd
+			, u.user_account as user_account
 			, d2.detail_name as chaCD_name
 			, d3.detail_name as delCD_name
+			, u.loginID as loginID
 		FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
 		JOIN tb_userinfo u
 		ON u.div_cd = d.detail_code
@@ -75,8 +84,14 @@
 			</choose>
         </if>
 		AND u.del_cd = #{del_cd}
+		<if test="approval_cd eq 'n'.toString()">
+			AND u.approval_cd = #{approval_cd}
+		</if>
+		<if test="approval_cd eq 'y'.toString()">
+			AND u.approval_cd = #{approval_cd}
+		</if>
         </where>
-		ORDER BY u.user_type
+		ORDER BY u.user_type , u.loginID
 		LIMIT #{pageIndex}, #{pageSize};
 		
 	</select>
@@ -99,6 +114,9 @@
 		    , u.user_dt_address as user_dt_address
 		    , u.user_company as user_company
 		    , u.del_cd as del_cd
+			, u.approval_cd as approval_cd
+			, u.bank_cd as bank_cd
+			, u.user_account as user_account
 			FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
 			JOIN tb_userinfo u
 			ON u.div_cd = d.detail_code
@@ -118,6 +136,8 @@
 			<if test="checkstaff.equals('outstaff')">
 			name = #{name2}
 			, user_company = #{company}
+			, user_account = #{account}
+			, bank_cd = #{selectBankCD}
 			</if>
 			, password = #{password}
 			, user_tel1 = #{tel1}
@@ -133,7 +153,7 @@
 	<!-- 회원 삭제 -->
 	<update id="deleteUser" parameterType="java.util.Map">
 		UPDATE tb_userinfo
-		SET del_cd = "1"
+		SET del_cd = "y"
 		WHERE loginID = #{loginID};
 	</update>
 	
@@ -148,7 +168,6 @@
 	<insert id="insertUser" parameterType="java.util.Map">
 		INSERT INTO tb_userinfo
 			(loginID
-			, name
 			, password
 			, user_tel1
 			, user_tel2
@@ -159,11 +178,14 @@
 			, user_email
 			, user_company
 			, del_cd
+			, name
 			, div_cd
-			, user_type)
+			, user_type
+			, user_account
+			, bank_cd
+			, approval_cd)
 		VALUES
 			(#{rloginID}
-			, #{name}
 			, #{password}
 			, #{tel1}
 			, #{tel2}
@@ -174,15 +196,21 @@
 			, #{email}
 			, #{company}
 			, "n"
-				<if test="checkstaff.equals('instaff')">
+		<if test="checkstaff.equals('instaff')">
+			, #{name}
 			, #{checkstaff}
 			, #{selectChaCD}
-				</if>
-				<if test="checkstaff.equals('outstaff')">
+			, ""
+			, ""
+		</if>
+		<if test="checkstaff.equals('outstaff')">
+			, #{name2}
 			, "outstaff"
 			, "C"
-				</if>
-			)
+			, #{account}
+			, #{selectBankCD}
+		</if>
+			, "y")
 	</insert>
 	
 	<!-- 담당자업무 조회 -->
@@ -195,10 +223,52 @@
 		AND detail_code!="F";				
 	</select>
 	
+	
 	<!-- loginID 중복검사 -->
 	<select id="check_loginID" parameterType="String" resultType="int">
 		SELECT count(*)
 		FROM tb_userinfo
 		WHERE loginID = #{loginID}
+	</select>
+	
+	<!-- 배송담당자 창고 조회 -->
+	<select id="listDeliWarehouse" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		SELECT ware_no
+			, ware_name
+		FROM tb_warehouse
+		WHERE loginID = #{loginID};
+	</select>
+	
+	<!-- 배송담당자 ID 조회    <> not -->
+	<select id="listDeliID" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		<![CDATA[
+		SELECT loginID
+			, name
+		FROM tb_userinfo
+		WHERE user_type = "B"
+		AND loginID <> #{loginID};
+		]]>
+	</select>
+	
+	<!-- 배송담당자 창고 이관 -->
+	<update id="deliTransfer" parameterType="java.util.Map">
+		UPDATE tb_warehouse
+		SET loginID = #{deli_id}
+		WHERE ware_no = #{ware_no};
+	</update>
+	
+	<!-- 회원 승인 -->
+	<update id="approvalUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+		SET approval_cd = "y"
+		WHERE loginID = #{loginID};
+	</update>
+	
+	<!-- 은행명 가져오기 -->
+	<select id="listBankName" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+	SELECT d.detail_name as bank_name
+		 , d.detail_code as bank_cd
+	FROM tb_detail_code d
+	WHERE d.group_code = 'bankCD';
 	</select>
 </mapper>

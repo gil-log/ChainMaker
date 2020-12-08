@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.scm.dao.UserInfoDao">
+	<!-- 빌립담당 -->
+	 <!--그룹코드 목록 조회   -->
+	<select id="userTotalCnt" resultType="int">
+      
+      select count(*) as total_cnt
+      FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
+		JOIN tb_userinfo u
+		ON u.div_cd = d.detail_code
+		JOIN (select * FROM tb_detail_code d where d.group_code = 'chaCD') d2
+		ON u.user_type = d2.detail_code
+		JOIN (select * FROM tb_detail_code d where d.group_code = 'delCD') d3
+		ON u.del_cd = d3.detail_code
+		<where>
+		<if test="(sname != null) and (!sname.equals('')) ">
+			<choose>
+				<when test= "(oname eq 'com_nm'.toString())">
+					AND user_company LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'sta_nm'.toString()">
+					AND name LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'man_nm'.toString()">
+					AND name LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'res_nm'.toString()">
+					AND d2.detail_name LIKE concat('%', #{sname}, '%')
+				</when>
+			</choose>
+        </if>
+		AND u.del_cd = #{del_cd}
+		<if test="approval_cd eq 'n'.toString()">
+			AND u.approval_cd = #{approval_cd}
+		</if>
+        </where>
+	</select> 
+
+	<!-- 회원 목록 조회 -->
+	<select id="listUser" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		/* 공통코드로 내부직원, 외부직원, 직책 가져오기 */
+		
+		SELECT u.user_type as user_type
+			, u.name as name
+			, d.detail_name as divCD_name
+			, u.user_company as user_company
+			, u.div_cd as div_cd
+			, u.loginID as loginID
+			, u.user_tel1 as user_tel1
+			, u.user_tel2 as user_tel2
+			, u.user_tel3 as user_tel3
+			, d2.detail_name as chaCD_name
+			, d3.detail_name as delCD_name
+			, u.loginID as loginID
+		FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
+		JOIN tb_userinfo u
+		ON u.div_cd = d.detail_code
+		JOIN (select * FROM tb_detail_code d where d.group_code = 'chaCD') d2
+		ON u.user_type = d2.detail_code
+		JOIN (select * FROM tb_detail_code d where d.group_code = 'delCD') d3
+		ON u.del_cd = d3.detail_code
+		<where>
+		<if test="(sname != null) and (!sname.equals('')) ">
+			<choose>
+				<when test= "(oname eq 'com_nm'.toString())">
+					AND user_company LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'sta_nm'.toString()">
+					AND name LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'man_nm'.toString()">
+					AND name LIKE concat('%', #{sname}, '%')
+				</when>
+				<when test= "oname eq 'res_nm'.toString()">
+					AND d2.detail_name LIKE concat('%', #{sname}, '%')
+				</when>
+			</choose>
+        </if>
+		AND u.del_cd = #{del_cd}
+		<if test="approval_cd eq 'n'.toString()">
+			AND u.approval_cd = #{approval_cd}
+		</if>
+        </where>
+		ORDER BY u.user_type , u.loginID
+		LIMIT #{pageIndex}, #{pageSize};
+		
+	</select>
+
+	<!-- 회원 1건 상세정보 -->
+	<select id="detailUser" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		select  u.user_type as user_type
+		    , u.name as name
+		    , u.loginID as loginID
+		    , u.user_email as user_email
+		    , u.password as password
+		    , u.user_tel1 as user_tel1
+		    , u.user_tel2 as user_tel2
+		    , u.user_tel3 as user_tel3
+		    , u.div_cd as div_cd
+		    , d.detail_name as divCD_name
+		    , d2.detail_name as chaCD_name
+		    , u.user_zipcode as user_zipcode
+		    , u.user_address as user_address
+		    , u.user_dt_address as user_dt_address
+		    , u.user_company as user_company
+		    , u.del_cd as del_cd
+			, u.approval_cd as approval_cd
+			FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
+			JOIN tb_userinfo u
+			ON u.div_cd = d.detail_code
+			JOIN (select * FROM tb_detail_code d where d.group_code = 'chaCD') d2
+			ON u.user_type = d2.detail_code
+			where loginID = #{loginID};
+	</select>
+	
+	<!-- 회원 수정 -->
+	<update id="updateUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+			SET 
+			<if test="checkstaff.equals('instaff')">
+			name = #{name}
+			, user_type = #{selectChaCD}
+			</if>
+			<if test="checkstaff.equals('outstaff')">
+			name = #{name2}
+			, user_company = #{company}
+			</if>
+			, password = #{password}
+			, user_tel1 = #{tel1}
+			, user_tel2 = #{tel2}
+			, user_tel3 = #{tel3}
+			, user_email = #{email}
+			, user_zipcode = #{zipcode}
+			, user_address = #{address}
+			, user_dt_address = #{dt_address}
+		WHERE loginID = #{loginID}
+	</update>
+	
+	<!-- 회원 삭제 -->
+	<update id="deleteUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+		SET del_cd = "y"
+		WHERE loginID = #{loginID};
+	</update>
+	
+	<!-- 회원 컴백 -->
+	<update id="comebackUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+		SET del_cd = "n"
+		WHERE loginID = #{loginID};
+	</update>
+	
+	<!-- 회원 삽입 -->
+	<insert id="insertUser" parameterType="java.util.Map">
+		INSERT INTO tb_userinfo
+			(loginID
+			, name
+			, password
+			, user_tel1
+			, user_tel2
+			, user_tel3
+			, user_zipcode
+			, user_address
+			, user_dt_address
+			, user_email
+			, user_company
+			, del_cd
+			, div_cd
+			, user_type
+			, approval_cd)
+		VALUES
+			(#{rloginID}
+			, #{name}
+			, #{password}
+			, #{tel1}
+			, #{tel2}
+			, #{tel3}
+			, #{zipcode}
+			, #{address}
+			, #{dt_address}
+			, #{email}
+			, #{company}
+			, "n"
+				<if test="checkstaff.equals('instaff')">
+			, #{checkstaff}
+			, #{selectChaCD}
+				</if>
+				<if test="checkstaff.equals('outstaff')">
+			, "outstaff"
+			, "C"
+				</if>
+			, "y")
+	</insert>
+	
+	<!-- 담당자업무 조회 -->
+	<select id="listChaCD" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		SELECT detail_name as chaCD_name
+			, detail_code as user_type
+		FROM tb_detail_code
+		WHERE group_code ="chaCD"
+		AND detail_code!="C"
+		AND detail_code!="F";				
+	</select>
+	
+	
+	<!-- loginID 중복검사 -->
+	<select id="check_loginID" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM tb_userinfo
+		WHERE loginID = #{loginID}
+	</select>
+	
+	<!-- 배송담당자 창고 조회 -->
+	<select id="listDeliWarehouse" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		SELECT ware_no
+			, ware_name
+		FROM tb_warehouse
+		WHERE loginID = #{loginID};
+	</select>
+	
+	<!-- 배송담당자 ID 조회    <> not -->
+	<select id="listDeliID" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+		<![CDATA[
+		SELECT loginID
+			, name
+		FROM tb_userinfo
+		WHERE user_type = "B"
+		AND loginID <> #{loginID};
+		]]>
+	</select>
+	
+	<!-- 배송담당자 창고 이관 -->
+	<update id="deliTransfer" parameterType="java.util.Map">
+		UPDATE tb_warehouse
+		SET loginID = #{deli_id}
+		WHERE ware_no = #{ware_no};
+	</update>
+	
+	<!-- 회원 승인 -->
+	<update id="approvalUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+		SET approval_cd = "y"
+		WHERE loginID = #{loginID};
+	</update>
+</mapper>

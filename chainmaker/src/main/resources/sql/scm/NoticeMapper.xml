@@ -50,8 +50,9 @@
 		SELECT
 		notice_no, notice_title, loginID, notice_regdate, notice_moddate, notice_hit, del_cd
 		FROM tb_notice
-		WHERE del_cd = "n"
+
 		<where>		
+			and del_cd = "n"
 			<choose>
 				<when test="(oname eq 'title'.toString())">
 					and notice_moddate between #{from_date} and #{to_date}
@@ -63,11 +64,9 @@
 					and notice_content LIKE CONCAT('%', #{sname}, '%')
 				</when>
 				<when test="(oname eq 'all'.toString())">	
-					and notice_moddate between #{from_date} and
-					#{to_date}
-					and (notice_title Like CONCAT('%', #{sname}, '%')
-					or
-					notice_content LIKE CONCAT('%', #{sname}, '%'))
+					and (notice_moddate between #{from_date} and #{to_date})
+					and ((notice_title Like CONCAT('%', #{sname}, '%'))
+					 or (notice_content LIKE CONCAT('%', #{sname}, '%')))
 					
 				</when>
 			</choose>			
@@ -83,8 +82,8 @@
 		         notice_title,
 		         loginID
 		FROM tb_notice
-		WHERE del_cd = "n"
 		<where>
+			and del_cd = "n"
 			<choose>				
 				<when test="(oname eq 'title'.toString())">
 					and notice_moddate between #{from_date} and
@@ -97,11 +96,9 @@
 					and notice_content LIKE CONCAT('%', #{sname}, '%')
 				</when>
 				<when test="(oname eq 'all'.toString())">
-					and notice_moddate between #{from_date} and
-					#{to_date}
-					and (notice_title Like CONCAT('%', #{sname}, '%')
-					or notice_content
-					LIKE CONCAT('%', #{sname}, '%'))
+					and (notice_moddate between #{from_date} and #{to_date})
+					and ((notice_title Like CONCAT('%', #{sname}, '%'))
+					or (notice_content LIKE CONCAT('%', #{sname}, '%')))
 				</when>
 			</choose>
 		</where>
@@ -131,8 +128,8 @@
 			</when>
 			<when test="(oname eq 'all'.toString())">
 				and notice_moddate between #{from_date} and #{to_date}
-				and (notice_title Like CONCAT('%', #{sname}, '%')
-				or notice_content LIKE CONCAT('%', #{sname}, '%'))
+				and ((notice_title Like CONCAT('%', #{sname}, '%')
+				or (notice_content LIKE CONCAT('%', #{sname}, '%'))
 			</when>
 		</choose>
 	</select>

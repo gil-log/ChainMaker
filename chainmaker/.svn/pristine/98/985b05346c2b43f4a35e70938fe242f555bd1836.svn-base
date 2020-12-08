@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.chainmaker.dashboard.dao.DashInfDao">
+
+
+<!-- 1:1문의 목록 조회 -->
+	 <select id="listInf" resultType="kr.happyjob.chainmaker.dashboard.model.InfModel">
+	   	 SELECT @rownum:=@rownum+1 as row_num,
+				   	 notice_no,
+					 notice_title,
+					 notice_content,
+					 notice_hit,
+					 date_format(notice_regdate,'%Y-%m-%d') as notice_regdate,
+					 notice_moddate,
+					 loginID
+		 FROM tb_notice
+		 WHERE (@rownum:=0)=0 AND del_cd = "n"
+		 ORDER BY notice_no  DESC 
+		 LIMIT #{pageIndex}, #{pageSize}
+	</select>
+	
+    <!-- 1:1문의 목록 조회 -->
+	 <select id="countListInf" resultType="int">
+	   	 SELECT count(*)
+		 FROM tb_notice
+	</select>	
+	
+	<!-- 	1:1문의 모달창 -->
+	<select id="selectInfByInfNo" resultType="kr.happyjob.chainmaker.dashboard.model.InfModel">
+	SELECT	 notice_no,
+					 notice_title,
+					 notice_content
+		  FROM tb_notice
+		  WHERE notice_no = #{notice_no}
+	</select>
+	
+	
+	
+</mapper>

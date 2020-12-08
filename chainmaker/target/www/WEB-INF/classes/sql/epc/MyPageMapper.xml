@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.chainmaker.epc.dao.MyPageDAO">
+
+	<select id="detailUser" resultType="kr.happyjob.chainmaker.epc.model.MyPageDTO">
+		select  u.user_type as user_type
+		    , u.name as name
+		    , u.loginID as loginID
+		    , u.user_email as user_email
+		    , u.password as password
+		    , u.user_tel1 as user_tel1
+		    , u.user_tel2 as user_tel2
+		    , u.user_tel3 as user_tel3
+		    , u.div_cd as div_cd
+		    , d.detail_name as divCD_name
+		    , d2.detail_name as chaCD_name
+		    , u.user_zipcode as user_zipcode
+		    , u.user_address as user_address
+		    , u.user_dt_address as user_dt_address
+		    , u.user_company as user_company
+		    , u.del_cd as del_cd
+			FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
+			JOIN tb_userinfo u
+			ON u.div_cd = d.detail_code
+			JOIN (select * FROM tb_detail_code d where d.group_code = 'chaCD') d2
+			ON u.user_type = d2.detail_code
+			where loginID = #{loginID};
+	</select>
+	
+	<!-- 회원 수정 -->
+	<update id="upUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+			SET 
+			  name = #{name}
+			, user_type = "C"
+			, password = #{password}
+			, user_tel1 = #{tel1}
+			, user_tel2 = #{tel2}
+			, user_tel3 = #{tel3}
+			, user_email = #{email}
+			, user_zipcode = #{zipcode}
+			, user_address = #{address}
+			, user_dt_address = #{dt_address}
+		WHERE loginID = #{loginID}
+	</update>
+	
+	
+	<!-- 회원 수정 -->
+	<update id="delUser" parameterType="java.util.Map">
+		UPDATE tb_userinfo
+			SET 
+			 del_cd = 'y'
+		WHERE loginID = #{loginID}
+	</update>
+</mapper>
+
+
