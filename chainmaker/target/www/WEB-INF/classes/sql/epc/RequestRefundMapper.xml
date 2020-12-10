@@ -46,7 +46,11 @@
         AND orders.order_cd IN ('order', 'complete') AND orders.deposit_cd = 1
         GROUP BY orders.order_no
         ) order_names ON order_qty.order_no = order_names.order_no
-		LEFT JOIN tb_shipping
+		LEFT JOIN (
+        SELECT *
+        FROM tb_shipping
+        GROUP BY order_no
+        )tb_shipping
         ON order_qty.order_no = tb_shipping.order_no
         AND tb_shipping.pro_no IN (order_qty.pro_no)
         

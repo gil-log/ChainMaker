@@ -29,13 +29,13 @@
 			ON tb_direction.purchase_no=tb_purchase.purchase_no	
 			
 		  LEFT JOIN tb_product 
-			ON tb_direction.pro_no=tb_product.pro_no
+			ON tb_purchase.pro_no=tb_product.pro_no
 				
 		  LEFT JOIN tb_delivery 
 			ON tb_product.deli_no=tb_delivery.deli_no
 				
 		  LEFT JOIN tb_warehouse 
-			ON tb_direction.ware_no=tb_warehouse.ware_no  
+			ON tb_purchase.ware_no=tb_warehouse.ware_no  
 		<where>  
 		   AND tb_direction.direction_cd='purchase'	
 		   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
@@ -97,13 +97,13 @@
 					ON tb_direction.purchase_no=tb_purchase.purchase_no
 						
 				  LEFT JOIN tb_product 
-					ON tb_direction.pro_no=tb_product.pro_no
+					ON tb_purchase.pro_no=tb_product.pro_no
 						
 				  LEFT JOIN tb_delivery 
 					ON tb_product.deli_no=tb_delivery.deli_no	
 					
 				  LEFT JOIN tb_warehouse 
-					ON tb_direction.ware_no=tb_warehouse.ware_no  
+					ON tb_purchase.ware_no=tb_warehouse.ware_no  
 				<where>  
 				   AND tb_direction.direction_cd='purchase'
 				   <if test="(checkBoxStatus != null) and (checkBoxStatus.equals('checked'))">
@@ -163,7 +163,7 @@
 			ON tb_direction.purchase_no=tb_purchase.purchase_no	
 			
 		  LEFT JOIN tb_product 
-			ON tb_direction.pro_no=tb_product.pro_no
+			ON tb_purchase.pro_no=tb_product.pro_no
 				
 		  LEFT JOIN tb_delivery 
 			ON tb_product.deli_no=tb_delivery.deli_no	
@@ -209,18 +209,18 @@
 			ON tb_direction.purchase_no=tb_purchase.purchase_no	
 			
 		  LEFT JOIN tb_product 
-			ON tb_direction.pro_no=tb_product.pro_no	
+			ON tb_purchase.pro_no=tb_product.pro_no	
 			
 		  LEFT JOIN tb_delivery 
 			ON tb_product.deli_no=tb_delivery.deli_no
 				
 		  LEFT JOIN tb_warehouse 
-			ON tb_direction.ware_no=tb_warehouse.ware_no  
+			ON tb_purchase.ware_no=tb_warehouse.ware_no  
 			  
 		 WHERE tb_direction.direction_cd='purchase'
 		   AND tb_purchase.purchase_no=#{purchase_no}
 		   
-		 GROUP BY tb_purchase.purchase_no, tb_warehouse.ware_no
+		 GROUP BY tb_purchase.purchase_no, tb_purchase.ware_no
 		 ORDER BY tb_purchase.purchase_no DESC
 	</select>
 	
@@ -249,15 +249,20 @@
 				  FROM tb_purchase   
 				  LEFT JOIN tb_direction 
 					ON tb_direction.purchase_no=tb_purchase.purchase_no	
+					
 				  LEFT JOIN tb_product 
-					ON tb_direction.pro_no=tb_product.pro_no	
+					ON tb_purchase.pro_no=tb_product.pro_no
+						
 				  LEFT JOIN tb_delivery 
-					ON tb_product.deli_no=tb_delivery.deli_no	
+					ON tb_product.deli_no=tb_delivery.deli_no
+						
 				  LEFT JOIN tb_warehouse 
-					ON tb_direction.ware_no=tb_warehouse.ware_no    
+					ON tb_purchase.ware_no=tb_warehouse.ware_no 
+					   
 				 WHERE tb_direction.direction_cd='purchase'
 				   AND tb_purchase.purchase_no=#{purchase_no}
-				 GROUP BY tb_purchase.purchase_no, tb_warehouse.ware_no
+				   
+				 GROUP BY tb_purchase.purchase_no, tb_purchase.ware_no
 				 ORDER BY tb_purchase.purchase_no DESC) 
 			tb_purchase
 	</select>

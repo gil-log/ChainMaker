@@ -58,6 +58,7 @@
 		      , i.category_cd as category_cd
 		      , i.loginID as loginID
 		      , a.ans_content as ans_content
+		      , a.ans_title as ans_title
 		      , i.inq_no as inq_no
 		      , i.inq_regdate as inq_regdate
 		FROM tb_inquiry i

@@ -227,15 +227,28 @@
 		FROM tb_product product LEFT JOIN tb_delivery delivery
 		ON product.deli_no = delivery.deli_no
 		LEFT JOIN ( 
-         
-        SELECT tb_product_warehouse.ware_no, tb_product_warehouse.pro_no, (tb_product_warehouse.pro_ware_qty - IFNULL(tb_product_io_warehouse.pro_io_qty, 0)) as pro_ware_qty
+        
+        
+		SELECT tb_product_warehouse.ware_no, tb_product_warehouse.pro_no, IFNULL((tb_product_warehouse.pro_ware_qty - tb_out_pre.pro_io_qty), tb_product_warehouse.pro_ware_qty) as pro_ware_qty
+        FROM (
+        SELECT tb_product_warehouse.ware_no, tb_product_warehouse.pro_no, tb_product_warehouse.pro_ware_qty
         FROM tb_product_warehouse
-		
-        LEFT JOIN tb_product_io_warehouse
-        ON tb_product_warehouse.ware_no = tb_product_io_warehouse.ware_no
-        AND tb_product_warehouse.pro_no = tb_product_io_warehouse.pro_no
-        AND tb_product_io_warehouse.pro_io_cd = 'out_pre'
-
+        WHERE tb_product_warehouse.pro_no = #{pro_no}
+		) tb_product_warehouse
+        LEFT JOIN
+       (
+        SELECT tb_product_io_warehouse.ware_no, tb_product_io_warehouse.pro_no, IFNULL(SUM(tb_product_io_warehouse.pro_io_qty), 0) as pro_io_qty
+        FROM tb_product_io_warehouse
+        WHERE tb_product_io_warehouse.pro_io_cd = 'out_pre'
+        AND tb_product_io_warehouse.pro_no = #{pro_no}
+        GROUP BY tb_product_io_warehouse.ware_no, tb_product_io_warehouse.pro_no
+        
+        ) tb_out_pre
+        ON tb_product_warehouse.ware_no = tb_out_pre.ware_no
+        AND tb_product_warehouse.pro_no = tb_out_pre.pro_no
+        
+        
+        
 		) product_warehouse
 		ON product.pro_no = product_warehouse.pro_no
 		LEFT JOIN tb_warehouse warehouse
@@ -250,16 +263,27 @@
 				tb_warehouse.ware_name,
 				tb_userinfo.name,
 				tb_product.pro_name
-		FROM ( 
-         
-        SELECT tb_product_warehouse.ware_no, tb_product_warehouse.pro_no, (tb_product_warehouse.pro_ware_qty - IFNULL(tb_product_io_warehouse.pro_io_qty, 0)) as pro_ware_qty
+		FROM
+         (
+		SELECT tb_product_warehouse.ware_no, tb_product_warehouse.pro_no, IFNULL((tb_product_warehouse.pro_ware_qty - tb_out_pre.pro_io_qty), tb_product_warehouse.pro_ware_qty) as pro_ware_qty
+        FROM (
+        SELECT tb_product_warehouse.ware_no, tb_product_warehouse.pro_no, tb_product_warehouse.pro_ware_qty
         FROM tb_product_warehouse
-		
-        LEFT JOIN tb_product_io_warehouse
-        ON tb_product_warehouse.ware_no = tb_product_io_warehouse.ware_no
-        AND tb_product_warehouse.pro_no = tb_product_io_warehouse.pro_no
-        AND tb_product_io_warehouse.pro_io_cd = 'out_pre'
-
+        WHERE tb_product_warehouse.pro_no = #{pro_no}
+		) tb_product_warehouse
+        LEFT JOIN
+       (
+        SELECT tb_product_io_warehouse.ware_no, tb_product_io_warehouse.pro_no, IFNULL(SUM(tb_product_io_warehouse.pro_io_qty), 0) as pro_io_qty
+        FROM tb_product_io_warehouse
+        WHERE tb_product_io_warehouse.pro_io_cd = 'out_pre'
+        AND tb_product_io_warehouse.pro_no = #{pro_no}
+        GROUP BY tb_product_io_warehouse.ware_no, tb_product_io_warehouse.pro_no
+        
+        ) tb_out_pre
+        ON tb_product_warehouse.ware_no = tb_out_pre.ware_no
+        AND tb_product_warehouse.pro_no = tb_out_pre.pro_no
+        
+        
 		) tb_product_wh
 		LEFT JOIN tb_warehouse tb_warehouse
 		ON tb_product_wh.ware_no = tb_warehouse.ware_no
@@ -267,7 +291,6 @@
 		ON tb_product_wh.pro_no = tb_product.pro_no
 		LEFT JOIN tb_userinfo tb_userinfo
 		ON tb_warehouse.loginID = tb_userinfo.loginID
-		WHERE tb_product_wh.pro_no = #{pro_no}
 	</select>
 	<insert id="insertShippingInfo" useGeneratedKeys="true" keyProperty="ship_no"
 	parameterType="kr.happyjob.chainmaker.scm.model.ShippingDirectionDTO">

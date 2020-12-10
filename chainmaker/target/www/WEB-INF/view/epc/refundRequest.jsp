@@ -157,7 +157,7 @@
 								<tbody id="orderDetailList"></tbody>
 							</table>
 							
-							<div class="paging">
+							<div class="btn_areaC mt30" style="margin-bottom: 30px;">
 							<a href="javascript:faddRefundBtn();" class="btnType blue"><span>반품 요청</span></a>
 							 </div>
 						</div>

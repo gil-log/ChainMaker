@@ -16,8 +16,9 @@ function fRefundOrder() {
   console.log(param);
 
   const resultCallback = function(data) {
-    //swal("refundResult - " + data.refundResult + "\ndirectionResult - " + data.directionResult + "\nproIoQtyResult - " + data.proIoQtyResult + "\npurchaseCDResult" + data.purchaseCDResult);
-    location.href = "";
+    swal(data.refundResult+"개의 목록이 반품처리 되었습니다.");
+    purchaseOrderList();
+    $("#chk_all").prop("checked", false);
   };
 
   /* sweetalert 창에 대한 버튼 */
@@ -94,8 +95,10 @@ function fPurchaseOrder() {
   console.log("param-- ", param);
 
   const resultCallback = function(data) {
-    //swal("purchaseResult - " + data.purchaseResult + "\nproIoWarehouseResult - " + data.proIoWarehouseResult + "\nrealQuantityResult - " + data.realQuantityResult);
-    location.href = "";
+    //swal(data.purchaseResult+" "+data.proIoWarehouseResult+" "+data.realQuantityResult);
+    swal("입고처리가 완료되었습니다.");
+    purchaseOrderList();
+    $("#chk_all").prop("checked", false);
   };
 
   /* sweetalert 창에 대한 버튼 */

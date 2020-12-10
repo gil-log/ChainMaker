@@ -18,11 +18,6 @@
 <!-- 빌립 페이지 vue로 작업 -->
 <script>
 
-
-	//상단테이블 페이징 설정
-	var pageSize = 30;
-	var pageBlockSize = 10;
-	
 	//Vue.js 사용 변수 설정
 	var cartvm;
 	var delvm;
@@ -124,7 +119,6 @@
 									delBasket_click();
 									break;
 								case "no": 
-									CartList();
 									break;
 								}
 							});
@@ -196,8 +190,6 @@
 		currentPage=currentPage || 1;
 		
 		var param={
-				currentPage : currentPage,
-				pageSize : pageSize
 		}
 		
 		var resultCallback = function(data){
@@ -214,18 +206,7 @@
 		
 		cartvm.items=[];
 		cartvm.items=data.listCart;
-		
-		//총 개수 추출
-		var totalCount=data.totalCount;
-		
-		//swal(totalCount);
-		
-		//페이지 네비게이션 생성
-		var paginationHtml = getPaginationHtml(currentPage, totalCount, pageSize, pageBlockSize, "CartList");
-		
-		$("#CartPagination").empty().append( paginationHtml );
-		
-		$("#currentPageCart").val(currentPage);		
+				
 	}
 
 		
@@ -397,7 +378,7 @@ function frealPopModal(object) {
 		$("#name").text(object.name);
 		$("#bank_name").text(object.bank_name);
 		$("#user_account").text(object.user_account);
-		$("#totalHap").text(vm2.hap);
+		$("#totalHap").text(vm2.hap.toLocaleString());
 
 		
 		$("#btnSaveCart").show();
@@ -670,7 +651,6 @@ input[type=number]::-webkit-outer-spin-button {
 							</div>	<!-- .divWhInventoryList 종료 -->
 							
 							<!-- 상단테이블 페이지 네비게이션 영역 -->
-							<div class="pagingArea"  id=CartPagination> </div> 
 							
 							<br /><br /><br />
 							<div id="cart_hap" style="float:right; width:300px; font-size:20px;">
@@ -679,7 +659,7 @@ input[type=number]::-webkit-outer-spin-button {
 									<br />
 									<hr />
 									<span>합계 금액</span> 
-									<sapn id="hap" name="hap"> &nbsp&nbsp&nbsp {{hap}}원  </sapn>
+									<sapn id="hap" name="hap"> &nbsp&nbsp&nbsp {{hap.toLocaleString()}}원  </sapn>
 									<br /><br />
 								</p>
 								<div id="cart_deldiv" style="float:right;">
@@ -716,7 +696,7 @@ input[type=number]::-webkit-outer-spin-button {
 					</colgroup>
 
 					
-					<tbody>
+					<tbody style="text-align : center;">
 						<tr>
 							<th style="width:70px" scope="row">은행명<span class="font_red">*</span></th>
 						</tr>

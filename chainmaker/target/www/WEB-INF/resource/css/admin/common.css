@@ -168,7 +168,7 @@ a.btn_icon.btn_calendar {background: url(/images/admin/comm/btn_calendar01.gif) 
 div.scroll {overflow:auto;}
 
 /* HEADER GNB */ 
-#header .logo img {margin-top:10px;}
+#header .logo img {height: 81px;width: 220px;}
 
 	.topUtil ul li.login	{margin-top: 25px;margin-right: 0 !important;}
 	.topUtil ul li.login img	{width: 35px;height: 35px;}

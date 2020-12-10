@@ -9,15 +9,15 @@
 		resultType="kr.happyjob.chainmaker.ged.model.RefundConfirmInfoVO">
 
 		SELECT <!-- @rownum:=@rownum+1 as row_num, -->
-			r.refund_no,
-			r.pro_no,
-			r.ware_no,
-			u.user_company,
-			p.pro_name,
-			o.order_date,
-			r.refund_date,
-			o.order_qty,
-			r.refund_qty,
+			r.refund_no as refund_no,
+			r.pro_no as pro_no,
+			r.ware_no as ware_no,
+			u.user_company as user_company,
+			p.pro_name as pro_name,
+			o.order_date as order_date,
+			r.refund_date as refund_date,
+			o.order_qty as order_qty,
+			r.refund_qty as refund_qty,
 			p.pro_price * r.refund_qty as total_price
 		FROM tb_refund r
 		     JOIN tb_order o on r.pro_no = o.pro_no and r.order_no = o.order_no

@@ -36,22 +36,13 @@ function fExcelDownload(tableID){
 
 function fCheckShippingUnDoneClickEvent(currentPage){
 
-	currentPage = currentPage || 1;
+	
 	
 	$("#shippingDoneCheck").change(
 			function() {
 				if ($("#shippingDoneCheck").is(":checked")) {
 					
-					let url ="/scm/shippingDirection.do/list/unshipping";
-					var param = {
-						currentPage : currentPage,
-						pageSize : pageSizeDailyOrder
-					}
-					var resultCallback = function(data) {
-						flistDailyOrderHistroyResult(data, currentPage);
-					};
-					callAjax(url, "get", "text", true, param, resultCallback);
-					
+					unshippingList(currentPage);
 
 				} else {
 					
@@ -63,11 +54,46 @@ function fCheckShippingUnDoneClickEvent(currentPage){
 }
 
 
+function unshippingList(currentPage){
+	
+	currentPage = currentPage || 1;
+	
+	let url ="/scm/shippingDirection.do/list/unshipping";
+	var param = {
+		currentPage : currentPage,
+		pageSize : pageSizeDailyOrder
+	}
+	var resultCallback = function(data) {
+		unshippingListResult(data, currentPage);
+	};
+	callAjax(url, "get", "text", true, param, resultCallback);
+	
+	
+}
 
+function unshippingListResult(data, currentPage){
+	  // alert(data);
+	  console.log(data);
 
+	  // 기존 목록 삭제
+	  $('#orderList').empty();
 
+	  var $data = $($(data).html());
 
+	  $("#orderList").append(data);
 
+	  // 총 개수 추출
+	  let totalCntDailyOrder = $("#totalCntDailyOrder").val();
+	  
+	  // 페이지 네비게이션 생성
+	  var paginationHtml = getPaginationHtml(currentPage, totalCntDailyOrder, pageSizeDailyOrder, pageBlockSizeDailyOrder, 'unshippingList');
+	  console.log("paginationHtml : " + paginationHtml);
+
+	  $("#orderListPagination").empty().append(paginationHtml);
+
+	  // 현재 페이지 설정
+	  $("#currentPageDailyOrder").val(currentPage);
+}
 
 
 

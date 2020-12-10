@@ -461,10 +461,12 @@
 
 			$('#instaff').show();
 			$('#outstaff').hide();
+			$('#outstaff_account').hide();
 
 			$("#zipcode").val("");
 			$("#address").val("");
 			$("#dt_address").val("");
+			$("#account").val("");
 
 			$('#checkstaff').change(function() {
 				var state = $('#checkstaff option:selected').val();
@@ -472,11 +474,13 @@
 					$("#selectChaDiv").show();
 					$('#instaff').show();
 					$('#outstaff').hide();
+					$('#outstaff_account').hide();
 					$("#company").val("");
 					$("#name2").val("");
 				} else {
 					$('#instaff').hide();
 					$('#outstaff').show();
+					$('#outstaff_account').show();
 					$("#selectChaDiv").hide();
 					$("#name").val("");
 				}
@@ -508,6 +512,7 @@
 						'selected').change(); // value 에 맞게 option change된다.
 				$("#instaff").show();
 				$("#outstaff").hide();
+				$("#outstaff_account").hide();
 				//$('#checkstaff').attr('disabled', 'true'); //disabled <- 비활성화
 				$('#checkstaff option[value=outstaff]').prop('disabled', true);
 
@@ -518,8 +523,12 @@
 						'selected').change();
 				$("#instaff").hide();
 				$("#outstaff").show();
+				$("#outstaff_account").show();
 				//$('#checkstaff').attr('disabled', 'true');
 				$('#checkstaff option[value=instaff]').prop('disabled', true);
+				$('#selectBankCD').val(object.bank_cd).prop("selected", true);
+				$('#account').val(object.user_account);
+				
 			}
 
 			$("#rloginID").val(object.loginID);
@@ -603,7 +612,8 @@
 					[ "zipcode", "우편번호를 입력해주세요!" ],
 					[ "address", "주소를 입력해주세요!" ],
 					[ "dt_address", "상세주소 기입해주세요!" ],
-					[ "name2", "담당자명 기입해주세요!" ], [ "company", "회사명 기입해주세요!" ] ]);
+					[ "name2", "담당자명 기입해주세요!" ], [ "company", "회사명 기입해주세요!" ],
+					[ "account", "계좌번호를 입력해주세요!"]]);
 		}
 
 		if (!chk) {
@@ -688,38 +698,52 @@
 
 	/* 회원 1건 복구 */
 	function fComebackUser() {
-		var con = confirm("복구하시겠습니까? ");
-		if (con) {
-			var resultCallback3 = function(data) {
-				fSaveUserResult(data);
-			}
-			$("#action").val("C"); // comeback
-			callAjax("/scm/userSave.do", "post", "json", true, $("#myUser")
-					.serialize(), resultCallback3);
-
-		} else {
-			gfCloseModal(); // 모달 닫기
-			selectUserList(currentPage); // 목록조회 함수 다시 출력 
-			frealPopModal();// 입력폼 초기화
-		}
+		swal({
+			  title : "복구하시겠습니까?",
+			  icon : "info",
+			  buttons:{
+				  yes : "예",
+				  no : "아니오"
+			  }
+			}).then((value) => {  /* 이건 이클립스가 게을러서 뜨는 에러!  */
+				switch(value){
+				case "yes":
+					var resultCallback3 = function(data) {
+					fSaveUserResult(data);
+				}
+				$("#action").val("C"); // comeback
+				callAjax("/scm/userSave.do", "post", "json", true, $("#myUser")
+						.serialize(), resultCallback3);
+					break;
+				case "no": 
+					break;
+				}
+			});
 	}
 	
 	/* 회원 1건 승인 */
 	function fApprovalUser() {
-		var con = confirm("승인하시겠습니까? ");
-		if (con) {
-			var resultCallback3 = function(data) {
-				fSaveUserResult(data);
-			}
-			$("#action").val("A"); // comeback
-			callAjax("/scm/userSave.do", "post", "json", true, $("#myUser")
-					.serialize(), resultCallback3);
-
-		} else {
-			gfCloseModal(); // 모달 닫기
-			selectUserList(currentPage); // 목록조회 함수 다시 출력 
-			frealPopModal();// 입력폼 초기화
-		}
+		swal({
+			  title : "승인하시겠습니까?",
+			  icon : "info",
+			  buttons:{
+				  yes : "예",
+				  no : "아니오"
+			  }
+			}).then((value) => {  /* 이건 이클립스가 게을러서 뜨는 에러!  */
+				switch(value){
+				case "yes":
+					var resultCallback3 = function(data) {
+					fSaveUserResult(data);
+				}
+				$("#action").val("A"); // comeback
+				callAjax("/scm/userSave.do", "post", "json", true, $("#myUser")
+						.serialize(), resultCallback3);
+					break;
+				case "no": 
+					break;
+				}
+			});
 	}
 
 	// 신규 등록시에 아이디 중복체크 
@@ -743,43 +767,58 @@
 
 	/* 회원 1건 삭제 */
 	function fDeleteUser() {
-		var con = confirm("삭제 하시겠습니까?");
-		if (con) {
-			if ($('#selectChaCD').val() == "B") //삭제할 때 배송담당자 이면 이거타게해서 다른모달띄워
-			{
-				var loginID = $("#rloginID").val();
-				//swal("이거 타나요?");
-				fDeliModal(loginID);
-			} else {
-				var resultCallback3 = function(data) {
-					fSaveUserResult(data);
+		swal({
+			  title : "삭제 하시겠습니까?",
+			  icon : "warning",
+			  buttons:{
+				  yes : "예",
+				  no : "아니오"
+			  }
+			}).then((value) => {  /* 이건 이클립스가 게을러서 뜨는 에러!  */
+				switch(value){
+				case "yes":
+					if ($('#selectChaCD').val() == "B") //삭제할 때 배송담당자 이면 이거타게해서 다른모달띄워
+					{
+						var loginID = $("#rloginID").val();
+						//swal("이거 타나요?");
+						fDeliModal(loginID);
+					} else {
+						var resultCallback3 = function(data) {
+							fSaveUserResult(data);
+						}
+						$("#action").val("D"); // delete
+						callAjax("/scm/userSave.do", "post", "json", true, $("#myUser")
+								.serialize(), resultCallback3);
+					}
+					break;
+				case "no": 
+					break;
 				}
-				$("#action").val("D"); // delete
-				callAjax("/scm/userSave.do", "post", "json", true, $("#myUser")
-						.serialize(), resultCallback3);
-			}
-
-		} else {
-			gfCloseModal(); // 모달 닫기
-			selectUserList(currentPage); // 목록조회 함수 다시 출력 
-			frealPopModal();// 입력폼 초기화
-		}
+			});
 	}
 	
 	/* 배송담당자 삭제 */
 	function fDeleteDeli(){
-		var con = confirm("배송담당자 삭제합니다.");
-		if (con) {
-			var resultCallback3 = function(data) {
-				fSaveUserResult(data);
-			}
-			$("#action").val("D"); // delete
-			callAjax("/scm/userSave.do", "post", "json", true, $("#myUser").serialize(), resultCallback3);
-		}else {
-			gfCloseModal(); // 모달 닫기
-			selectUserList(currentPage); // 목록조회 함수 다시 출력 
-			frealPopModal();// 입력폼 초기화
-		}
+		swal({
+			  title : "배송담당자 삭제합니다",
+			  icon : "warning",
+			  buttons:{
+				  yes : "예",
+				  no : "아니오"
+			  }
+			}).then((value) => {  /* 이건 이클립스가 게을러서 뜨는 에러!  */
+				switch(value){
+				case "yes":
+					var resultCallback3 = function(data) {
+					fSaveUserResult(data);
+				}
+				$("#action").val("D"); // delete
+				callAjax("/scm/userSave.do", "post", "json", true, $("#myUser").serialize(), resultCallback3);
+					break;
+				case "no": 
+					break;
+				}
+			});
 	}
 
 	/* 배송담당자(창고보는) 모달창(팝업) 실행  여기부터 */
@@ -1042,7 +1081,7 @@
 	</div>
 
 	<!-- 회원관리 모달 -->
-		<div id="user" class="layerPop layerType2" style="width: 1000px; height: 400px;">
+		<div id="user" class="layerPop layerType2" style="width: 1000px; display: table;">
 		<input type="hidden" id="loginID" name="loginID"> <!-- 수정시 필요한 num 값을 넘김  -->
            <dl>
 			<dt>
@@ -1130,7 +1169,22 @@
 							<th style="width:70px" scope="row">상세주소<span class="font_red">*</span></th>
 							<td colspan="4"><input type="text" name="dt_address" id="dt_address" size="100"/></td>
 						</tr>
+						<tr id="outstaff_account">
+							<th scope="row" style="width:70px">계좌번호<span class="font_red">*</span></th>
+							<td colspan="2"><input type="text" name="account" id="account" size="30"/></td>
 							
+							<th style="width:70px" scope="row">은행명<span class="font_red">*</span></th>
+							<td>
+							<div id="bankDiv">
+								<select id="selectBankCD" name="selectBankCD">
+									<c:forEach items="${listBankName}" var="list">
+										<option id ="optionBankCD" value="${list.bank_cd}" name="optionBankCD"><c:out value="${list.bank_name}"/>
+										</option>
+									</c:forEach>
+								</select>
+							</div>
+							</td>
+						</tr>
 					</tbody>
 					
 				</table>

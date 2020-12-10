@@ -333,7 +333,7 @@ function sendRefundFinalConfirm(currentPage){
 
 //주문고객의 반품내역 리스트 메일 전송 콜백
 function sendRefundFinalConfirmResult(data){
-	swal("배송지시서 발송이 완료되었습니다.\n"/* +data */);
+	swal("반품지시서 발송이 완료되었습니다.\n"/* +data */);
 	//모달 팝업
 	gfCloseModal();		
 	

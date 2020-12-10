@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <c:if test="${totalCnt eq 0 }">
@@ -21,11 +20,13 @@
 			<td>${list.order_date}</td>
 			<td>${list.refund_date}</td>
 			<td>${list.order_qty}</td>
-			<td>${list.refund_qty}</td>
-			<td>${list.total_price}원</td>
+			<td>${list.order_qty}</td>
+			<td><fmt:formatNumber value="${list.total_price}" pattern="#,###,###"/> 원</td>
 			<td><a class="btnType blue"              
 				onclick="javascript:fConfirmRefund('${list.refund_no}','${list.pro_no}','${list.ware_no}')"><span style = "cursor : pointer">승인</span></a></td>
-			
+			<%-- <fmt:formatNumber value="${list.order_qty}" pattern="#,###,###"/> --%>
+
+
 
 		</tr>
 		 <c:set var="nRow" value="${nRow + 1}" /> 

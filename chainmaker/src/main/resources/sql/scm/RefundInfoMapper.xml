@@ -13,6 +13,7 @@
 		r.refund_date as refund_date,
 		r.pro_no as pro_no,
 		p.pro_name as pro_name,
+		o.order_qty as order_qty,
 		r.refund_qty as refund_qty,
 		p.pro_price as pro_price,
 		p.pro_price * r.refund_qty as total_price,
@@ -21,7 +22,7 @@
 		r.ware_no as ware_no
 		
 		FROM tb_refund r
-		JOIN tb_order o   ON o.pro_no = r.pro_no AND o.order_no = r.order_no
+		JOIN tb_order o  	ON o.pro_no = r.pro_no AND o.order_no = r.order_no
 		JOIN tb_product p   ON p.pro_no = r.pro_no 
 		JOIN tb_userinfo u  ON o.loginID = u.loginID AND u.user_type  = 'C'
 

@@ -369,7 +369,8 @@
 	<!-- 입출고 내역 done으로 변경 -->
 	<update id="updateDeliveryBuyerProIOCD">
 		UPDATE tb_product_io_warehouse 
-		   SET pro_io_cd=#{pro_io_cd} 
+		   SET pro_io_cd=#{pro_io_cd},
+		  	   pro_io_memo='주문 배송으로 인한 출고 완료'  
 		   
 		 WHERE pro_no=#{pro_no} 
 		   AND order_no=#{order_no} 
@@ -379,7 +380,7 @@
 	<!-- 입출고 내역의  done의 재고 수량 적용 -->
 	<update id="updateDeliveryBuyerProWareQty">
 		UPDATE tb_product_warehouse 
-		   SET pro_ware_qty=pro_ware_qty-#{ship_qty} 
+		   SET pro_ware_qty=pro_ware_qty-#{ship_qty}		   	   
 		   
 		 WHERE ware_no=#{ware_no} 
 		   AND pro_no=#{pro_no}		

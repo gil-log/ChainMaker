@@ -47,7 +47,8 @@ p.logo	{text-align: center;}
     align-items: center;
     color: white;
     background: 
-  url(/images/admin/login/login4.png) no-repeat;
+  url(/images/admin/login/login.png) no-repeat;
+  background-position: 50% 35%;
 }
 
 .login-form-left-side{

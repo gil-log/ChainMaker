@@ -195,7 +195,8 @@
 	
 	<update id="updateOrderDepositProcessing">
 		UPDATE tb_order
-		   SET deposit_cd='1'
+		   SET deposit_cd='1'		   	   
+		   	  
 		 WHERE order_cd='order'
 		   AND order_no=#{order_no}
 	</update>

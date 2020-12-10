@@ -204,7 +204,7 @@
 			 $("#origin_ware_no").val(object.origin_ware_no);  //기존창고 정보도 가지고 있음 
 			 
 			 $("#refund_qty").val(object.refund_qty);
-			 $("#total_price").val(object.total_price);
+			 $("#total_price").val(object.total_price.toLocaleString());    // toLocalString() 메서드 3자리씩 나눠주는거
 			 
 	}	
 
@@ -403,7 +403,7 @@ select {
 
 									<thead>
 										<tr>
-											<th scope="col">순서</th>
+											<th scope="col">기업명</th>
 											<th scope="col">반품 코드</th>
 											<th scope="col">반품 신청일</th>
 											<th scope="col">제품 번호</th>
@@ -511,7 +511,7 @@ select {
 								<td id=""><input type="text" name="refund_qty" class="ui-widget ui-widget-content ui-corner-all" readonly
 									id="refund_qty" value="" /></td>
 								<td id=""><input type="text" name="total_price" class="ui-widget ui-widget-content ui-corner-all" readonly
-									id="total_price" value="" /></td>
+									id="total_price" /></td>
 								
 							</tr>
 						</tbody>

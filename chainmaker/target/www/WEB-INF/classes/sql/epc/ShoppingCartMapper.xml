@@ -19,8 +19,7 @@
 		FROM tb_basket b
 		JOIN tb_product p ON p.pro_no = b.pro_no
 		JOIN tb_file f ON p.pro_no = f.pro_no
-		AND b.loginID = #{loginID}
-		LIMIT #{pageIndex}, #{pageSize};
+		AND b.loginID = #{loginID};
 	</select>
 	
 	<select id="countListCart" resultType="int">

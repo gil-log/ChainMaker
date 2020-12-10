@@ -8,6 +8,7 @@
 	<select id="selectRefundList" parameterType="Map"
 		resultType="kr.happyjob.chainmaker.scm.model.RefundVO">
 		SELECT <!-- @rownum:=@rownum+1 as row_num, -->
+		u.user_company as user_company,
 		r.refund_no as refund_no,
 		r.refund_date as refund_date,
 		r.pro_no as pro_no,
@@ -20,8 +21,10 @@
 		r.ware_no as ware_no
 		
 		FROM tb_refund r
-		JOIN tb_product p
-		ON p.pro_no = r.pro_no
+		JOIN tb_order o   ON o.pro_no = r.pro_no AND o.order_no = r.order_no
+		JOIN tb_product p   ON p.pro_no = r.pro_no 
+		JOIN tb_userinfo u  ON o.loginID = u.loginID AND u.user_type  = 'C'
+
 		<where> 
 		<!-- where (@rownum:=0)=0 -->
 			<if test="(sname != null) and (!sname.equals('')) ">

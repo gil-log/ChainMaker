@@ -42,7 +42,7 @@
 <div id="lnb_area">
   <div class="logo">
     <div id="header">
-      <a class="logo" href="/dashboard/dashboard.do"> <img src="/images/admin/comm/chainLogo.png" alt="메인페이지" width="80%" height="55px" /></a>
+      <a class="logo" href="/dashboard/dashboard.do"> <img src="/images/admin/comm/chainLogoV2.png" alt="메인페이지" width="80%" height="55px" /></a>
     </div>
   </div>
   <div class="login">

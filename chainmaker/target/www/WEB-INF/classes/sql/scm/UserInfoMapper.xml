@@ -54,6 +54,8 @@
 			, u.user_tel1 as user_tel1
 			, u.user_tel2 as user_tel2
 			, u.user_tel3 as user_tel3
+			, u.bank_cd as bank_cd
+			, u.user_account as user_account
 			, d2.detail_name as chaCD_name
 			, d3.detail_name as delCD_name
 			, u.loginID as loginID
@@ -113,6 +115,8 @@
 		    , u.user_company as user_company
 		    , u.del_cd as del_cd
 			, u.approval_cd as approval_cd
+			, u.bank_cd as bank_cd
+			, u.user_account as user_account
 			FROM (select * FROM tb_detail_code d where d.group_code = 'divCD') d 
 			JOIN tb_userinfo u
 			ON u.div_cd = d.detail_code
@@ -132,6 +136,8 @@
 			<if test="checkstaff.equals('outstaff')">
 			name = #{name2}
 			, user_company = #{company}
+			, user_account = #{account}
+			, bank_cd = #{selectBankCD}
 			</if>
 			, password = #{password}
 			, user_tel1 = #{tel1}
@@ -175,6 +181,8 @@
 			, name
 			, div_cd
 			, user_type
+			, user_account
+			, bank_cd
 			, approval_cd)
 		VALUES
 			(#{rloginID}
@@ -192,11 +200,15 @@
 			, #{name}
 			, #{checkstaff}
 			, #{selectChaCD}
+			, ""
+			, ""
 		</if>
 		<if test="checkstaff.equals('outstaff')">
 			, #{name2}
 			, "outstaff"
 			, "C"
+			, #{account}
+			, #{selectBankCD}
 		</if>
 			, "y")
 	</insert>
@@ -251,4 +263,12 @@
 		SET approval_cd = "y"
 		WHERE loginID = #{loginID};
 	</update>
+	
+	<!-- 은행명 가져오기 -->
+	<select id="listBankName" resultType="kr.happyjob.chainmaker.scm.model.UserInfoModel">
+	SELECT d.detail_name as bank_name
+		 , d.detail_code as bank_cd
+	FROM tb_detail_code d
+	WHERE d.group_code = 'bankCD';
+	</select>
 </mapper>

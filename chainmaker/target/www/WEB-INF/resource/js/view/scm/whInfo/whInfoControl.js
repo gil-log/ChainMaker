@@ -30,7 +30,7 @@
         const resultMsg = data.resultMsg
         console.log(result);
         swal(resultMsg);
-        location.href = "";
+        location.href="";
       };
       break;
 
@@ -50,7 +50,7 @@
         const resultMsg = data.resultMsg
         console.log(result);
         swal(resultMsg);
-        location.href = "";
+        location.href="";
       };
       break;
 
@@ -70,7 +70,7 @@
       
     default:
       swal("잘못된 접근 입니다.");
-      location.href = "";
+      whInfoList();
     }
     callAjax(url, "post", "json", true, param, resultCallBack);
   }

@@ -93,8 +93,8 @@
                     <col width="8%">
                     <col width="20%">
                     <col width="5%">
-                    <col width="7%">
-                    <col width="10%">
+                    <col width="8%">
+                    <col width="9%">
                     <col width="7%">
                   </colgroup>
                   <thead>
