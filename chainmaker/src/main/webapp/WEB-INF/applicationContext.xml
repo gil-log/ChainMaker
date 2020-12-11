@@ -68,9 +68,9 @@
    <bean id="mysqlDataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://13.125.158.2:3306/chainmaker?allowMultiQueries=true" />
+		<property name="url" value="jdbc:mysql://localhost:3306/chainmaker?allowMultiQueries=true&amp;serverTimezone=UTC" />
 		<property name="username" value="root" />
-		<property name="password" value="@dltmd85" />
+		<property name="password" value="root" />
 		<property name="validationQuery" value="select 1" />
 	</bean> 
 

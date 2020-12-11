@@ -1,5 +1,0 @@
-package kr.happyjob.chainmaker.dashboard.service;
-
-public interface DashboardEpcService {
-
-}

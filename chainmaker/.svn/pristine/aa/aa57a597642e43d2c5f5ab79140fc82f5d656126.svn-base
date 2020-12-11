@@ -1,5 +1,0 @@
-package kr.happyjob.chainmaker.dashboard.dao;
-
-public interface DashboardEpcDao {
-
-}
