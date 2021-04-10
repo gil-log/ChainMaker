@@ -11,6 +11,7 @@
 		AND password = #{pwd}
 	</select>
 	
+	
 	<!-- 사용자 로그인 -->
 	<select id="selectMainLogin" resultType="kr.happyjob.chainmaker.mainlogin.model.MainLoginInfoModel">
 		SELECT loginId as lgn_id,
