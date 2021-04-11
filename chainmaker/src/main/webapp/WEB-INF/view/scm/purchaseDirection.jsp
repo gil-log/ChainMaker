@@ -28,7 +28,6 @@
 	
 	var svm;
 	var vm;
-
 	
 	/** OnLoad event */ 
 	$(document).ready(function() {
